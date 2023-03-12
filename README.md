@@ -23,7 +23,7 @@ Proximity-based merging:
 Road-based merging:
 
 5. Identifiy spots in areas where one doesnt need a road (see feature-based merging & port areas).
-6. Identifiy closest road segmnet (the road you are probably waiting at) for all spots but 1-3 & 5.
+6. Identifiy closest road segment (the road you are probably waiting at) for all spots but 1-3 & 5.
 7. Delete spots that have the closest road more than x meters away.
 8. Merge spots that are related to the same road segment.
 9. For spots within x and y meters from their road segment - move them to z meters away from the segment.
