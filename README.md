@@ -1,6 +1,14 @@
 # hitchmap_data_cleaning
 Relaunching the Hitchwiki map via https://github.com/bopjesvla/hitch with more meaningful hitchhiking spots.
 
+### cleaning.ipynb
+for executing the cleaning of map spots and getting a summary.
+
+### map.ipynb
+for observing the changes visually on a map.
+
+---
+
 Using the spots dump from 7th March 2023 for testing here. 
 
 25000 spots overall - 2500 in Germany.
