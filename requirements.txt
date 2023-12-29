@@ -1,0 +1,11 @@
+pandas
+numpy
+folium
+osmnx
+geopandas
+scikit-learn
+scipy
+matplotlib
+shapely
+ipython
+ipykernel
