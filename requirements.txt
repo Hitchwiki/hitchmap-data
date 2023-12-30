@@ -9,3 +9,4 @@ matplotlib
 shapely
 ipython
 ipykernel
+tqdm
