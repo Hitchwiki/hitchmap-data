@@ -118,7 +118,7 @@ def places_from_points(points):
     places["text"] = groups.text.apply(lambda t: "\n\n".join(t.dropna()))
 
     # group small countries together
-    # TODO why?
+    # this is for displaying them in one cluster on the map later
     places["country_group"] = places.country.replace(["BE", "NL", "LU"], "BNL")
     places.country_group = places.country_group.replace(["CH", "AT", "LI"], "ALP")
     places.country_group = places.country_group.replace(
