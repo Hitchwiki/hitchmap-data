@@ -4,6 +4,7 @@ import numpy as np
 from scipy.cluster.hierarchy import dendrogram
 import pandas as pd
 
+# returns distance in km!
 def haversine(lon1, lat1, lon2, lat2, earth_radius=6367):
     dlon = lon2 - lon1
     dlat = lat2 - lat1
