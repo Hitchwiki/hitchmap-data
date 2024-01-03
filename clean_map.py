@@ -32,7 +32,8 @@ from sklearn.metrics.pairwise import pairwise_distances
 pd.options.display.max_rows = 4000
 np.set_printoptions(threshold=sys.maxsize)
 
-osmnx.config(use_cache=True, log_console=False)
+osmnx.settings.use_cache = True
+osmnx.settings.log_console = False
 
 import logging
 
@@ -458,6 +459,8 @@ for group_id, places_group_at_road_segment in places_by_road_segment:
 cleaned_places = pd.concat([places, places_at_feature, places_deleted])
 cleaned_places = update_places(cleaned_places)
 stats = get_stats(cleaned_places)
+with open(f"./stats/stats_{region}.txt", "w") as f:
+    f.write(str(stats))
 # map
 # difference map
 # green points are from the new cleaned map vs red points from the original map
