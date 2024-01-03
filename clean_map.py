@@ -215,7 +215,7 @@ def feature_from_region(region: Polygon, tags: dict):
         return gpd.GeoDataFrame()
 
 
-for i in range(0, N_CLUSTERS):
+for i in tqdm(range(0, N_CLUSTERS)):
     places_cluster = places.loc[places.feature_cluster == i]
 
     # retrieving the OSM features that are relavant for the current cluster
@@ -279,6 +279,7 @@ for i in range(0, N_CLUSTERS):
 
     logging.info(f"Time to match places to features: {time.time() - start}")
 
+
 (
     places["geometry"],
     places["feature"],
@@ -307,7 +308,7 @@ n_clusters = len(np.unique(clustering.labels_))
 places["proximity_cluster"] = clustering.labels_
 
 # merge places to the centroid of their group
-for cluster in range(0, n_clusters):
+for cluster in tqdm(range(0, n_clusters)):
     if len(places[places.proximity_cluster == cluster]) > 1:
         merged_location = places[places.proximity_cluster == cluster].geometry.unary_union.centroid
         places.loc[places.proximity_cluster == cluster, ["geometry", "proximity"]] = merged_location, True
@@ -449,7 +450,7 @@ def attach_place_to_road(place):
 # find groups of places that are at the same road segment so they can be merged
 places_by_road_segment = places.groupby("nearest_road")
 
-for group_id, places_group_at_road_segment in places_by_road_segment:
+for group_id, places_group_at_road_segment in tqdm(places_by_road_segment):
     if len(places_group_at_road_segment) > 1:
         place_indices_at_road_segment = places_group_at_road_segment.index
         # TODO better solution than centroid here?
