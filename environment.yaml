@@ -3,15 +3,15 @@ dependencies:
   - pip
   - python=3.10
   - pip:
-    - numpy
     - folium
-    - osmnx
     - geopandas
+    - ipykernel
+    - ipython
+    - matplotlib
+    - numpy
+    - osmnx
+    - pandas
     - scikit-learn
     - scipy
-    - matplotlib
     - shapely
-    - ipython
-    - ipykernel
-    - pandas
     - tqdm
