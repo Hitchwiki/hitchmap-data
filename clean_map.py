@@ -32,7 +32,7 @@ from sklearn.metrics.pairwise import pairwise_distances
 pd.options.display.max_rows = 4000
 np.set_printoptions(threshold=sys.maxsize)
 
-osmnx.config(use_cache=True, log_console=True)
+osmnx.config(use_cache=True, log_console=False)
 
 import logging
 
@@ -40,12 +40,10 @@ from stats import *
 from utils import *
 
 logging.basicConfig(filename='logging.log', encoding='utf-8', level=logging.INFO)
-
 # progress bars
 from tqdm import tqdm
 
 tqdm.pandas()
-# TODO progress_apply for all apply functions 
 metric_crs = 'EPSG:3857'
 
 # used for gps - geographic crs
@@ -112,7 +110,7 @@ def cluster_places(places, n_clusters=100, linkage="average", distance_threshold
         n_clusters=n_clusters,
         linkage=linkage,
         compute_distances=True,
-        affinity="precomputed",
+        metric="precomputed",
         distance_threshold=distance_threshold
     )
     clustering.fit(D)
