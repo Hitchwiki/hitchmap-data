@@ -1,15 +1,8 @@
-import itertools
-import json
-import os
-import pickle
 import sqlite3
 import sys
 import time
-import warnings
-from itertools import chain
 from typing import List
 
-import anytree
 import folium
 import folium.plugins
 import geopandas as gpd
@@ -17,15 +10,12 @@ import numpy as np
 import osmnx
 import pandas as pd
 import pyproj
-import scipy
-import sklearn
-from anytree import Node, RenderTree
 from matplotlib import pyplot as plt
 from osmnx._errors import InsufficientResponseError
 from shapely.errors import ShapelyDeprecationWarning
-from shapely.geometry import (LineString, MultiPoint, MultiPolygon, Point,
+from shapely.geometry import (LineString, MultiPolygon, Point,
                               Polygon)
-from shapely.ops import nearest_points, unary_union
+from shapely.ops import nearest_points
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics.pairwise import pairwise_distances
 
