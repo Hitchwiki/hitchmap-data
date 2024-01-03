@@ -1,48 +1,49 @@
+import itertools
+import json
+import os
+import pickle
+import sqlite3
+import sys
+import time
+import warnings
+from itertools import chain
 from typing import List
 
-import pandas as pd
-import numpy as np
-import sqlite3
-import os
-import sys
+import anytree
 import folium
 import folium.plugins
-import osmnx
-from osmnx._errors import InsufficientResponseError 
 import geopandas as gpd
-import sklearn
+import numpy as np
+import osmnx
+import pandas as pd
+import pyproj
 import scipy
+import sklearn
+from anytree import Node, RenderTree
 from matplotlib import pyplot as plt
-import pickle
-from shapely.geometry import Point, LineString, Polygon, MultiPoint, MultiPolygon
-from shapely.ops import unary_union, nearest_points
-import warnings
+from osmnx._errors import InsufficientResponseError
 from shapely.errors import ShapelyDeprecationWarning
-import time
-import json
-
+from shapely.geometry import (LineString, MultiPoint, MultiPolygon, Point,
+                              Polygon)
+from shapely.ops import nearest_points, unary_union
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics.pairwise import pairwise_distances
-import pyproj
-from itertools import chain
-
-import itertools
-import anytree
-from anytree import Node, RenderTree
 
 pd.options.display.max_rows = 4000
 np.set_printoptions(threshold=sys.maxsize)
 
 osmnx.config(use_cache=True, log_console=True)
 
-from utils import *
-from stats import *
-
 import logging
+
+from stats import *
+from utils import *
+
 logging.basicConfig(filename='logging.log', encoding='utf-8', level=logging.INFO)
 
 # progress bars
 from tqdm import tqdm
+
 tqdm.pandas()
 # TODO progress_apply for all apply functions 
 metric_crs = 'EPSG:3857'
