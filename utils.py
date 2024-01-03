@@ -133,38 +133,3 @@ def places_from_points(points):
     places.sort_values("rating", inplace=True, ascending=False)
 
     return places
-
-
-callback = """\
-function (row) {
-    var marker;
-    var color = {1: 'red', 2: 'orange', 3: 'yellow', 4: 'lightgreen', 5: 'lightgreen'}[row[2]];
-    var opacity = {1: 0.3, 2: 0.4, 3: 0.6, 4: 0.8, 5: 0.8}[row[2]];
-    var point = new L.LatLng(row[0], row[1])
-    marker = L.circleMarker(point, {radius: 5, weight: 1 + 1 * (row[2] == 5), fillOpacity: opacity, color: 'black', fillColor: color});
-
-    marker.on('click', function(e) {
-        if ($$('.topbar.visible')) return
-
-        points = [point]
-
-        setTimeout(() => {
-            bar('.sidebar.show-spot')
-            $$('#spot-header').innerText = `${row[0].toFixed(5)}, ${row[1].toFixed(5)}`
-            $$('#spot-summary').innerText = `Rating: ${row[2].toFixed(0)}/5
-Waiting time in minutes: ${Number.isNaN(row[4]) ? '-' : row[4].toFixed(0)}
-Ride distance in km: ${Number.isNaN(row[5]) ? '-' : row[5].toFixed(0)}`
-
-            $$('#spot-text').innerText = row[3];
-            if (!row[3] && Number.isNaN(row[5])) $$('#extra-text').innerHTML = 'No comments/ride info. To hide points like this, check out the <a href=/light.html>lightweight map</a>.'
-            else $$('#extra-text').innerHTML = ''
-        },100)
-
-        L.DomEvent.stopPropagation(e)
-    })
-
-    // if(row[2] >= 4) marker.bringToFront()
-
-    return marker;
-};
-"""
