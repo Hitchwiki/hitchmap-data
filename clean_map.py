@@ -1,7 +1,9 @@
 import sqlite3
 import sys
 import time
+import warnings
 from typing import List
+import os
 
 import folium
 import folium.plugins
@@ -58,26 +60,31 @@ def points_from_country(region="Germany", level="country"):
 # contains all entries for the same place as single samples
 region = "Saxony"
 level = "state"
-points = points_from_country(region, level)
-# points = points_from_country("Germany", "country")
 
-# entries for the same spot are grouped together
-places = places_from_points(points)
-# to later plot the difference between orgiginal and modified places
-places["original_lat"] = places["lat"]
-places["original_lon"] = places["lon"]
-# possible cleaning reasons
-# feature specifies the type of feature as str 
-# other reasons are binary
-places["feature"] = None
-places["proximity"] = False
-places["road_delete"] = False
-places["road_distance"] = False
-places["road_segment"] = False
+places_file = f"./data/places_{region}.csv"
+if not os.path.isfile(places_file):
+    points = points_from_country(region, level)
+    # points = points_from_country("Germany", "country")
 
-original_places = places
+    # entries for the same spot are grouped together
+    places = places_from_points(points)
+    # to later plot the difference between orgiginal and modified places
+    places["original_lat"] = places["lat"]
+    places["original_lon"] = places["lon"]
+    # possible cleaning reasons
+    # feature specifies the type of feature as str 
+    # other reasons are binary
+    places["feature"] = None
+    places["proximity"] = False
+    places["road_delete"] = False
+    places["road_distance"] = False
+    places["road_segment"] = False
 
-places = gpd.GeoDataFrame(places, geometry=gpd.points_from_xy(places.lon, places.lat), crs=standard_crs)
+    places = gpd.GeoDataFrame(places, geometry=gpd.points_from_xy(places.lon, places.lat), crs=standard_crs)
+    places.to_csv(places_file)
+else:
+    places = pd.read_csv(places_file, index_col=0)
+    places = gpd.GeoDataFrame(places, geometry=gpd.points_from_xy(places.lon, places.lat), crs=standard_crs)
 # FULL PIPELINE
 
 # "geometry" is the feature that gets modified in our correction process
@@ -160,6 +167,7 @@ places['parking_corrected'] = None
 # TODO think about if there are different places within a port area
 places['port_corrected'] = None
 ### run ~10 min
+print("Run Feature")
 warnings.simplefilter(action="ignore", category=ShapelyDeprecationWarning)
 
 
@@ -285,6 +293,8 @@ places = places[places.feature.isnull()]
 
 # mind that lat, lon of places are not changed yet - "geometry" contains the up-to-date location
 ## 4 Proximity
+print("Run Proximity")
+
 # distance between spots in meter for which spots are seen as the same - transitive
 merge_threshold = 50
 merge_threshold = merge_threshold / 1000
@@ -302,6 +312,8 @@ for cluster in range(0, n_clusters):
         merged_location = places[places.proximity_cluster == cluster].geometry.unary_union.centroid
         places.loc[places.proximity_cluster == cluster, ["geometry", "proximity"]] = merged_location, True
 ## 5-9 Road
+print("Run Road")
+
 places = update_places(places)
 
 # using a metric coordinate system here for distance calculation
