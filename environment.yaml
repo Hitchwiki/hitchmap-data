@@ -1,0 +1,17 @@
+name: clean
+dependencies:
+  - pip
+  - python=3.10
+  - pip:
+    - numpy
+    - folium
+    - osmnx
+    - geopandas
+    - scikit-learn
+    - scipy
+    - matplotlib
+    - shapely
+    - ipython
+    - ipykernel
+    - pandas
+    - tqdm
