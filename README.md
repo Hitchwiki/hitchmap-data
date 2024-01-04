@@ -18,11 +18,6 @@ Moving = give a place a new location that is more meaningful.
 
 If features from a map are needed for a task those are obtained from OSM.
 
-
-- Red - place at its old location or unchanged place.
-- Green - place at its new location.
-- Black - delated place.
-
 Cleaning procedure ideas in the following sequence:
 
 **Feature-based merging (orange):**
@@ -48,3 +43,12 @@ Cleaning procedure ideas in the following sequence:
 2. Delete spots that have the closest road more than 100 meters away.
 3. Move places that are between 30 and 100 m was from a road closer to the road (to 30 m distance).
 4. Merge spots that are related to the same road segment to their centriod.
+
+---
+Cleaning results are stored in `map/`.
+
+
+Coloring:
+- Red - place at its old location or unchanged place.
+- Green - place at its new location.
+- Black - delated place.
