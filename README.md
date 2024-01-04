@@ -1,6 +1,6 @@
 # hitchmap_data_cleaning
 
-Relaunching the hitchmap.com via https://github.com/bopjesvla/hitch with more meaningful hitchhiking spots.
+Relaunching the https://hitchmap.com via https://github.com/bopjesvla/hitch with more meaningful hitchhiking spots.
 
 ### clean_map.ipynb
 
