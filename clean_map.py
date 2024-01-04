@@ -58,8 +58,8 @@ def points_from_country(region="Germany", level="country"):
 
 # select the country here
 # contains all entries for the same place as single samples
-region = "Saxony"
-level = "state"
+region = "Germany"
+level = "country"
 
 places_file = f"./data/places_{region}.csv"
 if not os.path.isfile(places_file):
