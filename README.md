@@ -45,10 +45,12 @@ Cleaning procedure ideas in the following sequence:
 4. Merge spots that are related to the same road segment to their centriod.
 
 ---
-Cleaning results are stored in `map/`.
+Cleaning run results are stored in `map/`.
 
 
 Coloring:
 - Red - place at its old location or unchanged place.
 - Green - place at its new location.
 - Black - delated place.
+
+Run stats in `stats/`.
