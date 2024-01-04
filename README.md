@@ -19,6 +19,10 @@ Moving = give a place a new location that is more meaningful.
 If features from a map are needed for a task those are obtained from OSM.
 
 
+- Red - place at its old location or unchanged place.
+- Green - place at its new location.
+- Black - delated place.
+
 Cleaning procedure ideas in the following sequence:
 
 **Feature-based merging (orange):**
