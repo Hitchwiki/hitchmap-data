@@ -1,0 +1,13 @@
+
+*.tif
+*.png
+*.txt
+cache/
+roads/
+cities/
+
+.vscode
+
+# env
+env/
+heatchmap/
