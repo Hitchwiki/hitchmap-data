@@ -53,4 +53,4 @@ Coloring:
 - Green - place at its new location.
 - Black - delated place.
 
-Run stats in `stats/`.
+See stats of the run in `stats/`.
