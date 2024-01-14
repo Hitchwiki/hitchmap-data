@@ -1,1 +1,1 @@
-All things data science on the spot data from [Hitchmap](hitchmap.com).
+All things data science on the spot data from [Hitchmap](https://hitchmap.com).
