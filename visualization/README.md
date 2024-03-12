@@ -1,4 +1,4 @@
-# heatchmap -> geoheatmap @pypi
+# heatchmap
 
 Important: if you are willing to just try it out or contribute reach out to me first. This repo needs some cleaning :)
 
