@@ -3,11 +3,6 @@
 *.png
 *.txt
 cache/
-roads/
-cities/
+map_features/
 
 .vscode
-
-# env
-env/
-heatchmap/
