@@ -4,5 +4,6 @@
 *.txt
 cache/
 map_features/
+models/
 
 .vscode

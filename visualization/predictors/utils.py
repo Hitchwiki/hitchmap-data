@@ -36,3 +36,19 @@ def get_points(path, wait_max=WAIT_MAX):
     points = points.to_crs(epsg=3857)
 
     return points
+
+class GP():
+    def __init__():
+        pass
+
+    def fit(X, y):
+        C = get_kernelmatrix(X)
+    
+    def rbf_kernel(x1, y2, l):
+        return l * exp((-1) * distance(x1, x2)**2)
+
+    def get_kernelmatrix(X):
+        pass
+
+    def pred():
+        return mean, variance
