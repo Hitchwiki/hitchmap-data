@@ -21,7 +21,7 @@ from pathlib import Path
 RESOLUTION = 10  # pixel per degree
 
 
-def define_raster(polygon, map):
+def define_raster(polygon, map, res=RESOLUTION):
     xx, yy = polygon.geometry[0].exterior.coords.xy
 
     # Note above return values are of type `array.array`
@@ -30,8 +30,8 @@ def define_raster(polygon, map):
 
     degree_width = int(map[2] - map[0])
     degree_height = int(map[3] - map[1])
-    pixel_width = degree_width * RESOLUTION
-    pixel_height = degree_height * RESOLUTION
+    pixel_width = degree_width * res
+    pixel_height = degree_height * res
 
     return xx, yy, pixel_width, pixel_height
 
@@ -81,8 +81,8 @@ def save_raster(Z, polygon, map):
         destination.write(Z, 1)
 
 
-def get_map_grid(polygon, map):
-    xx, yy, pixel_width, pixel_height = define_raster(polygon, map)
+def get_map_grid(polygon, map, res=RESOLUTION):
+    xx, yy, pixel_width, pixel_height = define_raster(polygon, map, res)
     x = np.linspace(xx[0], xx[2], pixel_width)
     # mind starting with upper value of y axis here
     y = np.linspace(yy[2], yy[0], pixel_height)
@@ -107,7 +107,7 @@ def get_points_in_region(points, region='world'):
         "south_america": [-90.0, -60.0, -30.0, 15.0],
         "australia": [100.0, -50.0, 180.0, 0.0],
         "middle_africa": [-10.0, -35.0, 60.0, 20.0],
-        "artificial": [8.0, -10.0, 30.0, 10.0],
+        "artificial": [8.0, -1.0, 30.0, 1.0],
         "greenland": [-80.0, 60.0, -10.0, 85.0],
     }
     map_boundary = maps[region]
