@@ -36,7 +36,7 @@ def define_raster(polygon, map, res=RESOLUTION):
     return xx, yy, pixel_width, pixel_height
 
 
-def save_raster(Z, polygon, map):
+def save_raster(Z, polygon, map, map_path):
 
     polygon_vertices_x, polygon_vertices_y, pixel_width, pixel_height = define_raster(
         polygon, map
