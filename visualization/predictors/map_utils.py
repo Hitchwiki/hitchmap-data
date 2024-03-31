@@ -98,6 +98,8 @@ def get_points_in_region(points, region='world'):
 
     maps = {
         "germany": [5.0, 48.0, 15.0, 55.0],
+        "spain": [-8.0, 36.0, 3.0, 43.0],
+        "spain_france": [-8.0, 36.0, 6.0, 50.0],
         "europe": [-12.0, 35.0, 45.0, 71.0],
         "world": [-180.0, -85.0, 180.0, 85.0],  # 85 lat bc of 3857
         "small": [12.0, 52.0, 15.0, 54.0],
