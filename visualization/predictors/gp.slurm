@@ -1,0 +1,12 @@
+#!/bin/sh
+#SBATCH -A herbrich
+#SBATCH --job-name=feedback2code-myjob
+#SBATCH --output ./log/output.out
+#SBATCH --partition sorcery
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=10
+#SBATCH --mem=80G
+#SBATCH --gpus=0
+
+python -u ./gp.py > ./gp.out
