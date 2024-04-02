@@ -17,8 +17,12 @@ from rasterio.control import GroundControlPoint as GCP
 import osmnx
 from pathlib import Path
 
+from tqdm.auto import tqdm
 
-RESOLUTION = 10  # pixel per degree
+tqdm.pandas()
+
+
+RESOLUTION = 20  # pixel per degree
 
 
 def define_raster(polygon, map, res=RESOLUTION):
@@ -36,10 +40,10 @@ def define_raster(polygon, map, res=RESOLUTION):
     return xx, yy, pixel_width, pixel_height
 
 
-def save_raster(Z, polygon, map, map_path):
+def save_raster(Z, polygon, map, map_path, res=RESOLUTION):
 
     polygon_vertices_x, polygon_vertices_y, pixel_width, pixel_height = define_raster(
-        polygon, map
+        polygon, map, res
     )
     # https://gis.stackexchange.com/questions/425903/getting-rasterio-transform-affine-from-lat-and-long-array
 
@@ -93,7 +97,7 @@ def get_map_grid(polygon, map, res=RESOLUTION):
     return X, Y
 
 
-def get_points_in_region(points, region='world'):
+def get_points_in_region(points, region="world"):
     # set lat long boundaries of different scopes of the map
 
     maps = {
@@ -131,3 +135,152 @@ def get_points_in_region(points, region='world'):
     points = points[points.geometry.within(polygon.geometry[0])]
 
     return points, polygon, map_boundary
+
+
+def build_map(
+    map_path,
+    method="ORDINARY",
+    points=None,
+    all_points=None,
+    region="world",
+    polygon=None,
+    show_cities=True,
+    show_roads=True,
+    show_spots=True,
+):
+    print("Loading information about states...")
+    states = gpd.read_file("map_features/states/ne_10m_admin_1_states_provinces.shp")
+    states = states.to_crs(epsg=3857)
+
+    # use smaller units for Russia
+    # country level except for Canada, Russia, USA, Australia, China, Brazil, India, Indonesia
+    states = states[states.admin != "Antarctica"]
+
+    # a state is hitchhikable if there are hitchhiking spots in it
+    def check_hitchhikability(state):
+        points_in_state = points[points.geometry.within(state.geometry)]
+        return len(points_in_state) > 0
+
+    print("Checking hitchhikability for each state...")
+    states["hh"] = states.progress_apply(check_hitchhikability, axis=1)
+    # define the heatmap color scale
+
+    # TODO smoother spectrum instead of buckets
+    buckets = [
+        "grey",  # not enough data
+        "#008200",  # dark green
+        "#00c800",  # light green
+        "green",  # green
+        "#c8ff00",  # light yellow
+        "#ffff00",  # yellow
+        "#ffc800",  # light orange
+        "#ff8200",  # dark orange
+        "red",  # red
+        "#c80000",  # dark red
+        "#820000",  # wine red
+        "blue",  # not necessary to color (eg sea)
+    ]
+
+    cmap = colors.ListedColormap(buckets)
+
+    max_wait = (
+        all_points.wait.max() + 0.1
+    )  # to get at least this value as maximum for the colored buckets
+    num_scale_colors = len(buckets) - 2  # because of upper and lower bucket
+    # build log scale starting at 0 and ending at max wait
+    base = (max_wait + 1) ** (1 / num_scale_colors)
+
+    def log_scale(x):
+        return base**x - 1
+
+    # how to prevent numerical instabilities resulting in some areas having a checkerboard pattern
+    # round pixel values to ints
+    # set the boundaries of the buckets to not be ints
+    # should happen automatically through the log scale
+    # -0.1 should be 0.0 actually
+    # boundary of last bucket does not matter - values outside of the range are colored in the last bucket
+    boundaries = (
+        [-1, -0.1]
+        + [log_scale(i) for i in range(1, num_scale_colors + 1)]
+        + [max_wait + 1]
+    )
+
+    # prepare the plot
+    norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
+    fig, ax = plt.subplots(figsize=(100, 100))
+
+    # get borders of all countries
+    # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip
+    # from https://www.naturalearthdata.com/downloads/110m-cultural-vectors/
+    print("Loading country shapes...")
+    countries = gpd.datasets.get_path("naturalearth_lowres")
+    countries = gpd.read_file(countries)
+    countries = countries.to_crs(epsg=3857)
+    countries = countries[countries.name != "Antarctica"]
+    # TODO so far does not work as in final map the raster is not applied to the whole region
+    # countries = countries[countries.geometry.within(polygon.geometry[0])]
+    country_shapes = countries.geometry
+    countries.plot(ax=ax, facecolor="none", edgecolor="black")
+
+    # TODO takes more time than expected
+    # use a pre-compiled list of important cities
+    # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_populated_places.zip
+    # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
+    # cities = gpd.read_file("cities/ne_10m_populated_places.shp", bbox=polygon.geometry[0]) should work but does not
+    if show_cities:
+        print("Loading cities...")
+        cities = gpd.read_file(
+            "map_features/cities/ne_10m_populated_places.shp"
+        )  # takes most time
+        cities = cities.to_crs(epsg=3857)
+        cities = cities[cities.geometry.within(polygon.geometry[0])]
+        cities.plot(ax=ax, markersize=1, color="black")
+
+    # use a pre-compiles list of important roads
+    # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_roads.zip
+    # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
+    if show_roads:
+        print("Loading roads...")
+        roads = gpd.read_file("map_features/roads/ne_10m_roads.shp")
+        roads = roads.to_crs(epsg=3857)
+        roads = roads[roads.geometry.within(polygon.geometry[0])]
+        roads.plot(ax=ax, markersize=1, color="black")
+
+    if show_spots:
+        all_points.plot(ax=ax, markersize=10, color="red")
+
+    # limit heatmap to landmass by asigning inf/ high value to sea
+    print("Transforming heatmap...")
+    with rasterio.open(map_path) as heatmap:
+        out_image, out_transform = rasterio.mask.mask(
+            heatmap, country_shapes, crop=True, filled=False
+        )
+        out_meta = heatmap.meta
+
+    out_meta.update(
+        {
+            "driver": "GTiff",
+            "height": out_image.shape[1],
+            "width": out_image.shape[2],
+            "transform": out_transform,
+        }
+    )
+
+    with rasterio.open(map_path, "w", **out_meta) as destination:
+        destination.write(out_image)
+
+    # plot the heatmap
+    print("Plotting heatmap...")
+    raster = rasterio.open(map_path)
+    rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm)
+
+    fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
+    if method == "ITERATIVE":
+        file_name = f"maps/map_{region}_iter_{ITERATIONS}.png"
+    elif method == "DYNAMIC":
+        file_name = f"maps/map_{region}_{K}.png"
+    elif method == "GP":
+        file_name = f"maps/map_gp_{region}.png"
+    else:
+        file_name = f"maps/map_{region}.png"
+    plt.savefig(file_name, bbox_inches="tight")
