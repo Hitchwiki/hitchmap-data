@@ -40,7 +40,7 @@ def define_raster(polygon, map, res=RESOLUTION):
     return xx, yy, pixel_width, pixel_height
 
 
-def save_raster(Z, polygon, map, map_path, res=RESOLUTION):
+def save_as_raster(Z, polygon, map, map_path='intermediate/map.tif', res=RESOLUTION):
 
     polygon_vertices_x, polygon_vertices_y, pixel_width, pixel_height = define_raster(
         polygon, map, res
@@ -84,6 +84,9 @@ def save_raster(Z, polygon, map, map_path, res=RESOLUTION):
     ) as destination:
         destination.write(Z, 1)
 
+def load_raster(map_path='intermediate/map.tif'):
+    return rasterio.open(map_path)
+
 
 def get_map_grid(polygon, map, res=RESOLUTION):
     xx, yy, pixel_width, pixel_height = define_raster(polygon, map, res)
@@ -101,7 +104,7 @@ def get_points_in_region(points, region="world"):
     # set lat long boundaries of different scopes of the map
 
     maps = {
-        "germany": [5.0, 48.0, 15.0, 55.0],
+        "germany": [3.0, 48.0, 16.0, 55.0],
         "spain": [-8.0, 36.0, 3.0, 43.0],
         "spain_france": [-8.0, 36.0, 6.0, 50.0],
         "europe": [-12.0, 35.0, 45.0, 71.0],
@@ -136,6 +139,96 @@ def get_points_in_region(points, region="world"):
 
     return points, polygon, map_boundary
 
+def make_raster_map(points, region, polygon, map, iteration=0, method='ordinary', recompute=True, circle_size = 50000, no_data_threshold=0.00000001):
+    
+    # https://stackoverflow.com/questions/7687679/how-to-generate-2d-gaussian-with-python
+    def makeGaussian(stdv, x0, y0):
+        """Make a square gaussian kernel.
+        size is the length of a side of the square
+        fwhm is full-width-half-maximum, which
+        can be thought of as an effective radius.
+        """
+        # https://en.wikipedia.org/wiki/Full_width_at_half_maximum
+        # TODO why fwhm used here?
+        fwhm = 2.355 * stdv
+
+        # gives the distribution in the whole raster space as X and Y are used here
+        # TODO only calculate for pixels that will be colored (landmass) in the end
+        # TODO only calculate for pixels that are significantly close to the point (e.g. 500 km around the point)
+        return np.exp(-4 * np.log(2) * ((X - x0) ** 2 + (Y - y0) ** 2) / fwhm**2)
+    
+    def get_distribution(lat, lon):
+        # standard deviation in meters -> 50 km around each spot; quite arbitrary
+        if method == 'DYNAMIC': STDV_M = max(circle_size, calc_radius(Point(lon, lat), points.geometry, k=K))
+        else : STDV_M = circle_size + 10000 * iteration
+        return makeGaussian(STDV_M, lon, lat)
+
+    # create pixel grid for map
+    X, Y = get_map_grid(polygon, map)
+    
+
+    # sum of distributions
+    Zn = None
+    # weighted sum of distributions
+    Zn_weighted = None
+
+    try:
+        if recompute:
+            raise Exception("recompute")
+        else:
+            Z = np.loadtxt(f'intermediate/map_{region}.txt', dtype=float)
+            
+    except:
+        # create a raster map - resulution is defined above
+        # https://stackoverflow.com/questions/56677267/tqdm-extract-time-passed-time-remaining
+        print("Weighting gaussians for all points...")
+        with tqdm(zip(points.geometry.y, points.geometry.x, points.wait), total=len(points)) as t:
+            # TODO find out how to speed up and parallelize this
+            for lat, lon, wait in t:
+                # distribution inserted by a single point
+                Zi = get_distribution(lat, lon)
+                # add the new distribution to the sum of existing distributions
+                # write them to Zn_weighted and wait every single point/ distribution by the waiting time
+                # => it matters where a distribiton is inserted (areas with more distributions have a higher certainty)
+                # and which waiting time weight is associated with it
+                if Zn is None:
+                    Zn = Zi
+                    Zn_weighted = Zi * wait
+                else:
+                    Zn = np.sum([Zn, Zi], axis=0)
+                    Zn_weighted = np.sum([Zn_weighted, Zi * wait], axis=0)
+
+            elapsed = t.format_dict['elapsed']
+            elapsed_str = t.format_interval(elapsed)
+            df = pd.DataFrame({"region": region, 'elapsed time': [elapsed_str]})
+
+            tracker_name = 'logging/time_tracker.csv'
+            try:
+                full_df = pd.read_csv(tracker_name, index_col=0)
+                full_df = pd.concat([full_df, df])
+                full_df.to_csv(tracker_name, sep=',')
+            except:
+                df.to_csv(tracker_name)
+
+        # normalize the weighted sum by the sum of all distributions -> so we see the actual waiting times in the raster
+        Z = np.divide(Zn_weighted, Zn, out=np.zeros_like(Zn_weighted), where=Zn!=0)
+
+        # grey out pixels with no hitchhiking spots near them
+        undefined = -1.0
+        Z = np.where(Zn < no_data_threshold, undefined, Z)
+    
+        # save the underlying raster data of the heatmap for later use
+        np.savetxt(f'intermediate/map_{region}.txt', Z) 
+
+    return X, Y, Z, Zn, Zn_weighted
+
+# from https://rasterio.readthedocs.io/en/stable/quickstart.html#spatial-indexing
+# in epsg 3857
+def map_predict(lon, lat, raster):
+    # transform the lat/lon to the raster's coordinate system
+    x, y = raster.index(lon, lat)
+    # read the raster at the given coordinates
+    return raster.read(1)[x, y]
 
 def build_map(
     map_path,
