@@ -21,8 +21,11 @@ import seaborn as sns
 import matplotlib
 import shapely
 from matplotlib.colors import LogNorm
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
-print("starting")
+logger.info("Starting")
 
 # log space
 points = get_points("../data/points_train.csv")
@@ -49,68 +52,68 @@ stdv = np.std(y_)
 
 # parameters to optimize
 
-l = 1e5
-L = [l, l]
-sigma = stdv
+# l = 1e5
+# L = [l, l]
+# sigma = stdv
 
-rbf = RBF(
-    length_scale=L, length_scale_bounds=(1e4, 1e6)
-)  # using anisotripic kernel (different length scales for each dimension)
+# rbf = RBF(
+#     length_scale=L, length_scale_bounds=(1e4, 1e6)
+# )  # using anisotripic kernel (different length scales for each dimension)
 
-kernel = ConstantKernel(
-    constant_value=sigma**2, constant_value_bounds="fixed"
-) * rbf + WhiteKernel(noise_level=1e-5, noise_level_bounds=(1e-1, 1e1))
+# kernel = ConstantKernel(
+#     constant_value=sigma**2, constant_value_bounds="fixed"
+# ) * rbf + WhiteKernel(noise_level=1e-5, noise_level_bounds=(1e-1, 1e1))
 
-gp = GaussianProcessRegressor(
-    kernel=kernel,
-    alpha=0.0**2,
-    optimizer="fmin_l_bfgs_b",  # maximizing marginal log lik: given the data, how likely is the parameterization of the kernel
-    # (if we draw a sample frome the multivariate gaussian with the kernel as covariance matrix, how likely is the data we have seen)
-    # prevents overfitting to some degree
-    normalize_y=False,
-    n_restarts_optimizer=1,
-    random_state=42,
-)
+# gp = GaussianProcessRegressor(
+#     kernel=kernel,
+#     alpha=0.0**2,
+#     optimizer="fmin_l_bfgs_b",  # maximizing marginal log lik: given the data, how likely is the parameterization of the kernel
+#     # (if we draw a sample frome the multivariate gaussian with the kernel as covariance matrix, how likely is the data we have seen)
+#     # prevents overfitting to some degree
+#     normalize_y=False,
+#     n_restarts_optimizer=1,
+#     random_state=42,
+# )
 
-print("Fitting GP...")
-gp.fit(X, y_)
-print(gp.kernel_, np.exp(gp.kernel_.theta))
+# logger.info("Fitting GP...")
+# gp.fit(X, y_)
+# logger.info(gp.kernel_, np.exp(gp.kernel_.theta))
 
-# training error
-print("Training error...")
-points["pred"], points["std"] = gp.predict(X, return_std=True)
-points["pred"] = np.exp(points["pred"] + average)
+# # training error
+# logger.info("Training error...")
+# points["pred"], points["std"] = gp.predict(X, return_std=True)
+# points["pred"] = np.exp(points["pred"] + average)
 
-print(
-    (
-        mean_squared_error(points["wait"], points["pred"]),
-        root_mean_squared_error(points["wait"], points["pred"]),
-        mean_absolute_error(points["wait"], points["pred"]),
-    )
-)
+# logger.info(
+#     (
+#         mean_squared_error(points["wait"], points["pred"]),
+#         root_mean_squared_error(points["wait"], points["pred"]),
+#         mean_absolute_error(points["wait"], points["pred"]),
+#     )
+# )
 
-# validation error
-print("Validation error...")
-val = get_points("../data/points_val.csv")
-val, polygon, map_boundary = get_points_in_region(val, region)
-val["lat"] = val.geometry.y
-val["lon"] = val.geometry.x
+# # validation error
+# logger.info("Validation error...")
+# val = get_points("../data/points_val.csv")
+# val, polygon, map_boundary = get_points_in_region(val, region)
+# val["lat"] = val.geometry.y
+# val["lon"] = val.geometry.x
 
-val["pred"], val["std"] = gp.predict(val[["lat", "lon"]].values, return_std=True)
-val["pred"] = np.exp(val["pred"] + average)
+# val["pred"], val["std"] = gp.predict(val[["lat", "lon"]].values, return_std=True)
+# val["pred"] = np.exp(val["pred"] + average)
 
-print(
-    (
-        mean_squared_error(val["wait"], val["pred"]),
-        root_mean_squared_error(val["wait"], val["pred"]),
-        mean_absolute_error(val["wait"], val["pred"]),
-    )
-)
+# logger.info(
+#     (
+#         mean_squared_error(val["wait"], val["pred"]),
+#         root_mean_squared_error(val["wait"], val["pred"]),
+#         mean_absolute_error(val["wait"], val["pred"]),
+#     )
+# )
 
-with open(f"./models/{region}.pkl", "wb") as f:
-    pickle.dump(gp, f)
+# with open(f"./models/{region}.pkl", "wb") as f:
+#     pickle.dump(gp, f)
 
-gp = pickle.load(open("./models/europe.pkl", "rb"))
+gp = pickle.load(open(f"./models/{region}.pkl", "rb"))
 
 # draw map
 resolution = 10

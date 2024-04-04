@@ -41,6 +41,9 @@ def define_raster(polygon, map, res=RESOLUTION):
 
 
 def save_as_raster(Z, polygon, map, map_path='intermediate/map.tif', res=RESOLUTION):
+    # side effect: save the numpy raster data as txt file
+    file_name = map_path.split('.')[0]
+    np.savetxt(file_name + '.txt', Z) 
 
     polygon_vertices_x, polygon_vertices_y, pixel_width, pixel_height = define_raster(
         polygon, map, res

@@ -8,5 +8,7 @@
 #SBATCH --cpus-per-task=10
 #SBATCH --mem=80G
 #SBATCH --gpus=0
+#SBATCH --time=10:00:00
+
 
 python -u ./gp.py > ./gp.out
