@@ -286,10 +286,10 @@ def build_map(
     all_points=None,
     region="world",
     polygon=None,
-    show_states=True,
-    show_cities=True,
-    show_roads=True,
-    show_spots=True,
+    show_states=False,
+    show_cities=False,
+    show_roads=False,
+    show_spots=False,
 ):
     map_path = f"intermediate/map_{method}_{region}_{resolution}.tif"
     
