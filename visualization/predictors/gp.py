@@ -22,6 +22,7 @@ import matplotlib
 import shapely
 from matplotlib.colors import LogNorm
 import logging
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -116,7 +117,7 @@ stdv = np.std(y_)
 gp = pickle.load(open(f"./models/{region}.pkl", "rb"))
 
 # draw map
-resolution = 10
+resolution = 2
 
 X, Y = get_map_grid(polygon, map_boundary, resolution)
 grid = np.array((Y, X)).T
@@ -132,7 +133,28 @@ for vertical_line in tqdm(grid):
 map = map.T
 certainty_map = certainty_map.T
 
-map_path = f'intermediate/map_gp_{region}.tif'
-save_as_raster(map, polygon, map_boundary, map_path, resolution)
+save_numpy_map(
+    map, region=region, method="gp", kind_of_map="map", resolution=resolution
+)
+save_numpy_map(
+    certainty_map,
+    region=region,
+    method="gp",
+    kind_of_map="certainty",
+    resolution=resolution,
+)
+save_as_raster(
+    map, polygon, map_boundary, region=region, method="gp", resolution=resolution
+)
 
-build_map(map_path, method='GP', points=points, all_points=points, region=region, polygon=polygon, show_cities=False, show_roads=False, show_spots=False)
+build_map(
+    method="gp",
+    resolution=resolution,
+    points=points,
+    all_points=points,
+    region=region,
+    polygon=polygon,
+    show_cities=False,
+    show_roads=False,
+    show_spots=False,
+)
