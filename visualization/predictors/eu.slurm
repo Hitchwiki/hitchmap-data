@@ -11,4 +11,4 @@
 #SBATCH --time=10:00:00
 
 
-python -u ./eu.py > ./gp.out
+python -u ./eu.py > ./eu.out
