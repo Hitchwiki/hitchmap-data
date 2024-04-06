@@ -295,7 +295,7 @@ def build_map(
     show_cities=False,
     show_roads=False,
     show_spots=False,
-    certainty=None,
+    certainty=1.0,
 ):
     map_path = f"intermediate/map_{method}_{region}_{resolution}.tif"
     

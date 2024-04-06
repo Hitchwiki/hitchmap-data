@@ -53,47 +53,50 @@ l = 1e5
 L = [l, l]
 sigma = stdv
 
-rbf = RBF(
-    length_scale=L, length_scale_bounds=(1e-100, 1e100)
-)  # using anisotripic kernel (different length scales for each dimension)
-rbf2 = RBF(
-    length_scale=L, length_scale_bounds=(1e-100, 1e100)
-)  # using anisotripic kernel (different length scales for each dimension)
-
-kernel = (
-    ConstantKernel(constant_value=sigma**2, constant_value_bounds=(1e-1, 1e1)) * rbf
-    + ConstantKernel(constant_value=sigma**2, constant_value_bounds=(1e-1, 1e1)) * rbf
-    + WhiteKernel(noise_level=1.05e0, noise_level_bounds=(1e-1, 1e1))
-)
-
-gp = GaussianProcessRegressor(
-    kernel=kernel,
-    alpha=0.0**2,
-    optimizer="fmin_l_bfgs_b",  # maximizing marginal log lik: given the data, how likely is the parameterization of the kernel
-    # (if we draw a sample frome the multivariate gaussian with the kernel as covariance matrix, how likely is the data we have seen)
-    # prevents overfitting to some degree
-    normalize_y=False,
-    n_restarts_optimizer=0,
-    random_state=42,
-)
-
-# have to fit once before using log_marginal_likelihood aka show the data
-gp.fit(X, y_)
-print(gp.kernel_, np.exp(gp.kernel_.theta))
-
-num = 10
+num = 5
 length_scale1 = np.logspace(3, 6, num=num)
 length_scale2 = np.logspace(3, 6, num=num)
 length_scale1_grid, length_scale2_grid = np.meshgrid(length_scale1, length_scale2)
 
 print("Calculating log marginal likelihood...")
-log_marginal_likelihood = [
-    gp.log_marginal_likelihood(theta=np.log([scale1, scale1, scale2, scale2]))
-    for scale1, scale2 in tqdm(
-        zip(length_scale1_grid.ravel(), length_scale2_grid.ravel()),
-        total=len(length_scale1_grid.ravel()),
+log_marginal_likelihood = []
+
+for scale1, scale2 in tqdm(
+    zip(length_scale1_grid.ravel(), length_scale2_grid.ravel()),
+    total=len(length_scale1_grid.ravel()),
+):
+    rbf = RBF(
+        length_scale=scale1, length_scale_bounds="fixed"
+    )  # using anisotripic kernel (different length scales for each dimension)
+    rbf2 = RBF(
+        length_scale=scale2, length_scale_bounds="fixed"
+    )  # using anisotripic kernel (different length scales for each dimension)
+
+    kernel = (
+        ConstantKernel(constant_value=sigma**2, constant_value_bounds=(1e-1, 1e1)) * rbf
+        + ConstantKernel(constant_value=sigma**2, constant_value_bounds=(1e-1, 1e1))
+        * rbf2
+        + WhiteKernel(noise_level=1.05e0, noise_level_bounds=(1e-1, 1e1))
     )
-]
+
+    gp = GaussianProcessRegressor(
+        kernel=kernel,
+        alpha=0.0**2,
+        optimizer="fmin_l_bfgs_b",  # maximizing marginal log lik: given the data, how likely is the parameterization of the kernel
+        # (if we draw a sample frome the multivariate gaussian with the kernel as covariance matrix, how likely is the data we have seen)
+        # prevents overfitting to some degree
+        normalize_y=False,
+        n_restarts_optimizer=0,
+        random_state=42,
+    )
+
+    # have to fit once before using log_marginal_likelihood aka show the data
+    gp.fit(X, y_)
+    print(gp.kernel_, np.exp(gp.kernel_.theta))
+
+    log_marginal_likelihood.append(gp.log_marginal_likelihood_value_)
+
+
 log_marginal_likelihood = np.reshape(
     log_marginal_likelihood, newshape=length_scale2_grid.shape
 )

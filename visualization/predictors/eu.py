@@ -51,16 +51,14 @@ l = 1e5
 L = [l, l]
 sigma = stdv
 
-rqk = RationalQuadratic(
-    length_scale=1e5,
-    alpha=1.0,
-    length_scale_bounds=(1e0, 1e6),
-    alpha_bounds=(1e-05, 100000.0),
-)
+rbf = RBF(
+    length_scale=1.0, length_scale_bounds=(1e3,1e6)
+)  # using anisotripic kernel (different length scales for each dimension)
 
-kernel = ConstantKernel(
-    constant_value=sigma**2, constant_value_bounds=(1e-1, 1e1)
-) * rqk + WhiteKernel(noise_level=1e-5, noise_level_bounds=(1e-2, 1e2))
+kernel = (
+    ConstantKernel(constant_value=sigma**2, constant_value_bounds=(1e-1, 1e1)) * rbf
+    + WhiteKernel(noise_level=1.05e0, noise_level_bounds=(1e-1, 1e1))
+)
 
 gp = GaussianProcessRegressor(
     kernel=kernel,
@@ -75,8 +73,6 @@ gp = GaussianProcessRegressor(
 
 gp.fit(X, y_)
 print(gp.kernel_, np.exp(gp.kernel_.theta))
-
-
 
 
 
