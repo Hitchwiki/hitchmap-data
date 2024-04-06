@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH -A herbrich
 #SBATCH --job-name=feedback2code-myjob
-#SBATCH --output ./log/output.out
+#SBATCH --output ./log/slurm-%j.out
 #SBATCH --partition sorcery
 #SBATCH --nodes=1
 #SBATCH --ntasks=1

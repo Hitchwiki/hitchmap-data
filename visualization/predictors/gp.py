@@ -119,33 +119,7 @@ gp = pickle.load(open(f"./models/{region}.pkl", "rb"))
 # draw map
 resolution = 2
 
-X, Y = get_map_grid(polygon, map_boundary, resolution)
-grid = np.array((Y, X)).T
-map = np.empty((0, X.shape[0]))
-certainty_map = np.empty((0, X.shape[0]))
-
-for vertical_line in tqdm(grid):
-    pred, stdv = gp.predict(vertical_line, return_std=True)
-    pred = np.exp(pred + average)
-    map = np.vstack((map, pred + average))
-    certainty_map = np.vstack((certainty_map, stdv))
-
-map = map.T
-certainty_map = certainty_map.T
-
-save_numpy_map(
-    map, region=region, method="gp", kind_of_map="map", resolution=resolution
-)
-save_numpy_map(
-    certainty_map,
-    region=region,
-    method="gp",
-    kind_of_map="certainty",
-    resolution=resolution,
-)
-save_as_raster(
-    map, polygon, map_boundary, region=region, method="gp", resolution=resolution
-)
+make_map_from_gp(gp, average, region, polygon, map_boundary, resolution=resolution)
 
 build_map(
     method="gp",
@@ -154,7 +128,4 @@ build_map(
     all_points=points,
     region=region,
     polygon=polygon,
-    show_cities=False,
-    show_roads=False,
-    show_spots=False,
 )

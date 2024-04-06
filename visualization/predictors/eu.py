@@ -107,3 +107,5 @@ print(
         mean_absolute_error(val["wait"], val["pred"]),
     )
 )
+
+m = make_map_from_gp(gp, average, region, polygon, map_boundary, resolution=2)

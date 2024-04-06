@@ -76,7 +76,8 @@ def save_as_raster(map, polygon, map_boundary, region="world", method="ordinary"
 
     # cannot use np.longdouble to write to tif
     map = np.double(map)
-    map = np.round(map, 0)
+    # TODO: need this?
+    # map = np.round(map, 0)
 
     # save the colored raster using the above transform
     # TODO find out why raster is getting smaller in x direction when stored as tif (e.g. 393x700 -> 425x700)
@@ -92,6 +93,8 @@ def save_as_raster(map, polygon, map_boundary, region="world", method="ordinary"
         dtype=map.dtype,
     ) as destination:
         destination.write(map, 1)
+
+    return map
 
 
 def load_raster(region="world", method="ordinary"):
@@ -259,7 +262,7 @@ def map_predict(lon, lat, raster):
     return raster.read(1)[x, y]
 
 
-def make_map_from_gp(gp, region, polygon, map_boundary, resolution=10):
+def make_map_from_gp(gp, average, region, polygon, map_boundary, resolution=10):
     X, Y = get_map_grid(polygon, map_boundary, resolution)
     grid = np.array((Y, X)).T
     map = np.empty((0, X.shape[0]))
@@ -268,7 +271,7 @@ def make_map_from_gp(gp, region, polygon, map_boundary, resolution=10):
     for vertical_line in tqdm(grid):
         pred, stdv = gp.predict(vertical_line, return_std=True)
         pred = np.exp(pred + average)
-        map = np.vstack((map, pred + average))
+        map = np.vstack((map, pred))
         certainty_map = np.vstack((certainty_map, stdv))
 
     map = map.T
@@ -276,11 +279,13 @@ def make_map_from_gp(gp, region, polygon, map_boundary, resolution=10):
 
     save_numpy_map(map, region=region, method="gp")
     save_numpy_map(certainty_map, region=region, method="gp", kind_of_map='certainty')
-    save_as_raster(map, polygon, map_boundary, region=region, method='gp', resolution=resolution)
-
+    map = save_as_raster(map, polygon, map_boundary, region=region, method='gp', resolution=resolution)
+    plt.contourf(X, Y, map)
+    plt.colorbar()
+    plt.savefig(f"maps/contourf_map_gp_{region}_{resolution}.png")
 
 def build_map(
-       method="ORDINARY",
+    method="ORDINARY",
     resolution=RESOLUTION,
     points=None,
     all_points=None,
@@ -290,6 +295,7 @@ def build_map(
     show_cities=False,
     show_roads=False,
     show_spots=False,
+    certainty=None,
 ):
     map_path = f"intermediate/map_{method}_{region}_{resolution}.tif"
     
@@ -384,7 +390,7 @@ def build_map(
 
     # TODO smoother spectrum instead of buckets
     buckets = [
-        "grey",  # not enough data
+        "blue",  # not enough data
         "#008200",  # dark green
         "#00c800",  # light green
         "#c8ff00",  # light yellow
@@ -394,7 +400,7 @@ def build_map(
         "red",  # red
         "#c80000",  # dark red
         "#820000",  # wine red
-        "blue",  # not necessary to color (eg sea)
+        "#820000",  # drop?
     ]
 
     cmap = colors.ListedColormap(buckets)
@@ -428,10 +434,14 @@ def build_map(
 
     # prepare the plot
     norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
-    
-    rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm)
 
-    fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
+    ax.set_facecolor("grey") # background color for landmass with uncertainty
+    # let certainty have no influence on sea color
+    certainty = np.where(raster.read()[0] == -1, 1, certainty)
+    rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=certainty)
+
+    cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
+    cbar.ax.tick_params(labelsize=50)
     if method == "ITERATIVE":
         file_name = f"maps/map_{region}_iter_{ITERATIONS}.png"
     elif method == "DYNAMIC":
