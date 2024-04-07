@@ -55,7 +55,7 @@ sigma = stdv
 
 num = 10
 length_scale1 = np.logspace(3, 6, num=num)
-length_scale2 = np.linspace(2e-1, 2e0, num=num)
+length_scale2 = np.linspace(6e-1, 1.5e0, num=num)
 length_scale1_grid, length_scale2_grid = np.meshgrid(length_scale1, length_scale2)
 
 print("Calculating log marginal likelihood...")
