@@ -60,13 +60,13 @@ sigma = stdv
 rqk = RationalQuadratic(
     length_scale=1e5,
     alpha=1.0,
-    length_scale_bounds=(1e-1, 1e6),
+    length_scale_bounds=(1e-3, 1e6),
     alpha_bounds=(1e-05, 100000.0),
 )
 
 kernel = ConstantKernel(
     constant_value=sigma**2, constant_value_bounds=(1e-1, 1e1)
-) * rqk + WhiteKernel(noise_level=1e-5, noise_level_bounds=(1e-2, 1e2))
+) * rqk + WhiteKernel(noise_level=1e-5, noise_level_bounds=(1e-4, 1e2))
 
 gp = GaussianProcessRegressor(
     kernel=kernel,
@@ -75,7 +75,7 @@ gp = GaussianProcessRegressor(
     # (if we draw a sample frome the multivariate gaussian with the kernel as covariance matrix, how likely is the data we have seen)
     # prevents overfitting to some degree
     normalize_y=False,
-    n_restarts_optimizer=1,
+    n_restarts_optimizer=5,
     random_state=42,
 )
 

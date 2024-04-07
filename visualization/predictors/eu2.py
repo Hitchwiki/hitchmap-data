@@ -53,9 +53,9 @@ l = 1e5
 L = [l, l]
 sigma = stdv
 
-num = 5
+num = 10
 length_scale1 = np.logspace(3, 6, num=num)
-length_scale2 = np.logspace(3, 6, num=num)
+length_scale2 = np.linspace(2e-1, 2e0, num=num)
 length_scale1_grid, length_scale2_grid = np.meshgrid(length_scale1, length_scale2)
 
 print("Calculating log marginal likelihood...")
@@ -68,15 +68,10 @@ for scale1, scale2 in tqdm(
     rbf = RBF(
         length_scale=scale1, length_scale_bounds="fixed"
     )  # using anisotripic kernel (different length scales for each dimension)
-    rbf2 = RBF(
-        length_scale=scale2, length_scale_bounds="fixed"
-    )  # using anisotripic kernel (different length scales for each dimension)
 
     kernel = (
         ConstantKernel(constant_value=sigma**2, constant_value_bounds=(1e-1, 1e1)) * rbf
-        + ConstantKernel(constant_value=sigma**2, constant_value_bounds=(1e-1, 1e1))
-        * rbf2
-        + WhiteKernel(noise_level=1.05e0, noise_level_bounds=(1e-1, 1e1))
+        + WhiteKernel(noise_level=scale2, noise_level_bounds='fixed')
     )
 
     gp = GaussianProcessRegressor(
@@ -114,7 +109,7 @@ plt.contour(
 plt.colorbar()
 plt.xscale("log")
 plt.yscale("log")
-plt.xlabel("Length-scale for lat")
-plt.ylabel("Length-scale for lon")
+plt.xlabel("Length-scale")
+plt.ylabel("noise-level")
 plt.title("Log-marginal-likelihood")
-plt.savefig(f"exp/search.png")
+plt.savefig(f"exp/search_l_n_variable_sigma.png")

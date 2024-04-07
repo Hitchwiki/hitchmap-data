@@ -97,8 +97,8 @@ def save_as_raster(map, polygon, map_boundary, region="world", method="ordinary"
     return map
 
 
-def load_raster(region="world", method="ordinary"):
-    map_path = f"intermediate/map_{method}_{region}.tif"
+def load_raster(region="world", method="ordinary", resolution=RESOLUTION):
+    map_path = f"intermediate/map_{method}_{region}_{resolution}.tif"
     return rasterio.open(map_path)
 
 
@@ -277,8 +277,8 @@ def make_map_from_gp(gp, average, region, polygon, map_boundary, resolution=10):
     map = map.T
     certainty_map = certainty_map.T
 
-    save_numpy_map(map, region=region, method="gp")
-    save_numpy_map(certainty_map, region=region, method="gp", kind_of_map='certainty')
+    save_numpy_map(map, region=region, method="gp", resolution=resolution)
+    save_numpy_map(certainty_map, region=region, method="gp", kind_of_map='certainty', resolution=resolution)
     map = save_as_raster(map, polygon, map_boundary, region=region, method='gp', resolution=resolution)
     plt.contourf(X, Y, map)
     plt.colorbar()
@@ -361,6 +361,7 @@ def build_map(
 
     # limit heatmap to landmass by asigning inf/ high value to sea
     print("Transforming heatmap...")
+    nodata = np.nan
     with rasterio.open(map_path) as heatmap:
         max_map_wait = heatmap.read().max()
         min_map_wait = heatmap.read().min()
@@ -368,7 +369,7 @@ def build_map(
         print("min map waiting time:", min_map_wait)
 
         out_image, out_transform = rasterio.mask.mask(
-            heatmap, country_shapes, nodata=-1
+            heatmap, country_shapes, nodata=nodata
         )
         out_meta = heatmap.meta
 
@@ -381,16 +382,16 @@ def build_map(
         }
     )
 
-    with rasterio.open(map_path, "w", **out_meta) as destination:
+    new_map_path = f"intermediate/map_{method}_{region}_{resolution}_processed.tif"
+    with rasterio.open(new_map_path, "w", **out_meta) as destination:
         destination.write(out_image)
 
     # plot the heatmap
     print("Plotting heatmap...")
-    raster = rasterio.open(map_path)
+    raster = rasterio.open(new_map_path)
 
     # TODO smoother spectrum instead of buckets
     buckets = [
-        "blue",  # not enough data
         "#008200",  # dark green
         "#00c800",  # light green
         "#c8ff00",  # light yellow
@@ -430,14 +431,33 @@ def build_map(
         + [max_wait + 1]
     )
 
+    # values higher than the upper boundary are colored in the upmost color
+    boundaries = (
+        [min_map_wait, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    )
+
     print(boundaries)
 
     # prepare the plot
     norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
 
-    ax.set_facecolor("grey") # background color for landmass with uncertainty
+    ax.set_facecolor('0.7') # background color light gray for landmass with uncertainty
+
+    try:
+        certainty = load_numpy_map(region=region, method=method, kind_of_map='certainty', resolution=resolution)
+        certainty = (certainty - certainty.min()) / (certainty.max() - certainty.min())
+        certainty = 1 - certainty
+    except:
+        certainty = 1.0
     # let certainty have no influence on sea color
-    certainty = np.where(raster.read()[0] == -1, 1, certainty)
+    certainty = np.where(np.isnan(raster.read()[0]), 1, certainty)
+    # shift (for rational quadratic kernel)
+    # certainty = certainty + 0.4
+    # certainty = np.clip(certainty, 0, 1)
+
+    # set color for nan (nodata... sea) values
+    # from https://stackoverflow.com/questions/2578752/how-can-i-plot-nan-values-as-a-special-color-with-imshow
+    cmap.set_bad(color='blue')
     rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=certainty)
 
     cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
