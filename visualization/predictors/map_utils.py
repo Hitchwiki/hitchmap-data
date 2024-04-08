@@ -25,7 +25,7 @@ tqdm.pandas()
 RESOLUTION = 20  # pixel per degree
 
 
-def define_raster(polygon, map, res=RESOLUTION):
+def define_raster(polygon, map, resolution=RESOLUTION):
     xx, yy = polygon.geometry[0].exterior.coords.xy
 
     # Note above return values are of type `array.array`
@@ -34,8 +34,8 @@ def define_raster(polygon, map, res=RESOLUTION):
 
     degree_width = int(map[2] - map[0])
     degree_height = int(map[3] - map[1])
-    pixel_width = degree_width * res
-    pixel_height = degree_height * res
+    pixel_width = degree_width * resolution
+    pixel_height = degree_height * resolution
 
     return xx, yy, pixel_width, pixel_height
 
@@ -164,6 +164,7 @@ def make_raster_map(
     recompute=True,
     circle_size=50000,
     no_data_threshold=0.00000001,
+    resolution=RESOLUTION,
 ):
 
     # https://stackoverflow.com/questions/7687679/how-to-generate-2d-gaussian-with-python
@@ -193,7 +194,7 @@ def make_raster_map(
         return makeGaussian(STDV_M, lon, lat)
 
     # create pixel grid for map
-    X, Y = get_map_grid(polygon, map)
+    X, Y = get_map_grid(polygon, map, resolution=resolution)
 
     # sum of distributions
     Zn = None
