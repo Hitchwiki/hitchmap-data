@@ -22,96 +22,26 @@ from tqdm.auto import tqdm
 tqdm.pandas()
 
 
-RESOLUTION = 20  # pixel per degree
+RESOLUTION = 2  # pixel per degree
 
 
-def define_raster(polygon, map, resolution=RESOLUTION):
-    xx, yy = polygon.geometry[0].exterior.coords.xy
-
-    # Note above return values are of type `array.array`
-    xx = xx.tolist()
-    yy = yy.tolist()
-
-    degree_width = int(map[2] - map[0])
-    degree_height = int(map[3] - map[1])
-    pixel_width = degree_width * resolution
-    pixel_height = degree_height * resolution
-
-    return xx, yy, pixel_width, pixel_height
-
-
-def save_numpy_map(map, region="world", method="ordinary", kind_of_map='map', resolution=RESOLUTION):
+def save_numpy_map(
+    map, region="world", method="ordinary", kind_of_map="map", resolution=RESOLUTION
+):
     map_path = f"intermediate/{kind_of_map}_{method}_{region}_{resolution}.txt"
     np.savetxt(map_path, map)
 
-def load_numpy_map(region="world", method="ordinary", kind_of_map='map', resolution=RESOLUTION):
+
+def load_numpy_map(
+    region="world", method="ordinary", kind_of_map="map", resolution=RESOLUTION
+):
     map_path = f"intermediate/{kind_of_map}_{method}_{region}_{resolution}.txt"
     return np.loadtxt(map_path)
-
-def save_as_raster(map, polygon, map_boundary, region="world", method="ordinary", resolution=RESOLUTION):
-    map_path = f"intermediate/map_{method}_{region}_{resolution}.tif"
-
-    polygon_vertices_x, polygon_vertices_y, pixel_width, pixel_height = define_raster(
-        polygon, map_boundary, resolution
-    )
-    # https://gis.stackexchange.com/questions/425903/getting-rasterio-transform-affine-from-lat-and-long-array
-
-    # lower/upper - left/right
-    ll = (polygon_vertices_x[0], polygon_vertices_y[0])
-    ul = (polygon_vertices_x[1], polygon_vertices_y[1])  # in lon, lat / x, y order
-    ur = (polygon_vertices_x[2], polygon_vertices_y[2])
-    lr = (polygon_vertices_x[3], polygon_vertices_y[3])
-    cols, rows = pixel_width, pixel_height
-
-    # ground control points
-    gcps = [
-        GCP(0, 0, *ul),
-        GCP(0, cols, *ur),
-        GCP(rows, 0, *ll),
-        GCP(rows, cols, *lr),
-    ]
-
-    # seems to need the vertices of the map polygon
-    transform = from_gcps(gcps)
-
-    # cannot use np.longdouble to write to tif
-    map = np.double(map)
-    # TODO: need this?
-    # map = np.round(map, 0)
-
-    # save the colored raster using the above transform
-    # TODO find out why raster is getting smaller in x direction when stored as tif (e.g. 393x700 -> 425x700)
-    with rasterio.open(
-        map_path,
-        "w",
-        driver="GTiff",
-        height=map.shape[0],
-        width=map.shape[1],
-        count=1,
-        crs=CRS.from_epsg(3857),
-        transform=transform,
-        dtype=map.dtype,
-    ) as destination:
-        destination.write(map, 1)
-
-    return map
 
 
 def load_raster(region="world", method="ordinary", resolution=RESOLUTION):
     map_path = f"intermediate/map_{method}_{region}_{resolution}.tif"
     return rasterio.open(map_path)
-
-
-def get_map_grid(polygon, map_boundary, resolution=RESOLUTION):
-    xx, yy, pixel_width, pixel_height = define_raster(polygon, map_boundary, resolution)
-    x = np.linspace(xx[0], xx[2], pixel_width)
-    # mind starting with upper value of y axis here
-    y = np.linspace(yy[2], yy[0], pixel_height)
-    X, Y = np.meshgrid(x, y)
-    # higher precision prevents pixels far away from the points to be 0/ nan
-    X = np.longdouble(X)
-    Y = np.longdouble(Y)
-    return X, Y
 
 
 def get_points_in_region(points, region="world"):
@@ -154,21 +84,52 @@ def get_points_in_region(points, region="world"):
     return points, polygon, map_boundary
 
 
-def make_raster_map(
-    points,
-    region,
-    polygon,
-    map,
-    iteration=0,
-    method="ordinary",
-    recompute=True,
-    circle_size=50000,
-    no_data_threshold=0.00000001,
-    resolution=RESOLUTION,
-):
+class weighted_averaged_gaussian:
+    def __init__(self, points, region, method="ordinary", resolution=RESOLUTION):
+        self.points = points
+        self.region = region
+        self.method = method
+        self.resolution = resolution
+        self.raster = None
+        self.raw_raster = None
+
+        self.set_map_boundary()
+
+    def set_map_boundary(self):
+        maps = {
+            "germany": [3.0, 48.0, 16.0, 55.0],
+            "spain": [-8.0, 36.0, 3.0, 43.0],
+            "spain_france": [-8.0, 36.0, 6.0, 50.0],
+            "europe": [-12.0, 35.0, 45.0, 71.0],
+            "world": [-180.0, -85.0, 180.0, 85.0],  # 85 lat bc of 3857
+            "small": [12.0, 52.0, 15.0, 54.0],
+            "africa": [-20.0, -35.0, 60.0, 40.0],
+            "asia": [40.0, 0.0, 180.0, 85.0],
+            "north_america": [-180.0, 0.0, -20.0, 85.0],
+            "south_america": [-90.0, -60.0, -30.0, 15.0],
+            "australia": [100.0, -50.0, 180.0, 0.0],
+            "middle_africa": [-10.0, -35.0, 60.0, 20.0],
+            "artificial": [8.0, -1.0, 30.0, 1.0],
+            "greenland": [-80.0, 60.0, -10.0, 85.0],
+        }
+        self.map_boundary = maps[self.region]
+
+    def predict(self, X):
+        # from https://rasterio.readthedocs.io/en/stable/quickstart.html#spatial-indexing
+        # in epsg 3857
+
+        predictions = []
+
+        for lon, lat in X:
+            # transform the lat/lon to the raster's coordinate system
+            x, y = self.raster.index(lon, lat)
+            # read the raster at the given coordinates
+            proictions.append(self.raster.read(1)[x, y])
+
+        return predictions
 
     # https://stackoverflow.com/questions/7687679/how-to-generate-2d-gaussian-with-python
-    def makeGaussian(stdv, x0, y0):
+    def makeGaussian(self, stdv, x0, y0):
         """Make a square gaussian kernel.
         size is the length of a side of the square
         fwhm is full-width-half-maximum, which
@@ -181,86 +142,198 @@ def make_raster_map(
         # gives the distribution in the whole raster space as X and Y are used here
         # TODO only calculate for pixels that will be colored (landmass) in the end
         # TODO only calculate for pixels that are significantly close to the point (e.g. 500 km around the point)
-        return np.exp(-4 * np.log(2) * ((X - x0) ** 2 + (Y - y0) ** 2) / fwhm**2)
+        return np.exp(
+            -4 * np.log(2) * ((self.X - x0) ** 2 + (self.Y - y0) ** 2) / fwhm**2
+        )
 
-    def get_distribution(lat, lon):
-        # standard deviation in meters -> 50 km around each spot; quite arbitrary
-        if method == "DYNAMIC":
-            STDV_M = max(
-                circle_size, calc_radius(Point(lon, lat), points.geometry, k=K)
+    # choose larger radius for not dense points (set radius till k other spots are in the radius)
+    # scaling: https://gis.stackexchange.com/questions/222315/finding-nearest-point-in-other-geodataframe-using-geopandas
+    def calc_radius(self, point, other_points, k=5):
+        k = k + 1  # +1 as the point itself is also in the array
+        distances = point.distance(other_points).to_numpy()
+        idx = np.argpartition(distances, k)
+        closest_distances = distances[idx[:k]]
+        radius = np.ceil(max(closest_distances)) / FACTOR_STDV
+        return radius
+
+    def get_distribution(self, lon, lat):
+        # standard deviation in meters -> 50 km around each spot; quite arbitrary choice
+        if self.method == "DYNAMIC":
+            stdv_m = max(
+                self.circle_size,
+                calc_radius(Point(lon, lat), self.points.geometry, k=K),
             )
         else:
-            STDV_M = circle_size + 10000 * iteration
-        return makeGaussian(STDV_M, lon, lat)
+            stdv_m = self.circle_size + 10000 * self.iteration
+        return self.makeGaussian(stdv_m, lon, lat)
+
+    # make_raster_map
+    def fit(
+        self,
+        X,
+        y,
+        iteration=0,
+        recompute=True,
+        no_data_threshold=0.00000001,
+    ):
+        self.circle_size = 50000
+        self.iteration = iteration
+        self.get_map_grid()
+
+        # sum of distributions
+        Zn = None
+        # weighted sum of distributions
+        Zn_weighted = None
+
+        try:
+            if recompute:
+                raise Exception("recompute")
+            else:
+                Z = np.loadtxt(f"intermediate/map_{region}.txt", dtype=float)
+
+        except:
+            # create a raster map - resulution is defined above
+            # https://stackoverflow.com/questions/56677267/tqdm-extract-time-passed-time-remaining
+            print("Weighting gaussians for all points...")
+            with tqdm(
+                zip(X[:, 0], X[:, 1], y),
+                total=X.shape[0],
+            ) as t:
+                # TODO find out how to speed up and parallelize this
+                for lon, lat, wait in t:
+                    # distribution inserted by a single point
+                    Zi = self.get_distribution(lon, lat)
+                    # add the new distribution to the sum of existing distributions
+                    # write them to Zn_weighted and wait every single point/ distribution by the waiting time
+                    # => it matters where a distribiton is inserted (areas with more distributions have a higher certainty)
+                    # and which waiting time weight is associated with it
+                    if Zn is None:
+                        Zn = Zi
+                        Zn_weighted = Zi * wait
+                    else:
+                        Zn = np.sum([Zn, Zi], axis=0)
+                        Zn_weighted = np.sum([Zn_weighted, Zi * wait], axis=0)
+
+                elapsed = t.format_dict["elapsed"]
+                elapsed_str = t.format_interval(elapsed)
+                df = pd.DataFrame(
+                    {"region": self.region, "elapsed time": [elapsed_str]}
+                )
+
+                tracker_name = "logging/time_tracker.csv"
+                try:
+                    full_df = pd.read_csv(tracker_name, index_col=0)
+                    full_df = pd.concat([full_df, df])
+                    full_df.to_csv(tracker_name, sep=",")
+                except:
+                    df.to_csv(tracker_name)
+
+            # normalize the weighted sum by the sum of all distributions -> so we see the actual waiting times in the raster
+            Z = np.divide(
+                Zn_weighted, Zn, out=np.zeros_like(Zn_weighted), where=Zn != 0
+            )
+
+            # grey out pixels with no hitchhiking spots near them
+            undefined = -1.0
+            Z = np.where(Zn < no_data_threshold, undefined, Z)
+
+            # save the underlying raster data of the heatmap for later use
+            np.savetxt(f"intermediate/map_{self.region}.txt", Z)
+
+        self.raw_raster = Z
+        self.save_as_raster()
+
+    def save_as_raster(self):
+        map_path = f"intermediate/map_{self.method}_{self.region}_{self.resolution}.tif"
+
+        polygon_vertices_x, polygon_vertices_y, pixel_width, pixel_height = (
+            self.define_raster()
+        )
+        # https://gis.stackexchange.com/questions/425903/getting-rasterio-transform-affine-from-lat-and-long-array
+
+        # lower/upper - left/right
+        ll = (polygon_vertices_x[0], polygon_vertices_y[0])
+        ul = (polygon_vertices_x[1], polygon_vertices_y[1])  # in lon, lat / x, y order
+        ur = (polygon_vertices_x[2], polygon_vertices_y[2])
+        lr = (polygon_vertices_x[3], polygon_vertices_y[3])
+        cols, rows = pixel_width, pixel_height
+
+        # ground control points
+        gcps = [
+            GCP(0, 0, *ul),
+            GCP(0, cols, *ur),
+            GCP(rows, 0, *ll),
+            GCP(rows, cols, *lr),
+        ]
+
+        # seems to need the vertices of the map polygon
+        transform = from_gcps(gcps)
+
+        # cannot use np.longdouble to write to tif
+        self.raw_raster = np.double(self.raw_raster)
+        # TODO: need this?
+        # map = np.round(map, 0)
+
+        # save the colored raster using the above transform
+        # TODO find out why raster is getting smaller in x direction when stored as tif (e.g. 393x700 -> 425x700)
+        with rasterio.open(
+            map_path,
+            "w",
+            driver="GTiff",
+            height=self.raw_raster .shape[0],
+            width=self.raw_raster .shape[1],
+            count=1,
+            crs=CRS.from_epsg(3857),
+            transform=transform,
+            dtype=self.raw_raster .dtype,
+        ) as destination:
+            destination.write(self.raw_raster, 1)
+
+        self.raster = rasterio.open(map_path)
+
+        return map
 
     # create pixel grid for map
-    X, Y = get_map_grid(polygon, map, resolution=resolution)
+    def get_map_grid(self):
+        xx, yy, pixel_width, pixel_height = self.define_raster()
+        x = np.linspace(xx[0], xx[2], pixel_width)
+        # mind starting with upper value of y axis here
+        y = np.linspace(yy[2], yy[0], pixel_height)
+        self.X, self.Y = np.meshgrid(x, y)
+        # higher precision prevents pixels far away from the points to be 0/ nan
+        self.X = np.longdouble(self.X)
+        self.Y = np.longdouble(self.Y)
 
-    # sum of distributions
-    Zn = None
-    # weighted sum of distributions
-    Zn_weighted = None
+    def map_to_polygon(self):
+        # create boundary polygon
+        polygon = Polygon(
+            [
+                (self.map_boundary[0], self.map_boundary[1]),
+                (self.map_boundary[0], self.map_boundary[3]),
+                (self.map_boundary[2], self.map_boundary[3]),
+                (self.map_boundary[2], self.map_boundary[1]),
+                (self.map_boundary[0], self.map_boundary[1]),
+            ]
+        )
+        polygon = gpd.GeoDataFrame(index=[0], crs="epsg:4326", geometry=[polygon])
+        polygon = polygon.to_crs(epsg=3857)
 
-    try:
-        if recompute:
-            raise Exception("recompute")
-        else:
-            Z = np.loadtxt(f"intermediate/map_{region}.txt", dtype=float)
+        return polygon
 
-    except:
-        # create a raster map - resulution is defined above
-        # https://stackoverflow.com/questions/56677267/tqdm-extract-time-passed-time-remaining
-        print("Weighting gaussians for all points...")
-        with tqdm(
-            zip(points.geometry.y, points.geometry.x, points.wait), total=len(points)
-        ) as t:
-            # TODO find out how to speed up and parallelize this
-            for lat, lon, wait in t:
-                # distribution inserted by a single point
-                Zi = get_distribution(lat, lon)
-                # add the new distribution to the sum of existing distributions
-                # write them to Zn_weighted and wait every single point/ distribution by the waiting time
-                # => it matters where a distribiton is inserted (areas with more distributions have a higher certainty)
-                # and which waiting time weight is associated with it
-                if Zn is None:
-                    Zn = Zi
-                    Zn_weighted = Zi * wait
-                else:
-                    Zn = np.sum([Zn, Zi], axis=0)
-                    Zn_weighted = np.sum([Zn_weighted, Zi * wait], axis=0)
+    def define_raster(self):
+        xx, yy = self.map_to_polygon().geometry[0].exterior.coords.xy
 
-            elapsed = t.format_dict["elapsed"]
-            elapsed_str = t.format_interval(elapsed)
-            df = pd.DataFrame({"region": region, "elapsed time": [elapsed_str]})
+        # Note above return values are of type `array.array`
+        xx = xx.tolist()
+        yy = yy.tolist()
 
-            tracker_name = "logging/time_tracker.csv"
-            try:
-                full_df = pd.read_csv(tracker_name, index_col=0)
-                full_df = pd.concat([full_df, df])
-                full_df.to_csv(tracker_name, sep=",")
-            except:
-                df.to_csv(tracker_name)
+        degree_width = int(self.map_boundary[2] - self.map_boundary[0])
+        degree_height = int(self.map_boundary[3] - self.map_boundary[1])
+        degree_height = int(self.map_boundary[3] - self.map_boundary[1])
+        pixel_width = degree_width * self.resolution
+        pixel_height = degree_height * self.resolution
 
-        # normalize the weighted sum by the sum of all distributions -> so we see the actual waiting times in the raster
-        Z = np.divide(Zn_weighted, Zn, out=np.zeros_like(Zn_weighted), where=Zn != 0)
-
-        # grey out pixels with no hitchhiking spots near them
-        undefined = -1.0
-        Z = np.where(Zn < no_data_threshold, undefined, Z)
-
-        # save the underlying raster data of the heatmap for later use
-        np.savetxt(f"intermediate/map_{region}.txt", Z)
-
-    return X, Y, Z, Zn, Zn_weighted
-
-
-# from https://rasterio.readthedocs.io/en/stable/quickstart.html#spatial-indexing
-# in epsg 3857
-def map_predict(lon, lat, raster):
-    # transform the lat/lon to the raster's coordinate system
-    x, y = raster.index(lon, lat)
-    # read the raster at the given coordinates
-    return raster.read(1)[x, y]
+        return xx, yy, pixel_width, pixel_height
 
 
 def make_map_from_gp(gp, average, region, polygon, map_boundary, resolution=10):
@@ -279,11 +352,20 @@ def make_map_from_gp(gp, average, region, polygon, map_boundary, resolution=10):
     certainty_map = certainty_map.T
 
     save_numpy_map(map, region=region, method="gp", resolution=resolution)
-    save_numpy_map(certainty_map, region=region, method="gp", kind_of_map='certainty', resolution=resolution)
-    map = save_as_raster(map, polygon, map_boundary, region=region, method='gp', resolution=resolution)
+    save_numpy_map(
+        certainty_map,
+        region=region,
+        method="gp",
+        kind_of_map="certainty",
+        resolution=resolution,
+    )
+    map = save_as_raster(
+        map, polygon, map_boundary, region=region, method="gp", resolution=resolution
+    )
     plt.contourf(X, Y, map)
     plt.colorbar()
     plt.savefig(f"maps/contourf_map_gp_{region}_{resolution}.png")
+
 
 def build_map(
     method="ORDINARY",
@@ -299,7 +381,7 @@ def build_map(
     certainty=1.0,
 ):
     map_path = f"intermediate/map_{method}_{region}_{resolution}.tif"
-    
+
     # print("Loading information about states...")
     # states = gpd.read_file("map_features/states/ne_10m_admin_1_states_provinces.shp")
     # states = states.to_crs(epsg=3857)
@@ -321,7 +403,7 @@ def build_map(
     # get borders of all countries
     # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip
     # from https://www.naturalearthdata.com/downloads/110m-cultural-vectors/
-    
+
     print("Loading country shapes...")
     countries = gpd.datasets.get_path("naturalearth_lowres")
     countries = gpd.read_file(countries)
@@ -433,19 +515,19 @@ def build_map(
     )
 
     # values higher than the upper boundary are colored in the upmost color
-    boundaries = (
-        [min_map_wait, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    )
+    boundaries = [min_map_wait, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
     print(boundaries)
 
     # prepare the plot
     norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
 
-    ax.set_facecolor('0.7') # background color light gray for landmass with uncertainty
+    ax.set_facecolor("0.7")  # background color light gray for landmass with uncertainty
 
     try:
-        certainty = load_numpy_map(region=region, method=method, kind_of_map='certainty', resolution=resolution)
+        certainty = load_numpy_map(
+            region=region, method=method, kind_of_map="certainty", resolution=resolution
+        )
         certainty = (certainty - certainty.min()) / (certainty.max() - certainty.min())
         certainty = 1 - certainty
     except:
@@ -458,7 +540,7 @@ def build_map(
 
     # set color for nan (nodata... sea) values
     # from https://stackoverflow.com/questions/2578752/how-can-i-plot-nan-values-as-a-special-color-with-imshow
-    cmap.set_bad(color='blue')
+    cmap.set_bad(color="blue")
     rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=certainty)
 
     cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
