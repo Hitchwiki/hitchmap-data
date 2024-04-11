@@ -9,6 +9,6 @@
 #SBATCH --mem=80G
 #SBATCH --gpus=0
 #SBATCH --time=10:00:00
-
+#SBATCH --constraint=ARCH:X86
 
 python -u ./gp.py > ./gp.out
