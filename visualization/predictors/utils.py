@@ -18,9 +18,33 @@ from rasterio.transform import from_gcps
 from rasterio.control import GroundControlPoint as GCP
 import osmnx
 from pathlib import Path
+from map_utils import *
+from matplotlib import pyplot as plt
+import pandas as pd
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import (
+    RBF,
+    ConstantKernel,
+    WhiteKernel,
+    RationalQuadratic,
+)
+import pickle
+from sklearn.metrics import (
+    root_mean_squared_error,
+    mean_squared_error,
+    mean_absolute_error,
+)
+import numpy as np
+import seaborn as sns
+import matplotlib
+import shapely
+from matplotlib.colors import LogNorm
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.base import TransformerMixin
 
 DAY = 24 * 60
 WAIT_MAX = DAY
+
 
 def get_points(path, wait_max=WAIT_MAX):
     points = gpd.read_file(path)
@@ -28,7 +52,7 @@ def get_points(path, wait_max=WAIT_MAX):
     points.lat = points.lat.astype(float)
     points.lon = points.lon.astype(float)
     # threshold - assuming that values above that are skewed due to angriness of the hiker
-    points = points[points['wait'] <= wait_max]
+    points = points[points["wait"] <= wait_max]
 
     # use epsg 3857 as default as it gives coordinates in meters
     points.geometry = gpd.points_from_xy(points.lon, points.lat)
@@ -36,3 +60,77 @@ def get_points(path, wait_max=WAIT_MAX):
     points = points.to_crs(epsg=3857)
 
     return points
+
+
+def get_cut_through_germany():
+    region = "germany"
+
+    points = get_points("../data/points_train.csv")
+    points, polygon, map_boundary = get_points_in_region(points, region)
+    points["lon"] = points.geometry.x
+    points["lat"] = points.geometry.y
+
+    val = get_points("../data/points_val.csv")
+    val, polygon, map_boundary = get_points_in_region(val, region)
+    val["lon"] = val.geometry.x
+    val["lat"] = val.geometry.y
+
+    vertical_cut = 6621293  # cutting Germany vertically through Dresden
+    offset = 10000  # 10km strip
+
+    points = points[
+        (points.lat > vertical_cut - offset) & (points.lat < vertical_cut + offset)
+    ]
+    points.geometry = points.geometry.map(
+        lambda point: shapely.ops.transform(lambda x, y: (x, vertical_cut), point)
+    )
+    points["lat"] = vertical_cut
+    val = val[(val.lat > vertical_cut - offset) & (val.lat < vertical_cut + offset)]
+    val.geometry = val.geometry.map(
+        lambda point: shapely.ops.transform(lambda x, y: (x, vertical_cut), point)
+    )
+    val["lat"] = vertical_cut
+
+    # ->
+    test_start = 0.4e6
+    test_stop = 1.7e6
+
+    return points, val
+
+class TargetTransformer(TransformerMixin):
+    def __init__(self, function=(lambda y: y), inverse_function=(lambda y: y)):
+        self.function = function
+        self.inverse_function = inverse_function
+        self.mean = 0
+
+    def fit(self, y):
+        self.targets = y
+        self.mean = np.mean(self.function(y))
+
+    def transform(self, y):
+        return self.function(y) - self.mean
+        
+
+    def inverse_transform(self, y):
+        return self.inverse_function(y + self.mean)
+
+    def fit_transform(self, y):
+        self.fit(y)
+        return self.transform(y)
+
+def evaluate(model, train, validation, features, transformer=TargetTransformer()):
+    train["pred"] = model.predict(train[features].values)
+    train["pred"] = transformer.inverse_transform(train["pred"])
+
+    print(
+        f"Training RMSE: {root_mean_squared_error(train['wait'], train['pred'])}\n",
+        f"Training MAE {mean_absolute_error(train['wait'], train['pred'])}",
+    )
+
+    validation["pred"] = model.predict(validation[features].values)
+
+    print(
+        f"Validation RMSE: {root_mean_squared_error(validation['wait'], validation['pred'])}\n",
+        f"Validation MAE {mean_absolute_error(validation['wait'], validation['pred'])}",
+    )
+

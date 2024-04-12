@@ -21,8 +21,7 @@ from tqdm.auto import tqdm
 
 tqdm.pandas()
 
-
-RESOLUTION = 2  # pixel per degree
+RESOLUTION = 2
 
 
 def save_numpy_map(
@@ -66,6 +65,7 @@ def get_points_in_region(points, region="world"):
     map_boundary = maps[region]
 
     # create boundary polygon
+    # nodes stars bottom left & clockwise
     polygon = Polygon(
         [
             (map_boundary[0], map_boundary[1]),
@@ -83,17 +83,9 @@ def get_points_in_region(points, region="world"):
 
     return points, polygon, map_boundary
 
-
-class weighted_averaged_gaussian:
-    def __init__(self, points, region, method="ordinary", resolution=RESOLUTION):
-        self.points = points
+class map_based_model:
+    def __init__(self, region):
         self.region = region
-        self.method = method
-        self.resolution = resolution
-        self.raster = None
-        self.raw_raster = None
-
-        self.set_map_boundary()
 
     def set_map_boundary(self):
         maps = {
@@ -114,19 +106,117 @@ class weighted_averaged_gaussian:
         }
         self.map_boundary = maps[self.region]
 
-    def predict(self, X):
-        # from https://rasterio.readthedocs.io/en/stable/quickstart.html#spatial-indexing
-        # in epsg 3857
+    def map_to_polygon(self):
+        # create boundary polygon
+        polygon = Polygon(
+            [
+                (self.map_boundary[0], self.map_boundary[1]),
+                (self.map_boundary[0], self.map_boundary[3]),
+                (self.map_boundary[2], self.map_boundary[3]),
+                (self.map_boundary[2], self.map_boundary[1]),
+                (self.map_boundary[0], self.map_boundary[1]),
+            ]
+        )
+        polygon = gpd.GeoDataFrame(index=[0], crs="epsg:4326", geometry=[polygon])
+        polygon = polygon.to_crs(epsg=3857) # transform to metric epsg
+        polygon = polygon.geometry[0]
 
+        return polygon
+
+class average():
+    def __init__(self):
+        pass
+
+    def fit(self, X, y):
+        self.mean = np.mean(y)
+    
+    def predict(self, X):
+        return np.ones(X.shape[0]) * self.mean
+
+
+class tiles(map_based_model):
+    def __init__(self, region='world', tile_size=300000):
+        self.region = region
+        self.tile_size = tile_size # in meters
+
+        self.set_map_boundary()
+
+        self.map_polygon = self.map_to_polygon()
+
+        self.tiles = self.create_tiles()
+
+    def get_tile_intervals(self, min, max):
+        intervals = [min]
+        while (max - min) > self.tile_size:
+            new_interval_bound = min + self.tile_size
+            intervals.append(new_interval_bound)
+            min = new_interval_bound
+
+        intervals.append(max)
+
+        return intervals
+
+
+    def create_tiles(self):
+        xx, yy = self.map_polygon.exterior.coords.xy
+        lon_min = xx[0]
+        lon_max = xx[3]
+        lat_min = yy[0]
+        lat_max = yy[1]
+
+        self.lon_intervals = self.get_tile_intervals(lon_min, lon_max)
+        self.lat_intervals = self.get_tile_intervals(lat_min, lat_max)
+
+        tiles = np.zeros((len(self.lon_intervals) - 1, len(self.lat_intervals) - 1))
+
+        return tiles
+
+
+    def get_interval_num(self, intervals, value):
+        for i in range(len(intervals) - 1):
+            if value >= intervals[i] and value <= intervals[i + 1]:
+                return i
+
+    def fit(self, X, y):
+        points_per_tile = np.zeros(self.tiles.shape)
+
+        for x, single_y in zip(X, y):
+            lon, lat = x
+            lon_num = self.get_interval_num(self.lon_intervals, lon)
+            lat_num = self.get_interval_num(self.lat_intervals, lat)
+
+            self.tiles[lon_num, lat_num] += single_y
+            points_per_tile[lon_num, lat_num] += 1
+
+        # average
+        points_per_tile= np.where(points_per_tile == 0, 1, points_per_tile)
+        self.tiles = self.tiles / points_per_tile
+
+        
+    
+    def predict(self, X):
         predictions = []
 
-        for lon, lat in X:
-            # transform the lat/lon to the raster's coordinate system
-            x, y = self.raster.index(lon, lat)
-            # read the raster at the given coordinates
-            proictions.append(self.raster.read(1)[x, y])
+        for x in X:
+            lon, lat = x
+            lon_num = self.get_interval_num(self.lon_intervals, lon)
+            lat_num = self.get_interval_num(self.lat_intervals, lat)
 
-        return predictions
+            predictions.append(self.tiles[lon_num, lat_num])
+
+        return np.array(predictions)
+    
+
+
+class weighted_averaged_gaussian(map_based_model):
+    def __init__(self, region, method="ordinary", resolution=2):
+        self.region = region
+        self.method = method
+        self.resolution = resolution # pixel per degree
+        self.raster = None
+        self.raw_raster = None
+
+        self.set_map_boundary()
 
     # https://stackoverflow.com/questions/7687679/how-to-generate-2d-gaussian-with-python
     def makeGaussian(self, stdv, x0, y0):
@@ -176,6 +266,7 @@ class weighted_averaged_gaussian:
         recompute=True,
         no_data_threshold=0.00000001,
     ):
+        self.points = X
         self.circle_size = 50000
         self.iteration = iteration
         self.get_map_grid()
@@ -280,18 +371,32 @@ class weighted_averaged_gaussian:
             map_path,
             "w",
             driver="GTiff",
-            height=self.raw_raster .shape[0],
-            width=self.raw_raster .shape[1],
+            height=self.raw_raster.shape[0],
+            width=self.raw_raster.shape[1],
             count=1,
             crs=CRS.from_epsg(3857),
             transform=transform,
-            dtype=self.raw_raster .dtype,
+            dtype=self.raw_raster.dtype,
         ) as destination:
             destination.write(self.raw_raster, 1)
 
         self.raster = rasterio.open(map_path)
 
         return map
+
+    def predict(self, X):
+        # from https://rasterio.readthedocs.io/en/stable/quickstart.html#spatial-indexing
+        # in epsg 3857
+
+        predictions = []
+
+        for lon, lat in X:
+            # transform the lat/lon to the raster's coordinate system
+            x, y = self.raster.index(lon, lat)
+            # read the raster at the given coordinates
+            predictions.append(self.raster.read(1)[x, y])
+
+        return np.array(predictions)
 
     # create pixel grid for map
     def get_map_grid(self):
@@ -304,24 +409,9 @@ class weighted_averaged_gaussian:
         self.X = np.longdouble(self.X)
         self.Y = np.longdouble(self.Y)
 
-    def map_to_polygon(self):
-        # create boundary polygon
-        polygon = Polygon(
-            [
-                (self.map_boundary[0], self.map_boundary[1]),
-                (self.map_boundary[0], self.map_boundary[3]),
-                (self.map_boundary[2], self.map_boundary[3]),
-                (self.map_boundary[2], self.map_boundary[1]),
-                (self.map_boundary[0], self.map_boundary[1]),
-            ]
-        )
-        polygon = gpd.GeoDataFrame(index=[0], crs="epsg:4326", geometry=[polygon])
-        polygon = polygon.to_crs(epsg=3857)
-
-        return polygon
 
     def define_raster(self):
-        xx, yy = self.map_to_polygon().geometry[0].exterior.coords.xy
+        xx, yy = self.map_to_polygon().exterior.coords.xy
 
         # Note above return values are of type `array.array`
         xx = xx.tolist()
