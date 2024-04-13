@@ -134,3 +134,16 @@ def evaluate(model, train, validation, features, transformer=TargetTransformer()
         f"Validation MAE {mean_absolute_error(validation['wait'], validation['pred'])}",
     )
 
+
+def get_optimized_gp_kernel(initial_kernel, X, y):
+    gp = GaussianProcessRegressor(
+        kernel=kernel,
+        alpha=0.0**2,
+        optimizer="fmin_l_bfgs_b",
+        normalize_y=False,
+        n_restarts_optimizer=0,
+        random_state=42,
+    )
+
+    gp.fit(X, y)
+    return gp.kernel_
