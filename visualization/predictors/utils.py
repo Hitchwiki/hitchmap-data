@@ -43,6 +43,7 @@ from sklearn.preprocessing import FunctionTransformer
 from sklearn.base import TransformerMixin
 from sklearn.model_selection import cross_validate
 from sklearn.base import BaseEstimator
+from sklearn.compose import TransformedTargetRegressor
 
 DAY = 24 * 60
 WAIT_MAX = DAY
@@ -99,6 +100,25 @@ def get_cut_through_germany():
 
     return points, val
 
+def get_from_region(region):
+    points = get_points('../data/points_train_val.csv')
+    points, polygon, map_boundary = get_points_in_region(points, region)
+    points['lon'] = points.geometry.x
+    points['lat'] = points.geometry.y
+
+    train = get_points('../data/points_train.csv')
+    train, polygon, map_boundary = get_points_in_region(train, region)
+    train['lon'] = train.geometry.x
+    train['lat'] = train.geometry.y
+    
+    val = get_points('../data/points_val.csv')
+    val, polygon, map_boundary = get_points_in_region(val, region)
+    val['lon'] = val.geometry.x
+    val['lat'] = val.geometry.y
+
+    return points, train, val
+
+# centers data to a zero mean
 class TargetTransformer(TransformerMixin, BaseEstimator):
     def __init__(self, function=(lambda y: y), inverse_function=(lambda y: y)):
         self.function = function
@@ -106,7 +126,7 @@ class TargetTransformer(TransformerMixin, BaseEstimator):
         self.mean = 0
 
     def fit(self, y):
-        self.targets = y
+         self.targets = y
         self.mean = np.mean(self.function(y))
 
     def transform(self, y):
@@ -153,8 +173,15 @@ def evaluate_cv(estimator, X, y):
     )
 
 
-def get_optimized_gp(initial_kernel, X, y):
-    gp = GaussianProcessRegressor(
+def get_optimized_gpr(initial_kernel, X, y):
+    gpr = get_gpr(initial_kernel=initial_kernel)
+    gpr.fit(X, y)
+
+    return gpr
+
+
+def get_gpr(initial_kernel):
+    gpr = GaussianProcessRegressor(
         kernel=initial_kernel,
         alpha=0.0**2,
         optimizer="fmin_l_bfgs_b",
@@ -163,19 +190,7 @@ def get_optimized_gp(initial_kernel, X, y):
         random_state=42,
     )
 
-    gp.fit(X, y)
+    log_transformer = TargetTransformer(function=np.log1p, inverse_function=np.expm1)
+    target_transform_gpr = TransformedTargetRegressor(regressor=gpr, transformer=log_transformer)
 
-    return gp
-
-
-def get_gp(initial_kernel):
-    gp = GaussianProcessRegressor(
-        kernel=initial_kernel,
-        alpha=0.0**2,
-        optimizer="fmin_l_bfgs_b",
-        normalize_y=False,
-        n_restarts_optimizer=0,
-        random_state=42,
-    )
-
-    return gp
+    return target_transform_gpr
