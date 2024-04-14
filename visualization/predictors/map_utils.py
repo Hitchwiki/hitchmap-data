@@ -16,6 +16,7 @@ from rasterio.transform import from_gcps
 from rasterio.control import GroundControlPoint as GCP
 import osmnx
 from pathlib import Path
+from sklearn.base import BaseEstimator, RegressorMixin
 
 from tqdm.auto import tqdm
 
@@ -83,11 +84,12 @@ def get_points_in_region(points, region="world"):
 
     return points, polygon, map_boundary
 
-class map_based_model:
-    def __init__(self, region):
+
+class MapBasedModel(BaseEstimator, RegressorMixin):
+    def __init__(self, region="world"):
         self.region = region
 
-    def set_map_boundary(self):
+    def get_map_boundary(self):
         maps = {
             "germany": [3.0, 48.0, 16.0, 55.0],
             "spain": [-8.0, 36.0, 3.0, 43.0],
@@ -104,7 +106,8 @@ class map_based_model:
             "artificial": [8.0, -1.0, 30.0, 1.0],
             "greenland": [-80.0, 60.0, -10.0, 85.0],
         }
-        self.map_boundary = maps[self.region]
+
+        return maps[self.region]
 
     def map_to_polygon(self):
         # create boundary polygon
@@ -118,32 +121,29 @@ class map_based_model:
             ]
         )
         polygon = gpd.GeoDataFrame(index=[0], crs="epsg:4326", geometry=[polygon])
-        polygon = polygon.to_crs(epsg=3857) # transform to metric epsg
+        polygon = polygon.to_crs(epsg=3857)  # transform to metric epsg
         polygon = polygon.geometry[0]
 
         return polygon
 
-class average():
+
+class Average(BaseEstimator, RegressorMixin):
     def __init__(self):
         pass
 
     def fit(self, X, y):
         self.mean = np.mean(y)
-    
+
+        return self
+
     def predict(self, X):
         return np.ones(X.shape[0]) * self.mean
 
 
-class tiles(map_based_model):
-    def __init__(self, region='world', tile_size=300000):
+class Tiles(MapBasedModel):
+    def __init__(self, region="world", tile_size=300000):
         self.region = region
-        self.tile_size = tile_size # in meters
-
-        self.set_map_boundary()
-
-        self.map_polygon = self.map_to_polygon()
-
-        self.tiles = self.create_tiles()
+        self.tile_size = tile_size  # in meters
 
     def get_tile_intervals(self, min, max):
         intervals = [min]
@@ -155,7 +155,6 @@ class tiles(map_based_model):
         intervals.append(max)
 
         return intervals
-
 
     def create_tiles(self):
         xx, yy = self.map_polygon.exterior.coords.xy
@@ -171,13 +170,16 @@ class tiles(map_based_model):
 
         return tiles
 
-
     def get_interval_num(self, intervals, value):
         for i in range(len(intervals) - 1):
             if value >= intervals[i] and value <= intervals[i + 1]:
                 return i
 
     def fit(self, X, y):
+        self.map_boundary = self.get_map_boundary()
+        self.map_polygon = self.map_to_polygon()
+        self.tiles = self.create_tiles()
+
         points_per_tile = np.zeros(self.tiles.shape)
 
         for x, single_y in zip(X, y):
@@ -189,11 +191,11 @@ class tiles(map_based_model):
             points_per_tile[lon_num, lat_num] += 1
 
         # average
-        points_per_tile= np.where(points_per_tile == 0, 1, points_per_tile)
+        points_per_tile = np.where(points_per_tile == 0, 1, points_per_tile)
         self.tiles = self.tiles / points_per_tile
 
-        
-    
+        return self
+
     def predict(self, X):
         predictions = []
 
@@ -205,18 +207,15 @@ class tiles(map_based_model):
             predictions.append(self.tiles[lon_num, lat_num])
 
         return np.array(predictions)
-    
 
 
-class weighted_averaged_gaussian(map_based_model):
-    def __init__(self, region, method="ordinary", resolution=2):
+class WeightedAveragedGaussian(MapBasedModel):
+    def __init__(self, region="world", method="ordinary", resolution=2, verbose=False):
         self.region = region
         self.method = method
-        self.resolution = resolution # pixel per degree
-        self.raster = None
-        self.raw_raster = None
-
-        self.set_map_boundary()
+        self.resolution = resolution  # pixel per degree
+        self.verbose = verbose
+        
 
     # https://stackoverflow.com/questions/7687679/how-to-generate-2d-gaussian-with-python
     def makeGaussian(self, stdv, x0, y0):
@@ -266,6 +265,10 @@ class weighted_averaged_gaussian(map_based_model):
         recompute=True,
         no_data_threshold=0.00000001,
     ):
+        self.raster = None
+        self.raw_raster = None
+        self.map_boundary = self.get_map_boundary()
+
         self.points = X
         self.circle_size = 50000
         self.iteration = iteration
@@ -285,10 +288,10 @@ class weighted_averaged_gaussian(map_based_model):
         except:
             # create a raster map - resulution is defined above
             # https://stackoverflow.com/questions/56677267/tqdm-extract-time-passed-time-remaining
-            print("Weighting gaussians for all points...")
+            if self.verbose: print("Weighting gaussians for all points...")
             with tqdm(
                 zip(X[:, 0], X[:, 1], y),
-                total=X.shape[0],
+                total=X.shape[0], disable=not self.verbose
             ) as t:
                 # TODO find out how to speed up and parallelize this
                 for lon, lat, wait in t:
@@ -333,6 +336,8 @@ class weighted_averaged_gaussian(map_based_model):
 
         self.raw_raster = Z
         self.save_as_raster()
+
+        return self
 
     def save_as_raster(self):
         map_path = f"intermediate/map_{self.method}_{self.region}_{self.resolution}.tif"
@@ -408,7 +413,6 @@ class weighted_averaged_gaussian(map_based_model):
         # higher precision prevents pixels far away from the points to be 0/ nan
         self.X = np.longdouble(self.X)
         self.Y = np.longdouble(self.Y)
-
 
     def define_raster(self):
         xx, yy = self.map_to_polygon().exterior.coords.xy

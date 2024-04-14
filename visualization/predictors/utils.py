@@ -41,6 +41,8 @@ import shapely
 from matplotlib.colors import LogNorm
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.base import TransformerMixin
+from sklearn.model_selection import cross_validate
+from sklearn.base import BaseEstimator
 
 DAY = 24 * 60
 WAIT_MAX = DAY
@@ -97,7 +99,7 @@ def get_cut_through_germany():
 
     return points, val
 
-class TargetTransformer(TransformerMixin):
+class TargetTransformer(TransformerMixin, BaseEstimator):
     def __init__(self, function=(lambda y: y), inverse_function=(lambda y: y)):
         self.function = function
         self.inverse_function = inverse_function
@@ -118,9 +120,8 @@ class TargetTransformer(TransformerMixin):
         self.fit(y)
         return self.transform(y)
 
-def evaluate(model, train, validation, features, transformer=TargetTransformer()):
+def evaluate(model, train, validation, features):
     train["pred"] = model.predict(train[features].values)
-    train["pred"] = transformer.inverse_transform(train["pred"])
 
     print(
         f"Training RMSE: {root_mean_squared_error(train['wait'], train['pred'])}\n",
@@ -134,10 +135,27 @@ def evaluate(model, train, validation, features, transformer=TargetTransformer()
         f"Validation MAE {mean_absolute_error(validation['wait'], validation['pred'])}",
     )
 
+def evaluate_cv(estimator, X, y):
+    cv_result = cross_validate(
+        estimator=estimator,
+        X=X,
+        y=y,
+        cv=5,
+        scoring=["neg_mean_absolute_error", "neg_root_mean_squared_error"],
+        return_train_score=True
+    )
 
-def get_optimized_gp_kernel(initial_kernel, X, y):
+    print(
+        f"Training RMSE: {cv_result['train_neg_root_mean_squared_error'].mean() * -1}\n",
+        f"Training MAE: {cv_result['train_neg_mean_absolute_error'].mean() * -1}\n",
+        f"Cross-validation RMSE: {cv_result['test_neg_root_mean_squared_error'].mean() * -1}\n",
+        f"Cross-validation MAE: {cv_result['test_neg_mean_absolute_error'].mean() * -1}",
+    )
+
+
+def get_optimized_gp(initial_kernel, X, y):
     gp = GaussianProcessRegressor(
-        kernel=kernel,
+        kernel=initial_kernel,
         alpha=0.0**2,
         optimizer="fmin_l_bfgs_b",
         normalize_y=False,
@@ -146,4 +164,18 @@ def get_optimized_gp_kernel(initial_kernel, X, y):
     )
 
     gp.fit(X, y)
-    return gp.kernel_
+
+    return gp
+
+
+def get_gp(initial_kernel):
+    gp = GaussianProcessRegressor(
+        kernel=initial_kernel,
+        alpha=0.0**2,
+        optimizer="fmin_l_bfgs_b",
+        normalize_y=False,
+        n_restarts_optimizer=0,
+        random_state=42,
+    )
+
+    return gp
