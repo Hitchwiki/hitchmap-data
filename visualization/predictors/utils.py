@@ -100,23 +100,25 @@ def get_cut_through_germany():
 
     return points, val
 
-def get_from_region(region):
-    points = get_points('../data/points_train_val.csv')
-    points, polygon, map_boundary = get_points_in_region(points, region)
-    points['lon'] = points.geometry.x
-    points['lat'] = points.geometry.y
 
-    train = get_points('../data/points_train.csv')
+def get_from_region(region):
+    points = get_points("../data/points_train_val.csv")
+    points, polygon, map_boundary = get_points_in_region(points, region)
+    points["lon"] = points.geometry.x
+    points["lat"] = points.geometry.y
+
+    train = get_points("../data/points_train.csv")
     train, polygon, map_boundary = get_points_in_region(train, region)
-    train['lon'] = train.geometry.x
-    train['lat'] = train.geometry.y
-    
-    val = get_points('../data/points_val.csv')
+    train["lon"] = train.geometry.x
+    train["lat"] = train.geometry.y
+
+    val = get_points("../data/points_val.csv")
     val, polygon, map_boundary = get_points_in_region(val, region)
-    val['lon'] = val.geometry.x
-    val['lat'] = val.geometry.y
+    val["lon"] = val.geometry.x
+    val["lat"] = val.geometry.y
 
     return points, train, val
+
 
 # centers data to a zero mean
 class TargetTransformer(TransformerMixin, BaseEstimator):
@@ -126,12 +128,11 @@ class TargetTransformer(TransformerMixin, BaseEstimator):
         self.mean = 0
 
     def fit(self, y):
-         self.targets = y
+        self.targets = y
         self.mean = np.mean(self.function(y))
 
     def transform(self, y):
         return self.function(y) - self.mean
-        
 
     def inverse_transform(self, y):
         return self.inverse_function(y + self.mean)
@@ -139,6 +140,7 @@ class TargetTransformer(TransformerMixin, BaseEstimator):
     def fit_transform(self, y):
         self.fit(y)
         return self.transform(y)
+
 
 def evaluate(model, train, validation, features):
     train["pred"] = model.predict(train[features].values)
@@ -155,6 +157,7 @@ def evaluate(model, train, validation, features):
         f"Validation MAE {mean_absolute_error(validation['wait'], validation['pred'])}",
     )
 
+
 def evaluate_cv(estimator, X, y):
     cv_result = cross_validate(
         estimator=estimator,
@@ -162,22 +165,24 @@ def evaluate_cv(estimator, X, y):
         y=y,
         cv=5,
         scoring=["neg_mean_absolute_error", "neg_root_mean_squared_error"],
-        return_train_score=True
+        return_train_score=True,
+        return_estimator=True,
     )
 
     print(
+        "Cross-validated averaged metrics...\n",
         f"Training RMSE: {cv_result['train_neg_root_mean_squared_error'].mean() * -1}\n",
         f"Training MAE: {cv_result['train_neg_mean_absolute_error'].mean() * -1}\n",
-        f"Cross-validation RMSE: {cv_result['test_neg_root_mean_squared_error'].mean() * -1}\n",
-        f"Cross-validation MAE: {cv_result['test_neg_mean_absolute_error'].mean() * -1}",
+        f"Validation RMSE: {cv_result['test_neg_root_mean_squared_error'].mean() * -1}\n",
+        f"Validation MAE: {cv_result['test_neg_mean_absolute_error'].mean() * -1}",
     )
 
+    # returning one of the estimators for visualization purposes
+    return cv_result["estimator"][0]
 
-def get_optimized_gpr(initial_kernel, X, y):
-    gpr = get_gpr(initial_kernel=initial_kernel)
-    gpr.fit(X, y)
 
-    return gpr
+def get_log_transformer():
+    return TargetTransformer(function=np.log1p, inverse_function=np.expm1)
 
 
 def get_gpr(initial_kernel):
@@ -190,7 +195,16 @@ def get_gpr(initial_kernel):
         random_state=42,
     )
 
-    log_transformer = TargetTransformer(function=np.log1p, inverse_function=np.expm1)
-    target_transform_gpr = TransformedTargetRegressor(regressor=gpr, transformer=log_transformer)
+    log_transformer = get_log_transformer()
+    target_transform_gpr = TransformedTargetRegressor(
+        regressor=gpr, transformer=log_transformer
+    )
 
     return target_transform_gpr
+
+
+def get_optimized_gpr(initial_kernel, X, y):
+    gpr = get_gpr(initial_kernel=initial_kernel)
+    gpr.fit(X, y)
+
+    return gpr
