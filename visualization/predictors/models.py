@@ -14,7 +14,6 @@ from matplotlib import cm
 from shapely.geometry import Polygon
 from rasterio.transform import from_gcps
 from rasterio.control import GroundControlPoint as GCP
-import osmnx
 from pathlib import Path
 from sklearn.base import BaseEstimator, RegressorMixin
 
@@ -156,9 +155,13 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         show_cities=False,
         show_roads=False,
         show_points=False,
-        show_certainty=False,
-        certainty=1.0,
+        show_uncertainties=False,
     ):
+        if self.raw_uncertainties is None:
+            uncertainty = 1.0
+        else:
+            uncertainty = self.raw_uncertainties
+
         map_path = f"intermediate/map_{self.method}_{self.region}_{self.resolution}.tif"
 
         # print("Loading information about states...")
@@ -304,32 +307,26 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             "0.7"
         )  # background color light gray for landmass with uncertainty
 
-        if show_certainty:
+        if show_uncertainty:
             try:
-                certainty = load_numpy_map(
-                    region=region,
-                    method=method,
-                    kind_of_map="certainty",
-                    resolution=resolution,
+                uncertainty = (uncertainty - uncertainty.min()) / (
+                    uncertainty.max() - uncertainty.min()
                 )
-                certainty = (certainty - certainty.min()) / (
-                    certainty.max() - certainty.min()
-                )
-                certainty = 1 - certainty
+                uncertainty = 1 - uncertainty
             except:
-                certainty = 1.0
+                uncertainty = 1.0
             # let certainty have no influence on sea color
-            certainty = np.where(np.isnan(raster.read()[0]), 1, certainty)
+            uncertainty = np.where(np.isnan(raster.read()[0]), 1, uncertainty)
             # shift (for rational quadratic kernel)
             # certainty = certainty + 0.4
             # certainty = np.clip(certainty, 0, 1)
         else:
-            certainty = 1.0
+            uncertainty = 1.0
 
         # set color for nan (nodata... sea) values
         # from https://stackoverflow.com/questions/2578752/how-can-i-plot-nan-values-as-a-special-color-with-imshow
         cmap.set_bad(color="blue")
-        rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=certainty)
+        rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=uncertainty)
         ax.set_xlabel("Longitude", fontsize=10)
         ax.set_ylabel("Latitude", fontsize=10)
         ax.tick_params(axis="both", which="major", labelsize=10)
@@ -429,7 +426,7 @@ class Tiles(MapBasedModel):
 
 
 class WeightedAveragedGaussian(MapBasedModel):
-    def __init__(self, region="world", method="ordinary", resolution=2, verbose=False):
+    def __init__(self, region="world", method="ordinary", resolution=RESOLUTION, verbose=False):
         self.region = region
         self.method = method
         self.resolution = resolution  # pixel per degree

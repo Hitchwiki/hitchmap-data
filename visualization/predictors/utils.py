@@ -16,7 +16,6 @@ from matplotlib import cm
 from shapely.geometry import Polygon
 from rasterio.transform import from_gcps
 from rasterio.control import GroundControlPoint as GCP
-import osmnx
 from pathlib import Path
 from map_utils import *
 from matplotlib import pyplot as plt

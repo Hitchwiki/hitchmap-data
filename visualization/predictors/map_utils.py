@@ -14,7 +14,6 @@ from matplotlib import cm
 from shapely.geometry import Polygon
 from rasterio.transform import from_gcps
 from rasterio.control import GroundControlPoint as GCP
-import osmnx
 from pathlib import Path
 from sklearn.base import BaseEstimator, RegressorMixin
 from models import *
@@ -117,7 +116,7 @@ def make_map_from_gp(gp, average, region, polygon, map_boundary, resolution=10):
     plt.savefig(f"maps/contourf_map_gp_{region}_{resolution}.png")
 
 
-def raster_from_model(model, region, resolution=10):
+def raster_from_model(model, region, resolution=RESOLUTION, show_uncertainties=False):
     model_name = type(model).__name__
 
     raster_maker = MapBasedModel(model_name, region, resolution)
@@ -127,23 +126,44 @@ def raster_from_model(model, region, resolution=10):
     grid = np.array((X, Y))
     height = X.shape[0]
     map = np.empty((0, height))
+    if show_uncertainties:
+        uncertainty_map = np.empty((0, height))
 
     # transposing the grid enables us to iterate over it vertically
     # and single elements become lon-lat pairs that can be fed into the model
     for vertical_line in tqdm(grid.transpose(), disable=not raster_maker.verbose):
-        pred = model.predict(vertical_line)
+        if show_uncertainties:
+            pred, stdv = model.predict(vertical_line, return_std=True)
+            uncertainty_map = np.vstack((uncertainty_map, stdv))
+        else:
+            pred = model.predict(vertical_line)
         map = np.vstack((map, pred))
-    
+
     # because we vstacked above
     map = map.T
+    if show_uncertainties:
+        uncertainty_map = uncertainty_map.T
 
     save_numpy_map(map, region=region, method=model_name, resolution=resolution)
+    if show_uncertainties:
+        save_numpy_map(
+            uncertainty_map,
+            region=region,
+            method=model_name,
+            kind_of_map="uncertainty",
+            resolution=resolution,
+        )
 
     raster_maker.raw_raster = map
+    raster_maker.raw_uncertaities = uncertainty_map
+
     raster_maker.save_as_raster()
 
-    return raster_maker 
+    return raster_maker
 
-def map_from_model(model, region, resolution=10):
-    raster_maker = raster_from_model(model, region, resolution)
-    raster_maker.build_map()
+
+def map_from_model(model, region, resolution=RESOLUTION, show_uncertainties=False):
+    raster_maker = raster_from_model(
+        model, region, resolution, show_uncertainties=show_uncertainties
+    )
+    raster_maker.build_map(show_uncertainties=show_uncertainties)
