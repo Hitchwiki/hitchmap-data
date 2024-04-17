@@ -343,6 +343,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             file_name = f"maps/map_{region}_{K}.png"
         else:
             file_name = f"maps/map_{self.method}_{self.region}_{self.resolution}.png"
+        plt.show()
         plt.savefig(file_name, bbox_inches="tight")
 
 
