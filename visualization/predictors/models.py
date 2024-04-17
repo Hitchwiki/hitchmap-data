@@ -164,30 +164,17 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         map_path = f"intermediate/map_{self.method}_{self.region}_{self.resolution}.tif"
 
-        # print("Loading information about states...")
-        # states = gpd.read_file("map_features/states/ne_10m_admin_1_states_provinces.shp")
-        # states = states.to_crs(epsg=3857)
-
-        # # use smaller units for Russia
-        # # country level except for Canada, Russia, USA, Australia, China, Brazil, India, Indonesia
-        # states = states[states.admin != "Antarctica"]
-
-        # # a state is hitchhikable if there are hitchhiking spots in it
-        # def check_hitchhikability(state):
-        #     points_in_state = points[points.geometry.within(state.geometry)]
-        #     return len(points_in_state) > 0
-
-        # print("Checking hitchhikability for each state...")
-        # states["hh"] = states.progress_apply(check_hitchhikability, axis=1)
-
         fig, ax = plt.subplots(figsize=(10, 10))
 
         # get borders of all countries
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip
         # from https://www.naturalearthdata.com/downloads/110m-cultural-vectors/
 
-        if self.verbose: print("Loading country shapes...")
-        countries = gpd.read_file('map_features/countries/ne_110m_admin_0_countries.shp')
+        if self.verbose:
+            print("Loading country shapes...")
+        countries = gpd.read_file(
+            "map_features/countries/ne_110m_admin_0_countries.shp"
+        )
         countries = countries.to_crs(epsg=3857)
         countries = countries[countries.NAME != "Antarctica"]
         # TODO so far does not work as in final map the raster is not applied to the whole region
@@ -196,16 +183,14 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         if show_states:
             countries.plot(ax=ax, facecolor="none", edgecolor="black")
 
-        # TODO takes more time than expected
+        # takes a lot of time
         # use a pre-compiled list of important cities
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_populated_places.zip
         # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
-        # cities = gpd.read_file("cities/ne_10m_populated_places.shp", bbox=polygon.geometry[0]) should work but does not
         if show_cities:
-            if self.verbose: print("Loading cities...")
-            cities = gpd.read_file(
-                "map_features/cities/ne_10m_populated_places.shp"
-            )  # takes most time
+            if self.verbose:
+                print("Loading cities...")
+            cities = gpd.read_file("map_features/cities/ne_10m_populated_places.shp")
             cities = cities.to_crs(epsg=3857)
             cities = cities[cities.geometry.within(polygon.geometry[0])]
             cities.plot(ax=ax, markersize=1, color="black")
@@ -214,7 +199,8 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_roads.zip
         # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
         if show_roads:
-            if self.verbose: print("Loading roads...")
+            if self.verbose:
+                print("Loading roads...")
             roads = gpd.read_file("map_features/roads/ne_10m_roads.shp")
             roads = roads.to_crs(epsg=3857)
             roads = roads[roads.geometry.within(polygon.geometry[0])]
@@ -223,14 +209,17 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         if show_points:
             all_points.plot(ax=ax, markersize=10, color="red")
 
-        # limit heatmap to landmass by asigning inf/ high value to sea
-        if self.verbose: print("Transforming heatmap...")
+        # limit heatmap to landmass by asigning no data value to sea
+        if self.verbose:
+            print("Transforming heatmap...")
         nodata = np.nan
         with rasterio.open(map_path) as heatmap:
             max_map_wait = heatmap.read().max()
             min_map_wait = heatmap.read().min()
-            if self.verbose: print("max map waiting time:", max_map_wait)
-            if self.verbose: print("min map waiting time:", min_map_wait)
+            if self.verbose:
+                print("max map waiting time:", max_map_wait)
+            if self.verbose:
+                print("min map waiting time:", min_map_wait)
 
             out_image, out_transform = rasterio.mask.mask(
                 heatmap, country_shapes, nodata=nodata
@@ -251,7 +240,8 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             destination.write(out_image)
 
         # plot the heatmap
-        if self.verbose: print("Plotting heatmap...")
+        if self.verbose:
+            print("Plotting heatmap...")
         raster = rasterio.open(new_map_path)
 
         # TODO smoother spectrum instead of buckets
@@ -274,7 +264,8 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         #     all_points.wait.max() + 0.1, 100
         # )  # to get at least this value as maximum for the colored buckets
         max_wait = 675
-        if self.verbose: print("max waiting time:", max_wait)
+        if self.verbose:
+            print("max waiting time:", max_wait)
         num_scale_colors = len(buckets) - 2  # because of upper and lower bucket
         # build log scale starting at 0 and ending at max wait
         base = (max_map_wait - min_map_wait + 1) ** (1 / num_scale_colors)
@@ -317,9 +308,6 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 uncertainty = 1.0
             # let certainty have no influence on sea color
             uncertainty = np.where(np.isnan(raster.read()[0]), 1, uncertainty)
-            # shift (for rational quadratic kernel)
-            # certainty = certainty + 0.4
-            # certainty = np.clip(certainty, 0, 1)
         else:
             uncertainty = 1.0
 
@@ -330,7 +318,6 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         ax.set_xlabel("Longitude", fontsize=10)
         ax.set_ylabel("Latitude", fontsize=10)
         ax.tick_params(axis="both", which="major", labelsize=10)
-
 
         cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
         cbar.ax.tick_params(labelsize=10)
@@ -382,7 +369,7 @@ class Tiles(MapBasedModel):
 
         self.lon_intervals = self.get_tile_intervals(lon_min, lon_max)
         self.lat_intervals = self.get_tile_intervals(lat_min, lat_max)
-        
+
         tiles = np.zeros((len(self.lon_intervals) - 1, len(self.lat_intervals) - 1))
 
         return tiles
@@ -426,7 +413,9 @@ class Tiles(MapBasedModel):
 
 
 class WeightedAveragedGaussian(MapBasedModel):
-    def __init__(self, region="world", method="ordinary", resolution=RESOLUTION, verbose=False):
+    def __init__(
+        self, region="world", method="ordinary", resolution=RESOLUTION, verbose=False
+    ):
         self.region = region
         self.method = method
         self.resolution = resolution  # pixel per degree

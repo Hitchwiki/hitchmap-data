@@ -207,3 +207,87 @@ def get_optimized_gpr(initial_kernel, X, y):
     gpr.fit(X, y)
 
     return gpr
+
+
+def plot_distribution_of_data_points():
+    points = get_points("../data/points_train.csv")
+
+    countries = gpd.datasets.get_path("naturalearth_lowres")
+    countries = gpd.read_file(countries)
+    countries = countries.to_crs(epsg=3857)
+    countries = countries[countries.name != "Antarctica"]
+    germany = countries[countries.name == "Germany"]
+    europe_without_germany = countries[(countries.continent == "Europe") & (countries.name != "Germany")]
+    europe_without_germany_shape = europe_without_germany.geometry.unary_union
+
+    world = countries[countries.continent != "Europe"]
+    germany_data = points[points.geometry.within(germany.geometry.values[0])]
+    europe_without_germany_data = points[points.geometry.within(europe_without_germany_shape)]
+
+    europe = pd.concat([germany, europe_without_germany])
+    europe_data = pd.concat([germany_data, europe_without_germany_data])
+
+    world_data = points[~(points.index.isin(europe_data.index))]
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 10))
+
+    europe.plot(ax=ax1, facecolor="none", edgecolor="black")
+    germany_data.plot(ax=ax1, markersize=0.01, color="red")
+    europe_without_germany_data.plot(ax=ax1, markersize=0.01, color="blue")
+    ax1.set_xlim([-0.3e7, 0.6e7])
+    ax1.set_ylim([0.4e7, 1.2e7])
+
+    countries.plot(ax=ax2, facecolor="none", edgecolor="black")
+    world_data.plot(ax=ax2, markersize=0.01, color="green")
+    europe_data.plot(ax=ax2, markersize=0.01, color="blue")
+
+    plt.show()
+
+    print(f"Germany: {round(len(germany_data) / len(points) * 100, 2)} %")
+    print(f"Europe without Germany: {round(len(europe_without_germany_data) / len(points) * 100, 2)} %")
+    print(f"Rest of the world: {round(len(world_data) / len(points) * 100, 2)} %")
+
+def plot_1d_model_comparison(points, val, X, y, wag_model, average_model, tiles_model, gpr_model):
+    x_test = np.linspace(start=tiles_model.lon_intervals[0], stop=tiles_model.lon_intervals[-1], num=300)
+    cut_through_germany = points.lat.values[0]
+    x_test_2d_model = np.array([[xi, cut_through_germany] for xi in x_test])
+    x_test = np.array([[xi] for xi in x_test])
+
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10))
+
+    ax1.scatter(X, y, label="Observations")
+    ax1.scatter(val.lon, val.wait, label="Validation")
+    wag_pred = wag_model.predict(x_test_2d_model)
+    ax1.plot(x_test, wag_pred, label="Weighted averaged Gaussian", color='red')
+    ax1.set_ylim([0, 80])
+    ax1.legend()
+    ax1.set_xlabel("Longitude in m at 51° latitude")
+    ax1.set_ylabel("Predicted waiting time")
+
+    ax2.scatter(X, y, label="Observations")
+    ax2.scatter(val.lon, val.wait, label="Validation")
+    average_pred = average_model.predict(x_test_2d_model)
+    ax2.plot(x_test, average_pred, label="Average", color='red')
+    ax2.set_ylim([0, 80])
+    ax2.legend()
+    ax2.set_xlabel("Longitude in m at 51° latitude")
+    ax2.set_ylabel("Predicted waiting time")
+
+    ax3.scatter(X, y, label="Observations")
+    ax3.scatter(val.lon, val.wait, label="Validation")
+    tiles_pred = tiles_model.predict(x_test_2d_model)
+    ax3.plot(x_test, tiles_pred, label="Tiles", color='red')
+    ax3.set_ylim([0, 80])
+    ax3.legend()
+    ax3.set_xlabel("Longitude in m at 51° latitude")
+    ax3.set_ylabel("Predicted waiting time")
+
+    ax4.scatter(X, y, label="Observations")
+    ax4.scatter(val.lon, val.wait, label="Validation")
+    gpr_pred = gpr_model.predict(x_test)
+    ax4.plot(x_test, gpr_pred, label="GP mean prediction", color='red')
+    ax4.set_ylim([0, 80])
+    ax4.legend()
+    ax4.set_xlabel("Longitude in m at 51° latitude")
+    ax4.set_ylabel("Predicted waiting time")
+
+    plt.show()
