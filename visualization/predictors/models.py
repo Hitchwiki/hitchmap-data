@@ -26,10 +26,11 @@ RESOLUTION = 2
 
 
 class MapBasedModel(BaseEstimator, RegressorMixin):
-    def __init__(self, method, region="world", resolution=RESOLUTION):
+    def __init__(self, method, region="world", resolution=RESOLUTION, verbose=False):
         self.method = method
         self.region = region
         self.resolution = resolution  # pixel per degree
+        self.verbose = verbose
 
     def get_map_boundary(self):
         maps = {
@@ -100,6 +101,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # map = np.round(map, 0)
 
         # save the colored raster using the above transform
+        # important: rasterio requires [0,0] of the raster to be in the upper left corner and [rows, cols] in the lower right corner
         # TODO find out why raster is getting smaller in x direction when stored as tif (e.g. 393x700 -> 425x700)
         with rasterio.open(
             map_path,
@@ -127,7 +129,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # mind starting with upper value of y axis here
         y = np.linspace(yy[2], yy[0], pixel_height)
         self.X, self.Y = np.meshgrid(x, y)
-        # higher precision prevents pixels with high uncertainty in the WAG model 0/ nan
+        # higher precision prevents pixels with high uncertainty (no data) in the WAG model to become 0/ nan
         self.X = np.longdouble(self.X)
         self.Y = np.longdouble(self.Y)
 
@@ -147,9 +149,10 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         return xx, yy, pixel_width, pixel_height
 
     def build_map(
+        self,
         points=None,
         all_points=None,
-        show_states=False,
+        show_states=True,
         show_cities=False,
         show_roads=False,
         show_points=False,
@@ -174,17 +177,16 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # print("Checking hitchhikability for each state...")
         # states["hh"] = states.progress_apply(check_hitchhikability, axis=1)
 
-        fig, ax = plt.subplots(figsize=(100, 100))
+        fig, ax = plt.subplots(figsize=(10, 10))
 
         # get borders of all countries
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip
         # from https://www.naturalearthdata.com/downloads/110m-cultural-vectors/
 
-        print("Loading country shapes...")
-        countries = gpd.datasets.get_path("naturalearth_lowres")
-        countries = gpd.read_file(countries)
+        if self.verbose: print("Loading country shapes...")
+        countries = gpd.read_file('map_features/countries/ne_110m_admin_0_countries.shp')
         countries = countries.to_crs(epsg=3857)
-        countries = countries[countries.name != "Antarctica"]
+        countries = countries[countries.NAME != "Antarctica"]
         # TODO so far does not work as in final map the raster is not applied to the whole region
         # countries = countries[countries.geometry.within(polygon.geometry[0])]
         country_shapes = countries.geometry
@@ -197,7 +199,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
         # cities = gpd.read_file("cities/ne_10m_populated_places.shp", bbox=polygon.geometry[0]) should work but does not
         if show_cities:
-            print("Loading cities...")
+            if self.verbose: print("Loading cities...")
             cities = gpd.read_file(
                 "map_features/cities/ne_10m_populated_places.shp"
             )  # takes most time
@@ -209,7 +211,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_roads.zip
         # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
         if show_roads:
-            print("Loading roads...")
+            if self.verbose: print("Loading roads...")
             roads = gpd.read_file("map_features/roads/ne_10m_roads.shp")
             roads = roads.to_crs(epsg=3857)
             roads = roads[roads.geometry.within(polygon.geometry[0])]
@@ -219,13 +221,13 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             all_points.plot(ax=ax, markersize=10, color="red")
 
         # limit heatmap to landmass by asigning inf/ high value to sea
-        print("Transforming heatmap...")
+        if self.verbose: print("Transforming heatmap...")
         nodata = np.nan
         with rasterio.open(map_path) as heatmap:
             max_map_wait = heatmap.read().max()
             min_map_wait = heatmap.read().min()
-            print("max map waiting time:", max_map_wait)
-            print("min map waiting time:", min_map_wait)
+            if self.verbose: print("max map waiting time:", max_map_wait)
+            if self.verbose: print("min map waiting time:", min_map_wait)
 
             out_image, out_transform = rasterio.mask.mask(
                 heatmap, country_shapes, nodata=nodata
@@ -246,7 +248,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             destination.write(out_image)
 
         # plot the heatmap
-        print("Plotting heatmap...")
+        if self.verbose: print("Plotting heatmap...")
         raster = rasterio.open(new_map_path)
 
         # TODO smoother spectrum instead of buckets
@@ -265,10 +267,11 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         cmap = colors.ListedColormap(buckets)
 
-        max_wait = max(
-            all_points.wait.max() + 0.1, 100
-        )  # to get at least this value as maximum for the colored buckets
-        print("max waiting time:", max_wait)
+        # max_wait = max(
+        #     all_points.wait.max() + 0.1, 100
+        # )  # to get at least this value as maximum for the colored buckets
+        max_wait = 675
+        if self.verbose: print("max waiting time:", max_wait)
         num_scale_colors = len(buckets) - 2  # because of upper and lower bucket
         # build log scale starting at 0 and ending at max wait
         base = (max_map_wait - min_map_wait + 1) ** (1 / num_scale_colors)
@@ -291,6 +294,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         )
 
         # values higher than the upper boundary are colored in the upmost color
+        min_map_wait = min(10, min_map_wait)
         boundaries = [min_map_wait, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
         # prepare the plot
@@ -326,17 +330,19 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # from https://stackoverflow.com/questions/2578752/how-can-i-plot-nan-values-as-a-special-color-with-imshow
         cmap.set_bad(color="blue")
         rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=certainty)
+        ax.set_xlabel("Longitude", fontsize=10)
+        ax.set_ylabel("Latitude", fontsize=10)
+        ax.tick_params(axis="both", which="major", labelsize=10)
+
 
         cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
-        cbar.ax.tick_params(labelsize=50)
-        if method == "ITERATIVE":
+        cbar.ax.tick_params(labelsize=10)
+        if self.method == "ITERATIVE":
             file_name = f"maps/map_{region}_iter_{ITERATIONS}.png"
-        elif method == "DYNAMIC":
+        elif self.method == "DYNAMIC":
             file_name = f"maps/map_{region}_{K}.png"
-        elif method == "gp":
-            file_name = f"maps/map_gp_{region}_{resolution}.png"
         else:
-            file_name = f"maps/map_{self.region}.png"
+            file_name = f"maps/map_{self.method}_{self.region}_{self.resolution}.png"
         plt.savefig(file_name, bbox_inches="tight")
 
 
@@ -378,7 +384,7 @@ class Tiles(MapBasedModel):
 
         self.lon_intervals = self.get_tile_intervals(lon_min, lon_max)
         self.lat_intervals = self.get_tile_intervals(lat_min, lat_max)
-
+        
         tiles = np.zeros((len(self.lon_intervals) - 1, len(self.lat_intervals) - 1))
 
         return tiles
@@ -400,8 +406,8 @@ class Tiles(MapBasedModel):
             lon_num = self.get_interval_num(self.lon_intervals, lon)
             lat_num = self.get_interval_num(self.lat_intervals, lat)
 
-            self.tiles[lon_num, lat_num] += single_y
-            points_per_tile[lon_num, lat_num] += 1
+            self.tiles[lon_num][lat_num] += single_y
+            points_per_tile[lon_num][lat_num] += 1
 
         # average
         points_per_tile = np.where(points_per_tile == 0, 1, points_per_tile)
@@ -416,8 +422,7 @@ class Tiles(MapBasedModel):
             lon, lat = x
             lon_num = self.get_interval_num(self.lon_intervals, lon)
             lat_num = self.get_interval_num(self.lat_intervals, lat)
-
-            predictions.append(self.tiles[lon_num, lat_num])
+            predictions.append(self.tiles[lon_num][lat_num])
 
         return np.array(predictions)
 

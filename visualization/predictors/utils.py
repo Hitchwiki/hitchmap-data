@@ -142,7 +142,7 @@ class TargetTransformer(TransformerMixin, BaseEstimator):
         return self.transform(y)
 
 
-def evaluate(model, train, validation, features):
+def evaluate(model, train, validation, features=['lon', 'lat']):
     train["pred"] = model.predict(train[features].values)
 
     print(
@@ -158,12 +158,12 @@ def evaluate(model, train, validation, features):
     )
 
 
-def evaluate_cv(estimator, X, y):
+def evaluate_cv(estimator, X, y, folds=5):
     cv_result = cross_validate(
         estimator=estimator,
         X=X,
         y=y,
-        cv=5,
+        cv=folds,
         scoring=["neg_mean_absolute_error", "neg_root_mean_squared_error"],
         return_train_score=True,
         return_estimator=True,
@@ -174,7 +174,7 @@ def evaluate_cv(estimator, X, y):
         f"Training RMSE: {cv_result['train_neg_root_mean_squared_error'].mean() * -1}\n",
         f"Training MAE: {cv_result['train_neg_mean_absolute_error'].mean() * -1}\n",
         f"Validation RMSE: {cv_result['test_neg_root_mean_squared_error'].mean() * -1}\n",
-        f"Validation MAE: {cv_result['test_neg_mean_absolute_error'].mean() * -1}",
+        f"Validation MAE: {cv_result['test_neg_mean_absolute_error'].mean() * -1}\n",
     )
 
     # returning one of the estimators for visualization purposes

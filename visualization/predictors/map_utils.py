@@ -122,15 +122,21 @@ def raster_from_model(model, region, resolution=10):
 
     raster_maker = MapBasedModel(model_name, region, resolution)
 
-    X, Y = raster_maker.get_map_grid()
-    grid = np.array((Y, X)).T
-    map = np.empty((0, X.shape[0]))
+    raster_maker.get_map_grid()
+    X, Y = raster_maker.X, raster_maker.Y
+    grid = np.array((X, Y))
+    height = X.shape[0]
+    map = np.empty((0, height))
 
-    for vertical_line in tqdm(grid):
-        pred = model.predict(vertical_line, return_std=True)
+    # transposing the grid enables us to iterate over it vertically
+    # and single elements become lon-lat pairs that can be fed into the model
+    for vertical_line in tqdm(grid.transpose(), disable=not raster_maker.verbose):
+        pred = model.predict(vertical_line)
         map = np.vstack((map, pred))
-
+    
+    # because we vstacked above
     map = map.T
+
     save_numpy_map(map, region=region, method=model_name, resolution=resolution)
 
     raster_maker.raw_raster = map
