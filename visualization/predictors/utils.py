@@ -54,7 +54,8 @@ def get_points(path, wait_max=WAIT_MAX):
     points.lat = points.lat.astype(float)
     points.lon = points.lon.astype(float)
     # threshold - assuming that values above that are skewed due to angriness of the hiker
-    points = points[points["wait"] <= wait_max]
+    points = points[points['wait'] <= wait_max]
+    points = points[points['lat'] < 70] # removing the point on Greenland
 
     # use epsg 3857 as default as it gives coordinates in meters
     points.geometry = gpd.points_from_xy(points.lon, points.lat)
@@ -290,4 +291,25 @@ def plot_1d_model_comparison(points, val, X, y, wag_model, average_model, tiles_
     ax4.set_xlabel("Longitude in m at 51° latitude")
     ax4.set_ylabel("Predicted waiting time")
 
+    plt.show()
+
+def plot_1d_with_uncertainties(gpr, X, y, start, stop):
+    x_test = np.linspace(start=start, stop=stop, num=300)
+    x_test = np.array([[xi] for xi in x_test])
+
+    y_pred, std_prediction = gpr.predict(x_test, return_std=True)
+
+    plt.scatter(X, y, label="Observations")
+    plt.plot(x_test, y_pred, label="Mean prediction")
+    plt.fill_between(
+        x_test.ravel(),
+        y_pred - 1.96 * std_prediction,
+        y_pred + 1.96 * std_prediction,
+        alpha=0.5,
+        label=r"95% confidence interval",
+    )
+
+    plt.legend()
+    plt.xlabel("$x$")
+    plt.ylabel("$f(x)$")
     plt.show()

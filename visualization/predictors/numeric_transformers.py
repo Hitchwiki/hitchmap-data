@@ -1,3 +1,5 @@
+# from https://github.com/scikit-learn/scikit-learn/issues/24638
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Callable
@@ -120,6 +122,7 @@ def get_transformer_with_least_skew(
     return best_transformation
 
 
+# see https://en.wikipedia.org/wiki/Log-normal_distribution#Arithmetic_moments
 # needed for Target transformer when we have std
 def inverse_log_mean(log_mean, log_std):
     """
