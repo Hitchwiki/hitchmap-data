@@ -1,56 +1,21 @@
-import sys
-import numpy
 import rasterio
 import rasterio.plot
-from rasterio.crs import CRS
 from matplotlib import pyplot as plt
 import geopandas as gpd
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import rasterio.mask
-from shapely.geometry import Point
-from geopandas import GeoDataFrame
-import matplotlib.colors as colors
-from matplotlib import cm
-from shapely.geometry import Polygon
-from rasterio.transform import from_gcps
-from rasterio.control import GroundControlPoint as GCP
-from pathlib import Path
 from map_utils import *
-from matplotlib import pyplot as plt
 import pandas as pd
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import (
-    RBF,
-    ConstantKernel,
-    WhiteKernel,
-    RationalQuadratic,
-)
-import pickle
-from sklearn.metrics import (
-    root_mean_squared_error,
-    mean_squared_error,
-    mean_absolute_error,
-)
 import numpy as np
-import seaborn as sns
-import matplotlib
-import shapely
 from matplotlib.colors import LogNorm
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.base import TransformerMixin
-from sklearn.model_selection import cross_validate
-from sklearn.base import BaseEstimator
-from sklearn.compose import TransformedTargetRegressor
-from numeric_transformers import LogTransformer
-from transformed_target_regressor_with_uncertainty import (
-    TransformedTargetRegressorWithUncertainty,
-)
+
 
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 from numeric_transformers import log_plus_tiny, exp_minus_tiny
+from utils import *
 
 def plot_distribution_of_data_points():
     points = get_points("../data/points_train.csv")

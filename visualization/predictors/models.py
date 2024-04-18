@@ -5,18 +5,15 @@ from matplotlib import pyplot as plt
 import geopandas as gpd
 import pandas as pd
 import numpy as np
-from tqdm import tqdm
 import rasterio.mask
 from shapely.geometry import Point
-from geopandas import GeoDataFrame
 import matplotlib.colors as colors
 from matplotlib import cm
 from shapely.geometry import Polygon
 from rasterio.transform import from_gcps
 from rasterio.control import GroundControlPoint as GCP
-from pathlib import Path
-from sklearn.base import BaseEstimator, RegressorMixin
 
+from sklearn.base import BaseEstimator, RegressorMixin
 from tqdm.auto import tqdm
 
 tqdm.pandas()
