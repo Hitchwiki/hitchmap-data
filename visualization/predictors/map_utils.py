@@ -155,7 +155,8 @@ def raster_from_model(model, region, resolution=RESOLUTION, show_uncertainties=F
         )
 
     raster_maker.raw_raster = map
-    raster_maker.raw_uncertaities = uncertainty_map
+    if show_uncertainties:
+        raster_maker.raw_uncertaities = uncertainty_map
 
     raster_maker.save_as_raster()
 

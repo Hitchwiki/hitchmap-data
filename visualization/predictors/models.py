@@ -157,7 +157,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         show_points=False,
         show_uncertainties=False,
     ):
-        if self.raw_uncertainties is None:
+        if not hasattr(self, 'raw_uncertainties'):
             uncertainty = 1.0
         else:
             uncertainty = self.raw_uncertainties
@@ -298,7 +298,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             "0.7"
         )  # background color light gray for landmass with uncertainty
 
-        if show_uncertainty:
+        if show_uncertainties:
             try:
                 uncertainty = (uncertainty - uncertainty.min()) / (
                     uncertainty.max() - uncertainty.min()

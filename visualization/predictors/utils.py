@@ -43,6 +43,14 @@ from sklearn.base import TransformerMixin
 from sklearn.model_selection import cross_validate
 from sklearn.base import BaseEstimator
 from sklearn.compose import TransformedTargetRegressor
+from numeric_transformers import LogTransformer
+from transformed_target_regressor_with_uncertainty import (
+    TransformedTargetRegressorWithUncertainty,
+)
+
+from sklearn.utils._testing import ignore_warnings
+from sklearn.exceptions import ConvergenceWarning
+from numeric_transformers import log_plus_tiny, exp_minus_tiny
 
 DAY = 24 * 60
 WAIT_MAX = DAY
@@ -54,8 +62,8 @@ def get_points(path, wait_max=WAIT_MAX):
     points.lat = points.lat.astype(float)
     points.lon = points.lon.astype(float)
     # threshold - assuming that values above that are skewed due to angriness of the hiker
-    points = points[points['wait'] <= wait_max]
-    points = points[points['lat'] < 70] # removing the point on Greenland
+    points = points[points["wait"] <= wait_max]
+    points = points[points["lat"] < 70]  # removing the point on Greenland
 
     # use epsg 3857 as default as it gives coordinates in meters
     points.geometry = gpd.points_from_xy(points.lon, points.lat)
@@ -121,6 +129,7 @@ def get_from_region(region):
 
 
 # centers data to a zero mean
+# use this transformer if you want to center the data outside of the GP model (e.g. for visualization)
 class TargetTransformer(TransformerMixin, BaseEstimator):
     def __init__(self, function=(lambda y: y), inverse_function=(lambda y: y)):
         self.function = function
@@ -142,19 +151,19 @@ class TargetTransformer(TransformerMixin, BaseEstimator):
         return self.transform(y)
 
 
-def evaluate(model, train, validation, features=['lon', 'lat']):
+def evaluate(model, train, validation, features=["lon", "lat"]):
     train["pred"] = model.predict(train[features].values)
 
-    print(
-        f"Training RMSE: {root_mean_squared_error(train['wait'], train['pred'])}\n",
-        f"Training MAE {mean_absolute_error(train['wait'], train['pred'])}",
-    )
+    print(f"Training RMSE: {root_mean_squared_error(train['wait'], train['pred'])}")
+    print(f"Training MAE {mean_absolute_error(train['wait'], train['pred'])}")
 
     validation["pred"] = model.predict(validation[features].values)
 
     print(
-        f"Validation RMSE: {root_mean_squared_error(validation['wait'], validation['pred'])}\n",
-        f"Validation MAE {mean_absolute_error(validation['wait'], validation['pred'])}",
+        f"Validation RMSE: {root_mean_squared_error(validation['wait'], validation['pred'])}"
+    )
+    print(
+        f"Validation MAE {mean_absolute_error(validation['wait'], validation['pred'])}"
     )
 
 
@@ -169,20 +178,18 @@ def evaluate_cv(estimator, X, y, folds=5):
         return_estimator=True,
     )
 
+    print(f"Cross-validated averaged metrics...")
     print(
-        "Cross-validated averaged metrics...\n",
-        f"Training RMSE: {cv_result['train_neg_root_mean_squared_error'].mean() * -1}\n",
-        f"Training MAE: {cv_result['train_neg_mean_absolute_error'].mean() * -1}\n",
-        f"Validation RMSE: {cv_result['test_neg_root_mean_squared_error'].mean() * -1}\n",
-        f"Validation MAE: {cv_result['test_neg_mean_absolute_error'].mean() * -1}\n",
+        f"Training RMSE: {cv_result['train_neg_root_mean_squared_error'].mean() * -1}"
     )
+    print(f"Training MAE: {cv_result['train_neg_mean_absolute_error'].mean() * -1}")
+    print(
+        f"Validation RMSE: {cv_result['test_neg_root_mean_squared_error'].mean() * -1}"
+    )
+    print(f"Validation MAE: {cv_result['test_neg_mean_absolute_error'].mean() * -1}")
 
     # returning one of the estimators for visualization purposes
     return cv_result["estimator"][0]
-
-
-def get_log_transformer():
-    return TargetTransformer(function=np.log1p, inverse_function=np.expm1)
 
 
 def get_gpr(initial_kernel):
@@ -190,126 +197,36 @@ def get_gpr(initial_kernel):
         kernel=initial_kernel,
         alpha=0.0**2,
         optimizer="fmin_l_bfgs_b",
-        normalize_y=False,
+        normalize_y=True,
         n_restarts_optimizer=0,
         random_state=42,
     )
 
-    log_transformer = get_log_transformer()
-    target_transform_gpr = TransformedTargetRegressor(
-        regressor=gpr, transformer=log_transformer
+    target_transform_gpr = TransformedTargetRegressorWithUncertainty(
+        regressor=gpr, numeric_transformer=LogTransformer()
     )
 
     return target_transform_gpr
 
 
-def get_optimized_gpr(initial_kernel, X, y):
-    gpr = get_gpr(initial_kernel=initial_kernel)
+def fit_gpr(gpr, X, y):
     gpr.fit(X, y)
 
     return gpr
 
 
-def plot_distribution_of_data_points():
-    points = get_points("../data/points_train.csv")
+@ignore_warnings(category=ConvergenceWarning)
+def fit_gpr_silent(gpr, X, y):
+    gpr.fit(X, y)
 
-    countries = gpd.datasets.get_path("naturalearth_lowres")
-    countries = gpd.read_file(countries)
-    countries = countries.to_crs(epsg=3857)
-    countries = countries[countries.name != "Antarctica"]
-    germany = countries[countries.name == "Germany"]
-    europe_without_germany = countries[(countries.continent == "Europe") & (countries.name != "Germany")]
-    europe_without_germany_shape = europe_without_germany.geometry.unary_union
+    return gpr
 
-    world = countries[countries.continent != "Europe"]
-    germany_data = points[points.geometry.within(germany.geometry.values[0])]
-    europe_without_germany_data = points[points.geometry.within(europe_without_germany_shape)]
 
-    europe = pd.concat([germany, europe_without_germany])
-    europe_data = pd.concat([germany_data, europe_without_germany_data])
+def get_optimized_gpr(initial_kernel, X, y, verbose=False):
+    gpr = get_gpr(initial_kernel=initial_kernel)
+    if verbose:
+        gpr = fit_gpr(gpr, X, y)
+    else:
+        gpr = fit_gpr_silent(gpr, X, y)
 
-    world_data = points[~(points.index.isin(europe_data.index))]
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 10))
-
-    europe.plot(ax=ax1, facecolor="none", edgecolor="black")
-    germany_data.plot(ax=ax1, markersize=0.01, color="red")
-    europe_without_germany_data.plot(ax=ax1, markersize=0.01, color="blue")
-    ax1.set_xlim([-0.3e7, 0.6e7])
-    ax1.set_ylim([0.4e7, 1.2e7])
-
-    countries.plot(ax=ax2, facecolor="none", edgecolor="black")
-    world_data.plot(ax=ax2, markersize=0.01, color="green")
-    europe_data.plot(ax=ax2, markersize=0.01, color="blue")
-
-    plt.show()
-
-    print(f"Germany: {round(len(germany_data) / len(points) * 100, 2)} %")
-    print(f"Europe without Germany: {round(len(europe_without_germany_data) / len(points) * 100, 2)} %")
-    print(f"Rest of the world: {round(len(world_data) / len(points) * 100, 2)} %")
-
-def plot_1d_model_comparison(points, val, X, y, wag_model, average_model, tiles_model, gpr_model):
-    x_test = np.linspace(start=tiles_model.lon_intervals[0], stop=tiles_model.lon_intervals[-1], num=300)
-    cut_through_germany = points.lat.values[0]
-    x_test_2d_model = np.array([[xi, cut_through_germany] for xi in x_test])
-    x_test = np.array([[xi] for xi in x_test])
-
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10))
-
-    ax1.scatter(X, y, label="Observations")
-    ax1.scatter(val.lon, val.wait, label="Validation")
-    wag_pred = wag_model.predict(x_test_2d_model)
-    ax1.plot(x_test, wag_pred, label="Weighted averaged Gaussian", color='red')
-    ax1.set_ylim([0, 80])
-    ax1.legend()
-    ax1.set_xlabel("Longitude in m at 51° latitude")
-    ax1.set_ylabel("Predicted waiting time")
-
-    ax2.scatter(X, y, label="Observations")
-    ax2.scatter(val.lon, val.wait, label="Validation")
-    average_pred = average_model.predict(x_test_2d_model)
-    ax2.plot(x_test, average_pred, label="Average", color='red')
-    ax2.set_ylim([0, 80])
-    ax2.legend()
-    ax2.set_xlabel("Longitude in m at 51° latitude")
-    ax2.set_ylabel("Predicted waiting time")
-
-    ax3.scatter(X, y, label="Observations")
-    ax3.scatter(val.lon, val.wait, label="Validation")
-    tiles_pred = tiles_model.predict(x_test_2d_model)
-    ax3.plot(x_test, tiles_pred, label="Tiles", color='red')
-    ax3.set_ylim([0, 80])
-    ax3.legend()
-    ax3.set_xlabel("Longitude in m at 51° latitude")
-    ax3.set_ylabel("Predicted waiting time")
-
-    ax4.scatter(X, y, label="Observations")
-    ax4.scatter(val.lon, val.wait, label="Validation")
-    gpr_pred = gpr_model.predict(x_test)
-    ax4.plot(x_test, gpr_pred, label="GP mean prediction", color='red')
-    ax4.set_ylim([0, 80])
-    ax4.legend()
-    ax4.set_xlabel("Longitude in m at 51° latitude")
-    ax4.set_ylabel("Predicted waiting time")
-
-    plt.show()
-
-def plot_1d_with_uncertainties(gpr, X, y, start, stop):
-    x_test = np.linspace(start=start, stop=stop, num=300)
-    x_test = np.array([[xi] for xi in x_test])
-
-    y_pred, std_prediction = gpr.predict(x_test, return_std=True)
-
-    plt.scatter(X, y, label="Observations")
-    plt.plot(x_test, y_pred, label="Mean prediction")
-    plt.fill_between(
-        x_test.ravel(),
-        y_pred - 1.96 * std_prediction,
-        y_pred + 1.96 * std_prediction,
-        alpha=0.5,
-        label=r"95% confidence interval",
-    )
-
-    plt.legend()
-    plt.xlabel("$x$")
-    plt.ylabel("$f(x)$")
-    plt.show()
+    return gpr

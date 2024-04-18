@@ -13,20 +13,26 @@ class TransformedTargetRegressorWithUncertainty(TransformedTargetRegressor):
     target distribution transformation.
     """
 
-    def __init__(self, regressor: BaseEstimator, transformer: Transformer):
-        if (
-            transformer.inverse_mean_func is None
-            or transformer.inverse_std_func is None
-        ):
+    def __init__(self, regressor: BaseEstimator, numeric_transformer: Transformer):
+        super().__init__()
+        self.numeric_transformer = numeric_transformer
+        self.regressor = regressor
+        
+    def fit(self, X, y, **fit_params):
+        """
+        Fit the regressor and the transformer.
+        """
+        # setting parameters required for fitting
+        if self.numeric_transformer.inverse_mean_func is None or self.numeric_transformer.inverse_std_func is None:
             raise ValueError(
                 "To support predictions with a standard deviation a transformer"
-                "must have inverse_mean_func and inverse_std_func functions."
-            )
-        self.inverse_mean_func = transformer.inverse_mean_func
-        self.inverse_std_func = transformer.inverse_std_func
-        super().__init__(
-            regressor, func=transformer.func, inverse_func=transformer.inverse_func
-        )
+                "must have inverse_mean_func and inverse_std_func functions.")
+        
+        self.func=self.numeric_transformer.func
+        self.inverse_func=self.numeric_transformer.inverse_func
+
+        return super().fit(X, y, **fit_params)
+
 
     def predict(self, X, return_std=False, **predict_params):
         """
@@ -35,7 +41,7 @@ class TransformedTargetRegressorWithUncertainty(TransformedTargetRegressor):
         if return_std:
             model: BaseEstimator = self.regressor_
             tran_pred, tran_std = model.predict(X, return_std=return_std)
-            pred = self.inverse_mean_func(tran_pred, tran_std)
-            std = self.inverse_std_func(tran_pred, tran_std)
+            pred = self.numeric_transformer.inverse_mean_func(tran_pred, tran_std)
+            std = self.numeric_transformer.inverse_std_func(tran_pred, tran_std)
             return pred, std
         return super().predict(X, **predict_params)
