@@ -6,10 +6,11 @@ import geopandas as gpd
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+import shapely
 
 from shapely.geometry import Point
 
-from map_utils import *
+from utils_map import *
 
 
 DAY = 24 * 60

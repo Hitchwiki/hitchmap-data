@@ -21,7 +21,8 @@ def inverse_log_mean(log_mean, log_std):
     by incorporating the variance.
     """
     log_var = log_std**2
-    return np.exp(log_mean + log_var / 2) - 1e-7
+    # np.exp(log_mean + log_var / 2) - 1e-7 would be the correct back-transformation but yields too high values for our use case
+    return np.exp(log_mean) - 1e-7
 
 
 def inverse_log_std(log_mean, log_std):

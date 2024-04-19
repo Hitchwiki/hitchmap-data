@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import rasterio.mask
-from map_utils import *
+from utils_map import *
 import pandas as pd
 import numpy as np
 from matplotlib.colors import LogNorm
@@ -15,21 +15,22 @@ from matplotlib.colors import LogNorm
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 from numeric_transformers import log_plus_tiny, exp_minus_tiny
-from utils import *
+from utils_models import TargetTransformer
+from utils_data import get_points
 
 def plot_distribution_of_data_points():
     points = get_points("../data/points_train.csv")
 
     countries = gpd.read_file("map_features/countries/ne_110m_admin_0_countries.shp")
     countries = countries.to_crs(epsg=3857)
-    countries = countries[countries.name != "Antarctica"]
-    germany = countries[countries.name == "Germany"]
+    countries = countries[countries.NAME != "Antarctica"]
+    germany = countries[countries.NAME == "Germany"]
     europe_without_germany = countries[
-        (countries.continent == "Europe") & (countries.name != "Germany")
+        (countries.CONTINENT == "Europe") & (countries.NAME != "Germany")
     ]
     europe_without_germany_shape = europe_without_germany.geometry.unary_union
 
-    world = countries[countries.continent != "Europe"]
+    world = countries[countries.CONTINENT != "Europe"]
     germany_data = points[points.geometry.within(germany.geometry.values[0])]
     europe_without_germany_data = points[
         points.geometry.within(europe_without_germany_shape)
@@ -101,7 +102,7 @@ def plot_1d_model_comparison(
 
     ax4.scatter(X, y, label="Observations")
     ax4.scatter(val.lon, val.wait, label="Validation")
-    gpr_pred = gpr_model.predict(x_test)
+    gpr_pred, _ = gpr_model.predict(x_test, return_std=True)
     ax4.plot(x_test, gpr_pred, label="GP mean prediction", color="red")
     ax4.set_ylim([0, 80])
     ax4.legend()

@@ -66,7 +66,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         return polygon
 
     def save_as_raster(self):
-        map_path = f"intermediate/map_{self.method}_{self.region}_{self.resolution}.tif"
+        map_path = self.get_raster_path()
 
         polygon_vertices_x, polygon_vertices_y, pixel_width, pixel_height = (
             self.define_raster()
@@ -91,10 +91,8 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # seems to need the vertices of the map polygon
         transform = from_gcps(gcps)
 
-        # cannot use np.longdouble to write to tif
-        self.raw_raster = np.double(self.raw_raster)
-        # TODO: need this?
-        # map = np.round(map, 0)
+        # cannot use np.float128 to write to tif
+        self.raw_raster = self.raw_raster.astype(np.float64)
 
         # save the colored raster using the above transform
         # important: rasterio requires [0,0] of the raster to be in the upper left corner and [rows, cols] in the lower right corner
@@ -125,7 +123,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # mind starting with upper value of y axis here
         y = np.linspace(yy[2], yy[0], pixel_height)
         self.X, self.Y = np.meshgrid(x, y)
-        # higher precision prevents pixels with high uncertainty (no data) in the WAG model to become 0/ nan
+        # higher precision prevents pixels with high uncertainties (no data) in the WAG model to become 0/ nan
         self.X = np.longdouble(self.X)
         self.Y = np.longdouble(self.Y)
 
@@ -144,6 +142,9 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         return xx, yy, pixel_width, pixel_height
 
+    def get_raster_path(self):
+        return f"intermediate/map_{self.method}_{self.region}_{self.resolution}.tif"
+
     def build_map(
         self,
         points=None,
@@ -155,11 +156,11 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         show_uncertainties=False,
     ):
         if not hasattr(self, 'raw_uncertainties'):
-            uncertainty = 1.0
+            uncertainties = 1.0
         else:
-            uncertainty = self.raw_uncertainties
+            uncertainties = self.raw_uncertainties
 
-        map_path = f"intermediate/map_{self.method}_{self.region}_{self.resolution}.tif"
+        map_path = self.get_raster_path()
 
         fig, ax = plt.subplots(figsize=(10, 10))
 
@@ -252,7 +253,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             "red",  # red
             "#c80000",  # dark red
             "#820000",  # wine red
-            "#820000",  # drop?
+            "#330101",  # drop?
         ]
 
         cmap = colors.ListedColormap(buckets)
@@ -293,25 +294,26 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         ax.set_facecolor(
             "0.7"
-        )  # background color light gray for landmass with uncertainty
+        )  # background color light gray for landmass with uncertainties
 
         if show_uncertainties:
             try:
-                uncertainty = (uncertainty - uncertainty.min()) / (
-                    uncertainty.max() - uncertainty.min()
+                uncertainties = (uncertainties - uncertainties.min()) / (
+                    uncertainties.max() - uncertainties.min()
                 )
-                uncertainty = 1 - uncertainty
+                uncertainties = 1 - uncertainties
             except:
-                uncertainty = 1.0
+                uncertainties = 1.0
             # let certainty have no influence on sea color
-            uncertainty = np.where(np.isnan(raster.read()[0]), 1, uncertainty)
+            uncertainties = np.where(np.isnan(raster.read()[0]), 1, uncertainties)
+            uncertainties = uncertainties.astype(np.float64) # matplotlib cannot handle float128
         else:
-            uncertainty = 1.0
+            uncertainties = 1.0
 
         # set color for nan (nodata... sea) values
         # from https://stackoverflow.com/questions/2578752/how-can-i-plot-nan-values-as-a-special-color-with-imshow
         cmap.set_bad(color="blue")
-        rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=uncertainty)
+        rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=uncertainties)
         ax.set_xlabel("Longitude", fontsize=10)
         ax.set_ylabel("Latitude", fontsize=10)
         ax.tick_params(axis="both", which="major", labelsize=10)

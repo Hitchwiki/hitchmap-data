@@ -5,6 +5,7 @@ from sklearn.base import BaseEstimator
 from sklearn.compose import TransformedTargetRegressor
 from numeric_transformers import Transformer
 
+
 class TransformedTargetRegressorWithUncertainty(TransformedTargetRegressor):
     """
     Thin wrapper over sklearn.compose.TransformedTargetRegressor.
@@ -17,31 +18,36 @@ class TransformedTargetRegressorWithUncertainty(TransformedTargetRegressor):
         super().__init__()
         self.numeric_transformer = numeric_transformer
         self.regressor = regressor
-        
+
     def fit(self, X, y, **fit_params):
         """
         Fit the regressor and the transformer.
         """
         # setting parameters required for fitting
-        if self.numeric_transformer.inverse_mean_func is None or self.numeric_transformer.inverse_std_func is None:
+        if (
+            self.numeric_transformer.inverse_mean_func is None
+            or self.numeric_transformer.inverse_std_func is None
+        ):
             raise ValueError(
                 "To support predictions with a standard deviation a transformer"
-                "must have inverse_mean_func and inverse_std_func functions.")
-        
-        self.func=self.numeric_transformer.func
-        self.inverse_func=self.numeric_transformer.inverse_func
+                "must have inverse_mean_func and inverse_std_func functions."
+            )
+
+        self.func = self.numeric_transformer.func
+        self.inverse_func = self.numeric_transformer.inverse_func
 
         return super().fit(X, y, **fit_params)
-
 
     def predict(self, X, return_std=False, **predict_params):
         """
         Predict using the underlying regressor and transform the result back.
         """
+        # always return the standard deviation as it is required for the proper inverse_transform
+        model: BaseEstimator = self.regressor_
+        tran_pred, tran_std = model.predict(X, return_std=True)
+        pred = self.numeric_transformer.inverse_mean_func(tran_pred, tran_std)
+        std = self.numeric_transformer.inverse_std_func(tran_pred, tran_std)
         if return_std:
-            model: BaseEstimator = self.regressor_
-            tran_pred, tran_std = model.predict(X, return_std=return_std)
-            pred = self.numeric_transformer.inverse_mean_func(tran_pred, tran_std)
-            std = self.numeric_transformer.inverse_std_func(tran_pred, tran_std)
             return pred, std
-        return super().predict(X, **predict_params)
+        else:
+            return pred
