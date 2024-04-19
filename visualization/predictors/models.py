@@ -320,6 +320,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
         cbar.ax.tick_params(labelsize=10)
+        cbar.ax.set_ylabel('Waiting time in minutes', rotation=90)
         if self.method == "ITERATIVE":
             file_name = f"maps/map_{region}_iter_{ITERATIONS}.png"
         elif self.method == "DYNAMIC":
