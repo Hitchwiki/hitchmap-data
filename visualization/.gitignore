@@ -466,7 +466,6 @@ junit/
 
 # Custom
 *.tif
-*.png
 *.txt
 *.out
 cache/
