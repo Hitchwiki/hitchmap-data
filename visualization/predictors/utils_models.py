@@ -11,7 +11,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 
 from sklearn.metrics import mean_absolute_error, mean_squared_error, root_mean_squared_error
 
-from numeric_transformers import LogTransformer
+from numeric_transformers import LogTransformer, MyLogTransformer
 from transformed_target_regressor_with_uncertainty import (
     TransformedTargetRegressorWithUncertainty,
 )
@@ -96,7 +96,7 @@ def get_gpr(initial_kernel):
     )
 
     target_transform_gpr = TransformedTargetRegressorWithUncertainty(
-        regressor=gpr, numeric_transformer=LogTransformer()
+        regressor=gpr, numeric_transformer=MyLogTransformer()
     )
 
     return target_transform_gpr

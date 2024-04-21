@@ -297,6 +297,8 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         )  # background color light gray for landmass with uncertainties
 
         if show_uncertainties:
+            # let certainty have no influence on sea color
+            uncertainties = np.where(np.isnan(raster.read()[0]), uncertainties.min(), uncertainties)
             try:
                 uncertainties = (uncertainties - uncertainties.min()) / (
                     uncertainties.max() - uncertainties.min()
@@ -307,6 +309,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             # let certainty have no influence on sea color
             uncertainties = np.where(np.isnan(raster.read()[0]), 1, uncertainties)
             uncertainties = uncertainties.astype(np.float64) # matplotlib cannot handle float128
+            self.uncertainties = uncertainties
         else:
             uncertainties = 1.0
 

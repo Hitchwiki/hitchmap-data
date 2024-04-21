@@ -21,8 +21,7 @@ def inverse_log_mean(log_mean, log_std):
     by incorporating the variance.
     """
     log_var = log_std**2
-    # np.exp(log_mean + log_var / 2) - 1e-7 would be the correct back-transformation but yields too high values for our use case
-    return np.exp(log_mean) - 1e-7
+    return np.exp(log_mean + log_var / 2) - 1e-7
 
 
 def inverse_log_std(log_mean, log_std):
@@ -94,7 +93,7 @@ class Transformer(TransformerMixin, BaseEstimator):
 class LogTransformer(Transformer):
     def __init__(
         self,
-        description="log(x + 1e-7)",
+        description="log(x + 1)",
         func=log_plus_tiny,
         inverse_func=exp_minus_tiny,
         allows_negatives=False,
@@ -108,6 +107,30 @@ class LogTransformer(Transformer):
         self.inverse_mean_func = inverse_mean_func
         self.inverse_std_func = inverse_std_func
 
+def f(x): return np.log(x + 1)
+def g(x): return np.exp(x) - 1
+def h(x, y): return np.exp(x) - 1
+def i(x, y): return y
+# the correct stdvs (uncertainties) are not important - relative values matter more
+# the correct back-transformation but yields too high values for our use case
+# np.log(x + 1e-7) should be used but yielded worse results in our use case
+# to be investigated
+class MyLogTransformer(Transformer):
+    def __init__(
+        self,
+        description="log(x + 1e-7)",
+        func=f,
+        inverse_func=g,
+        allows_negatives=False,
+        inverse_mean_func=h,
+        inverse_std_func=i,
+    ):
+        self.description = description
+        self.func = func
+        self.inverse_func = inverse_func
+        self.allows_negatives = allows_negatives
+        self.inverse_mean_func = inverse_mean_func
+        self.inverse_std_func = inverse_std_func
 
 class SqrtTransformer(Transformer):
     def __init__(self):

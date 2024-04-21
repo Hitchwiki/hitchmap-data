@@ -38,14 +38,16 @@ class TransformedTargetRegressorWithUncertainty(TransformedTargetRegressor):
 
         return super().fit(X, y, **fit_params)
 
-    def predict(self, X, return_std=False, **predict_params):
+    def predict(self, X, return_std=False, transform_predictions=True, **predict_params):
         """
         Predict using the underlying regressor and transform the result back.
         """
         # always return the standard deviation as it is required for the proper inverse_transform
         model: BaseEstimator = self.regressor_
         tran_pred, tran_std = model.predict(X, return_std=True)
-        pred = self.numeric_transformer.inverse_mean_func(tran_pred, tran_std)
+        if transform_predictions:
+            tran_pred = self.numeric_transformer.inverse_mean_func(tran_pred, tran_std)
+        pred = tran_pred
         std = self.numeric_transformer.inverse_std_func(tran_pred, tran_std)
         if return_std:
             return pred, std

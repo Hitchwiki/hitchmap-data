@@ -116,9 +116,9 @@ def plot_1d_with_uncertainties(gpr, X, y, start, stop):
     x_test = np.linspace(start=start, stop=stop, num=300)
     x_test = np.array([[xi] for xi in x_test])
 
-    y_pred, std_prediction = gpr.predict(x_test, return_std=True)
+    y_pred, std_prediction = gpr.predict(x_test, return_std=True, transform_predictions=False)
 
-    plt.scatter(X, y, label="Observations")
+    #plt.scatter(X, y, label="Observations")
     plt.plot(x_test, y_pred, label="Mean prediction")
     plt.fill_between(
         x_test.ravel(),
