@@ -146,6 +146,9 @@ def plot_transformed_targets(X, y, start=0.3e6, stop=1.7e6):
     ax1.scatter(X, y, label="Original data")
     ax1.plot(x_test, np.ones(x_test.shape[0]) * np.mean(y), label="Mean", color="red")
     ax1.legend()
+    ax1.set_xlabel("Longitude in m at 51° latitude")
+    ax1.set_ylabel("Waiting time")
+
     ax2.scatter(X, y_transformed, label="Transformed data", color="orange")
     ax2.plot(
         x_test,
@@ -154,9 +157,9 @@ def plot_transformed_targets(X, y, start=0.3e6, stop=1.7e6):
         color="red",
     )
     ax2.legend()
+    ax2.set_xlabel("Longitude in m at 51° latitude")
+    ax2.set_ylabel("Waiting time")
 
-    plt.xlabel("Longitude in m at 51° latitude")
-    plt.ylabel("Waiting time")
     plt.show()
 
 
@@ -193,4 +196,31 @@ def plot_lmm_depending_on_lengthscale_noise(gpr):
     plt.xlabel("Length-scale")
     plt.ylabel("Noise-level")
     plt.title("Log-marginal-likelihood")
+    plt.show()
+
+def plot_rbf_covariance():
+    def rbf(x, l, s=1.0):
+        return s * np.exp(-0.5 * (x**2 / l**2))
+
+    X_distance = np.logspace(0, 6, 100)
+
+    fig, (ax1, ax2) = plt.subplots(2, figsize=(10, 5))
+
+    lengthscale = 1.68e5
+    ax1.plot(X_distance, rbf(X_distance, lengthscale, 1.0))
+    ax1.set_xscale("log")
+    ax1.axvline(x=lengthscale, color='red', label="Lengthscale")
+    ax1.legend()
+    ax1.set_xlabel("Distance")
+    ax1.set_ylabel("RBF covariance")
+    
+
+    lengthscale = 3.3e3
+    ax2.plot(X_distance, rbf(X_distance, lengthscale, 1.0))
+    ax2.set_xscale("log")
+    ax2.axvline(x=lengthscale, color='red', label="Lengthscale")
+    ax2.legend()
+    ax2.set_xlabel("Distance")
+    ax2.set_ylabel("RBF covariance")
+
     plt.show()
