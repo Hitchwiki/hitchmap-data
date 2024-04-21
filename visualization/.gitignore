@@ -468,6 +468,7 @@ junit/
 *.tif
 *.txt
 *.out
+*.slurm
 cache/
 map_features/
 models/
