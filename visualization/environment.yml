@@ -27,6 +27,7 @@ dependencies:
     - idna==3.4
     - ipykernel==6.25.2
     - ipython==8.16.0
+    - ipywidgets
     - jedi==0.19.0
     - jsonschema==4.19.1
     - jsonschema-specifications==2023.7.1
