@@ -154,15 +154,17 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         show_roads=False,
         show_points=False,
         show_uncertainties=False,
+        figsize=10,
     ):
-        if not hasattr(self, 'raw_uncertainties'):
+        # setup
+        if not hasattr(self, "raw_uncertainties"):
             uncertainties = 1.0
         else:
             uncertainties = self.raw_uncertainties
-
+        self.map_boundary = self.get_map_boundary()
         map_path = self.get_raster_path()
 
-        fig, ax = plt.subplots(figsize=(10, 10))
+        fig, ax = plt.subplots(figsize=(figsize, figsize))
 
         # get borders of all countries
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_countries.zip
@@ -181,6 +183,17 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         if show_states:
             countries.plot(ax=ax, facecolor="none", edgecolor="black")
 
+        # use a pre-compiles list of important roads
+        # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_roads.zip
+        # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
+        if show_roads:
+            if self.verbose:
+                print("Loading roads...")
+            roads = gpd.read_file("map_features/roads/ne_10m_roads.shp")
+            roads = roads.to_crs(epsg=3857)
+            roads = roads[roads.geometry.within(self.map_to_polygon())]
+            roads.plot(ax=ax, markersize=0.2, linewidth=0.5, color="gray", zorder=2)
+
         # takes a lot of time
         # use a pre-compiled list of important cities
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_populated_places.zip
@@ -190,19 +203,8 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 print("Loading cities...")
             cities = gpd.read_file("map_features/cities/ne_10m_populated_places.shp")
             cities = cities.to_crs(epsg=3857)
-            cities = cities[cities.geometry.within(polygon.geometry[0])]
-            cities.plot(ax=ax, markersize=1, color="black")
-
-        # use a pre-compiles list of important roads
-        # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_roads.zip
-        # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
-        if show_roads:
-            if self.verbose:
-                print("Loading roads...")
-            roads = gpd.read_file("map_features/roads/ne_10m_roads.shp")
-            roads = roads.to_crs(epsg=3857)
-            roads = roads[roads.geometry.within(polygon.geometry[0])]
-            roads.plot(ax=ax, markersize=1, color="black")
+            cities = cities[cities.geometry.within(self.map_to_polygon())]
+            cities.plot(ax=ax, markersize=0.3, color="navy", marker='o', zorder=10)
 
         if show_points:
             all_points.plot(ax=ax, markersize=10, color="red")
@@ -287,18 +289,21 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         # values higher than the upper boundary are colored in the upmost color
         min_map_wait = min(10, min_map_wait)
-        boundaries = [min_map_wait, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        boundaries = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
         # prepare the plot
         norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
 
+        background_color = "0.7"
         ax.set_facecolor(
-            "0.7"
+            background_color
         )  # background color light gray for landmass with uncertainties
 
         if show_uncertainties:
             # let certainty have no influence on sea color
-            uncertainties = np.where(np.isnan(raster.read()[0]), uncertainties.min(), uncertainties)
+            uncertainties = np.where(
+                np.isnan(raster.read()[0]), uncertainties.min(), uncertainties
+            )
             try:
                 uncertainties = (uncertainties - uncertainties.min()) / (
                     uncertainties.max() - uncertainties.min()
@@ -308,7 +313,9 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 uncertainties = 1.0
             # let certainty have no influence on sea color
             uncertainties = np.where(np.isnan(raster.read()[0]), 1, uncertainties)
-            uncertainties = uncertainties.astype(np.float64) # matplotlib cannot handle float128
+            uncertainties = uncertainties.astype(
+                np.float64
+            )  # matplotlib cannot handle float128
             self.uncertainties = uncertainties
         else:
             uncertainties = 1.0
@@ -317,13 +324,34 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # from https://stackoverflow.com/questions/2578752/how-can-i-plot-nan-values-as-a-special-color-with-imshow
         cmap.set_bad(color="blue")
         rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=uncertainties)
-        ax.set_xlabel("Longitude", fontsize=10)
-        ax.set_ylabel("Latitude", fontsize=10)
-        ax.tick_params(axis="both", which="major", labelsize=10)
+        ax.set_xlabel("Longitude", fontsize=figsize)
+        ax.set_ylabel("Latitude", fontsize=figsize)
+        ax.tick_params(axis="both", which="major", labelsize=figsize)
 
-        cbar = fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
-        cbar.ax.tick_params(labelsize=10)
-        cbar.ax.set_ylabel('Waiting time in minutes', rotation=90)
+        if show_uncertainties:
+            norm_uncertainties = plt.Normalize(0, 1)
+            cmap_uncertainties = colors.LinearSegmentedColormap.from_list(
+                "", ["#00c800", background_color]
+            )
+
+            cbar_uncertainty = fig.colorbar(
+                cm.ScalarMappable(norm=norm_uncertainties, cmap=cmap_uncertainties),
+                ax=ax,
+                shrink=0.3,
+                pad=0.0,
+            )
+            cbar_uncertainty.ax.tick_params(labelsize=figsize)
+            cbar_uncertainty.ax.set_ylabel(
+                "Uncertainty in waiting time estimation", rotation=90, fontsize=figsize
+            )
+
+        cbar = fig.colorbar(
+            cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, shrink=0.3, pad=0.03
+        )
+        cbar.ax.set_yticks(boundaries)
+        cbar.ax.tick_params(labelsize=figsize)
+        cbar.ax.set_ylabel("Waiting time in minutes", rotation=90, fontsize=figsize)
+
         if self.method == "ITERATIVE":
             file_name = f"maps/map_{region}_iter_{ITERATIONS}.png"
         elif self.method == "DYNAMIC":

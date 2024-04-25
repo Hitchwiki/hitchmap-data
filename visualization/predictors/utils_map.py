@@ -7,6 +7,7 @@ from tqdm import tqdm
 import rasterio.mask
 from shapely.geometry import Polygon
 from models import *
+from IPython.display import display, Image
 from tqdm.auto import tqdm
 tqdm.pandas()
 
@@ -139,3 +140,32 @@ def map_from_model(
     if return_raster:
         return raster_maker
 
+
+def show_map(path='maps/map.png'):
+    display(Image(filename=path))
+
+
+def generate_highres_map():
+    res = 10
+
+    m = MapBasedModel(
+        method="TransformedTargetRegressorWithUncertainty",
+        region='world',
+        resolution=res,
+        verbose=True,
+    )
+
+    m.raw_uncertainties = load_numpy_map(
+        region="world", method="TransformedTargetRegressorWithUncertainty", kind_of_map="uncertainty", resolution=res
+    )
+
+    m.build_map(
+        points=None,
+        all_points=None,
+        show_states=True,
+        show_cities=True,
+        show_roads=True,
+        show_points=False,
+        show_uncertainties=True,
+        figsize=250
+    )
