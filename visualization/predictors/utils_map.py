@@ -169,3 +169,7 @@ def generate_highres_map():
         show_uncertainties=True,
         figsize=250
     )
+
+
+def map(region='world'):
+    show_map(path=f'final_maps/{region}.png'):

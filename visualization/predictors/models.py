@@ -152,6 +152,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         show_points=False,
         show_uncertainties=False,
         discrete_uncertainties=False,
+        final=False,
         figsize=10,
     ):
         # setup
@@ -357,7 +358,10 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         elif self.method == "DYNAMIC":
             file_name = f"maps/map_{region}_{K}.png"
         else:
-            file_name = f"maps/map_{self.method}_{self.region}_{self.resolution}.png"
+            if final:
+                file_name = f"final_maps/{self.region}.png"
+            else:
+                file_name = f"maps/{self.method}_{self.region}_{self.resolution}.png"
         plt.show()
         plt.savefig(file_name, bbox_inches="tight")
 

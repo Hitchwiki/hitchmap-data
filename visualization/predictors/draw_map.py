@@ -1,3 +1,4 @@
+# this is estimated to take about several hours to run
 from utils_imports import *
 
 with open("models/best_gp.pkl", "rb") as file:
