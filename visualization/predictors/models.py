@@ -33,17 +33,14 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             "germany": [3.0, 48.0, 16.0, 55.0],
             "spain": [-8.0, 36.0, 3.0, 43.0],
             "spain_france": [-8.0, 36.0, 6.0, 50.0],
-            "europe": [-12.0, 35.0, 45.0, 71.0],
+            "europe": [-25.0, 34.0, 46.0, 72.0],
             "world": [-180.0, -56.0, 180.0, 80.0],
-            "small": [12.0, 52.0, 15.0, 54.0],
-            "africa": [-20.0, -35.0, 60.0, 40.0],
-            "asia": [40.0, 0.0, 180.0, 85.0],
-            "north_america": [-180.0, 0.0, -20.0, 85.0],
-            "south_america": [-90.0, -60.0, -30.0, 15.0],
-            "australia": [100.0, -50.0, 180.0, 0.0],
-            "middle_africa": [-10.0, -35.0, 60.0, 20.0],
+            "africa": [-19.0, -35.0, 52.0, 38.0],
+            "asia": [34.0, 5.0, -169.0, 78.0],
+            "north_america": [-170.0, 15.0, -50.0, 75.0],
+            "south_america": [-83.0, -56.0, -33.0, 15.0],
+            "australia": [95.0, -48.0, 180.0, 8.0],
             "artificial": [8.0, -1.0, 30.0, 1.0],
-            "greenland": [-80.0, 60.0, -10.0, 85.0],
         }
 
         return maps[self.region]
@@ -154,6 +151,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         show_roads=False,
         show_points=False,
         show_uncertainties=False,
+        discrete_uncertainties=False,
         figsize=10,
     ):
         # setup
@@ -309,6 +307,8 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                     uncertainties.max() - uncertainties.min()
                 )
                 uncertainties = 1 - uncertainties
+                if discrete_uncertainties:
+                    uncertainties = np.round(uncertainties)
             except:
                 uncertainties = 1.0
             # let certainty have no influence on sea color
