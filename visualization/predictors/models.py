@@ -33,9 +33,11 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             "germany": [3.0, 48.0, 16.0, 55.0],
             "spain": [-8.0, 36.0, 3.0, 43.0],
             "spain_france": [-8.0, 36.0, 6.0, 50.0],
+            "turkey": [26.0, 36.0, 45.0, 42.0],
             "europe": [-25.0, 34.0, 46.0, 72.0],
             "world": [-180.0, -56.0, 180.0, 80.0],
             "africa": [-19.0, -35.0, 52.0, 38.0],
+            "nigeria": [2.0, 4.0, 15.0, 14.0],
             "asia": [34.0, 5.0, -169.0, 78.0],
             "north_america": [-170.0, 15.0, -50.0, 75.0],
             "south_america": [-83.0, -56.0, -33.0, 15.0],
@@ -131,9 +133,13 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         xx = xx.tolist()
         yy = yy.tolist()
 
-        degree_width = int(self.map_boundary[2] - self.map_boundary[0])
         degree_height = int(self.map_boundary[3] - self.map_boundary[1])
-        degree_height = int(self.map_boundary[3] - self.map_boundary[1])
+        # handling special case when map spans over the 180 degree meridian
+        degree_width = (
+            int(self.map_boundary[2] - self.map_boundary[0])
+            if not (self.map_boundary[2] < 0 and self.map_boundary[0] > 0)
+            else int(360 - self.map_boundary[0] + self.map_boundary[2])
+        )
         pixel_width = degree_width * self.resolution
         pixel_height = degree_height * self.resolution
 
@@ -150,6 +156,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         show_cities=False,
         show_roads=False,
         show_points=False,
+        show_axis=False,
         show_uncertainties=False,
         discrete_uncertainties=False,
         final=False,
@@ -203,7 +210,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             cities = gpd.read_file("map_features/cities/ne_10m_populated_places.shp")
             cities = cities.to_crs(epsg=3857)
             cities = cities[cities.geometry.within(self.map_to_polygon())]
-            cities.plot(ax=ax, markersize=0.3, color="navy", marker='o', zorder=10)
+            cities.plot(ax=ax, markersize=0.3, color="navy", marker="o", zorder=10)
 
         if show_points:
             all_points.plot(ax=ax, markersize=10, color="red")
@@ -265,35 +272,15 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         max_wait = 675
         if self.verbose:
             print("max waiting time:", max_wait)
-        num_scale_colors = len(buckets) - 2  # because of upper and lower bucket
-        # build log scale starting at 0 and ending at max wait
-        base = (max_map_wait - min_map_wait + 1) ** (1 / num_scale_colors)
-
-        def log_scale(x):
-            return base**x - 1
 
         # define the heatmap color scale
-
-        # how to prevent numerical instabilities resulting in some areas having a checkerboard pattern
-        # round pixel values to ints
-        # set the boundaries of the buckets to not be ints
-        # should happen automatically through the log scale
-        # -0.1 should be 0.0 actually
-        # boundary of last bucket does not matter - values outside of the range are colored in the last bucket
-        boundaries = (
-            [-1, min_map_wait - 0.1]
-            + [min_map_wait + log_scale(i) for i in range(1, num_scale_colors + 1)]
-            + [max_wait + 1]
-        )
-
         # values higher than the upper boundary are colored in the upmost color
-        min_map_wait = min(10, min_map_wait)
         boundaries = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
         # prepare the plot
         norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
 
-        background_color = "0.7"
+        background_color = "0.5"
         ax.set_facecolor(
             background_color
         )  # background color light gray for landmass with uncertainties
@@ -303,14 +290,15 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             uncertainties = np.where(
                 np.isnan(raster.read()[0]), uncertainties.min(), uncertainties
             )
-            try:
+            if (uncertainties.max() - uncertainties.min()) != 0:
                 uncertainties = (uncertainties - uncertainties.min()) / (
                     uncertainties.max() - uncertainties.min()
                 )
                 uncertainties = 1 - uncertainties
                 if discrete_uncertainties:
-                    uncertainties = np.round(uncertainties)
-            except:
+                    # threshold for uncertainty decided by experiment
+                    uncertainties = np.where(uncertainties < 0.25, 0.0, 1.0)
+            else:
                 uncertainties = 1.0
             # let certainty have no influence on sea color
             uncertainties = np.where(np.isnan(raster.read()[0]), 1, uncertainties)
@@ -325,11 +313,14 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # from https://stackoverflow.com/questions/2578752/how-can-i-plot-nan-values-as-a-special-color-with-imshow
         cmap.set_bad(color="blue")
         rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=uncertainties)
-        ax.set_xlabel("Longitude", fontsize=figsize)
-        ax.set_ylabel("Latitude", fontsize=figsize)
-        ax.tick_params(axis="both", which="major", labelsize=figsize)
+        if show_axis:
+            ax.set_xlabel("Longitude", fontsize=figsize)
+            ax.set_ylabel("Latitude", fontsize=figsize)
+            ax.tick_params(axis="both", which="major", labelsize=figsize)
+        else:
+            ax.axis("off")
 
-        if show_uncertainties:
+        if show_uncertainties and not discrete_uncertainties:
             norm_uncertainties = plt.Normalize(0, 1)
             cmap_uncertainties = colors.LinearSegmentedColormap.from_list(
                 "", ["#00c800", background_color]
@@ -349,9 +340,21 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         cbar = fig.colorbar(
             cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, shrink=0.3, pad=0.03
         )
-        cbar.ax.set_yticks(boundaries)
+        boundary_labels = [
+            "0 min",
+            "10",
+            "20",
+            "30",
+            "40",
+            "50",
+            "60",
+            "70",
+            "80",
+            "90",
+            "> 100",
+        ]
+        cbar.ax.set_yticks(ticks=boundaries, labels=boundary_labels)
         cbar.ax.tick_params(labelsize=figsize)
-        cbar.ax.set_ylabel("Waiting time in minutes", rotation=90, fontsize=figsize)
 
         if self.method == "ITERATIVE":
             file_name = f"maps/map_{region}_iter_{ITERATIONS}.png"

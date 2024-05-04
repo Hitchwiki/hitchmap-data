@@ -9,6 +9,7 @@ from shapely.geometry import Polygon
 from models import *
 from IPython.display import display, Image
 from tqdm.auto import tqdm
+
 tqdm.pandas()
 
 RESOLUTION = 2
@@ -93,6 +94,7 @@ def raster_from_model(
 
     # transposing the grid enables us to iterate over it vertically
     # and single elements become lon-lat pairs that can be fed into the model
+    print("Compute rows of pixels...")
     for vertical_line in tqdm(grid.transpose(), disable=not verbose):
         if show_uncertainties:
             pred, stdv = model.predict(vertical_line, return_std=True)
@@ -126,7 +128,14 @@ def raster_from_model(
 
 
 def map_from_model(
-    model, region, resolution=RESOLUTION, show_uncertainties=False, verbose=False, return_raster=False
+    model,
+    region,
+    resolution=RESOLUTION,
+    show_uncertainties=False,
+    verbose=False,
+    discrete_uncertainties=False,
+    return_raster=False,
+    final=False,
 ):
     raster_maker = raster_from_model(
         model,
@@ -135,13 +144,17 @@ def map_from_model(
         show_uncertainties=show_uncertainties,
         verbose=verbose,
     )
-    raster_maker.build_map(show_uncertainties=show_uncertainties)
-    
+    raster_maker.build_map(
+        show_uncertainties=show_uncertainties,
+        discrete_uncertainties=discrete_uncertainties,
+        final=final,
+    )
+
     if return_raster:
         return raster_maker
 
 
-def show_map(path='maps/map.png'):
+def show_map(path="maps/map.png"):
     display(Image(filename=path))
 
 
@@ -150,13 +163,16 @@ def generate_highres_map():
 
     m = MapBasedModel(
         method="TransformedTargetRegressorWithUncertainty",
-        region='world',
+        region="world",
         resolution=res,
         verbose=True,
     )
 
     m.raw_uncertainties = load_numpy_map(
-        region="world", method="TransformedTargetRegressorWithUncertainty", kind_of_map="uncertainty", resolution=res
+        region="world",
+        method="TransformedTargetRegressorWithUncertainty",
+        kind_of_map="uncertainty",
+        resolution=res,
     )
 
     m.build_map(
@@ -167,9 +183,9 @@ def generate_highres_map():
         show_roads=True,
         show_points=False,
         show_uncertainties=True,
-        figsize=250
+        figsize=250,
     )
 
 
-def map(region='world'):
-    show_map(path=f'final_maps/{region}.png'):
+def map(region="world"):
+    show_map(path=f"final_maps/{region}.png")
