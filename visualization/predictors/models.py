@@ -280,7 +280,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # prepare the plot
         norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
 
-        background_color = "0.5"
+        background_color = "0.7"
         ax.set_facecolor(
             background_color
         )  # background color light gray for landmass with uncertainties
@@ -318,7 +318,9 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             ax.set_ylabel("Latitude", fontsize=figsize)
             ax.tick_params(axis="both", which="major", labelsize=figsize)
         else:
-            ax.axis("off")
+            # do not show axis labels
+            ax.set_xticks([])
+            ax.set_yticks([])
 
         if show_uncertainties and not discrete_uncertainties:
             norm_uncertainties = plt.Normalize(0, 1)
