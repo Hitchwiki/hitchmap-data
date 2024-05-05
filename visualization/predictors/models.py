@@ -20,6 +20,9 @@ tqdm.pandas()
 
 RESOLUTION = 2
 
+# 180 degree meridian in epsg 3857
+MERIDIAN = 20037508
+
 
 class MapBasedModel(BaseEstimator, RegressorMixin):
     def __init__(self, method, region="world", resolution=RESOLUTION, verbose=False):
@@ -29,6 +32,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         self.verbose = verbose
 
     def get_map_boundary(self):
+        # [lon_bottom_left, lat_bottom_left, lon_top_right, lat_top_right]
         maps = {
             "germany": [3.0, 48.0, 16.0, 55.0],
             "spain": [-8.0, 36.0, 3.0, 43.0],
@@ -70,6 +74,13 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         polygon_vertices_x, polygon_vertices_y, pixel_width, pixel_height = (
             self.define_raster()
         )
+
+        # handling special case when map spans over the 180 degree meridian
+        if (polygon_vertices_x[0] > 0 and polygon_vertices_x[2] < 0):
+            polygon_vertices_x[2] = 2 * MERIDIAN + polygon_vertices_x[2]
+            polygon_vertices_x[3] = 2 * MERIDIAN + polygon_vertices_x[3]
+
+
         # https://gis.stackexchange.com/questions/425903/getting-rasterio-transform-affine-from-lat-and-long-array
 
         # lower/upper - left/right
@@ -118,7 +129,14 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         self.map_boundary = self.get_map_boundary()
 
         xx, yy, pixel_width, pixel_height = self.define_raster()
-        x = np.linspace(xx[0], xx[2], pixel_width)
+        # handling special case when map spans over the 180 degree meridian
+        if not (xx[0] > 0 and xx[2] < 0):
+            x = np.linspace(xx[0], xx[2], pixel_width)
+        else:
+            ratio = (MERIDIAN - xx[0]) / ((MERIDIAN - xx[0]) + (xx[2] + MERIDIAN))
+            x = np.linspace(xx[0], MERIDIAN, int(pixel_width * ratio))
+            x = np.append(x, np.linspace(-MERIDIAN+1, xx[2], int(pixel_width * (1 - ratio))))
+
         # mind starting with upper value of y axis here
         y = np.linspace(yy[2], yy[0], pixel_height)
         self.X, self.Y = np.meshgrid(x, y)
@@ -312,6 +330,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # set color for nan (nodata... sea) values
         # from https://stackoverflow.com/questions/2578752/how-can-i-plot-nan-values-as-a-special-color-with-imshow
         cmap.set_bad(color="blue")
+        # TODO: not able to plot across 180 meridian
         rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=uncertainties)
         if show_axis:
             ax.set_xlabel("Longitude", fontsize=figsize)

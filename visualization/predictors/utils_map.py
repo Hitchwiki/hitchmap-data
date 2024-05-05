@@ -148,6 +148,8 @@ def map_from_model(
         show_uncertainties=show_uncertainties,
         discrete_uncertainties=discrete_uncertainties,
         final=final,
+        show_cities=True,
+        show_roads=True,
     )
 
     if return_raster:
