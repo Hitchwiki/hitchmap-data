@@ -160,32 +160,41 @@ def show_map(path="maps/map.png"):
     display(Image(filename=path))
 
 
-def generate_highres_map():
+# draw a map from pre-computed raster
+def generate_highres_map(
+    region,
+    resolution=RESOLUTION,
+    show_uncertainties=False,
+    verbose=False,
+    discrete_uncertainties=False,
+    return_raster=False,
+    final=False,
+    figsize=10,
+):
     res = 10
 
     m = MapBasedModel(
         method="TransformedTargetRegressorWithUncertainty",
-        region="world",
+        region=region,
         resolution=res,
-        verbose=True,
     )
 
-    m.raw_uncertainties = load_numpy_map(
-        region="world",
-        method="TransformedTargetRegressorWithUncertainty",
-        kind_of_map="uncertainty",
-        resolution=res,
-    )
+    if show_uncertainties:
+        m.raw_uncertainties = load_numpy_map(
+            region=region,
+            method="TransformedTargetRegressorWithUncertainty",
+            kind_of_map="uncertainty",
+            resolution=res,
+        )
 
     m.build_map(
-        points=None,
-        all_points=None,
+        final=final,
         show_states=True,
         show_cities=True,
         show_roads=True,
-        show_points=False,
-        show_uncertainties=True,
-        figsize=250,
+        show_uncertainties=show_uncertainties,
+        discrete_uncertainties=discrete_uncertainties,
+        figsize=figsize
     )
 
 

@@ -42,7 +42,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             "world": [-180.0, -56.0, 180.0, 80.0],
             "africa": [-19.0, -35.0, 52.0, 38.0],
             "nigeria": [2.0, 4.0, 15.0, 14.0],
-            "asia": [34.0, 5.0, -169.0, 78.0],
+            "asia": [34.0, 5.0, 180.0, 78.0], # TODO right lon value should be -169.0
             "north_america": [-170.0, 15.0, -50.0, 75.0],
             "south_america": [-83.0, -56.0, -33.0, 15.0],
             "australia": [95.0, -48.0, 180.0, 8.0],
@@ -205,7 +205,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # countries = countries[countries.geometry.within(polygon.geometry[0])]
         country_shapes = countries.geometry
         if show_states:
-            countries.plot(ax=ax, facecolor="none", edgecolor="black")
+            countries.plot(ax=ax, linewidth=0.5 * (0.1 * figsize), facecolor="none", edgecolor="black")
 
         # use a pre-compiles list of important roads
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_roads.zip
@@ -216,7 +216,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             roads = gpd.read_file("map_features/roads/ne_10m_roads.shp")
             roads = roads.to_crs(epsg=3857)
             roads = roads[roads.geometry.within(self.map_to_polygon())]
-            roads.plot(ax=ax, markersize=0.2, linewidth=0.5, color="gray", zorder=2)
+            roads.plot(ax=ax, markersize=0.2 * (0.1 * figsize), linewidth=0.5 * (0.1 * figsize), color="gray", zorder=2)
 
         # takes a lot of time
         # use a pre-compiled list of important cities
@@ -228,7 +228,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             cities = gpd.read_file("map_features/cities/ne_10m_populated_places.shp")
             cities = cities.to_crs(epsg=3857)
             cities = cities[cities.geometry.within(self.map_to_polygon())]
-            cities.plot(ax=ax, markersize=0.3, color="navy", marker="o", zorder=10)
+            cities.plot(ax=ax, markersize=1.0 * figsize, color="navy", marker="o", zorder=10)
 
         if show_points:
             all_points.plot(ax=ax, markersize=10, color="red")
@@ -358,8 +358,10 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 "Uncertainty in waiting time estimation", rotation=90, fontsize=figsize
             )
 
+        cax = fig.add_axes([ax.get_position().x1+0.01,ax.get_position().y0,0.02,ax.get_position().height])
+
         cbar = fig.colorbar(
-            cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, shrink=0.3, pad=0.03
+            cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax
         )
         boundary_labels = [
             "0 min",
@@ -386,8 +388,9 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 file_name = f"final_maps/{self.region}.png"
             else:
                 file_name = f"maps/{self.method}_{self.region}_{self.resolution}.png"
-        plt.show()
         plt.savefig(file_name, bbox_inches="tight")
+        plt.show()
+        
 
 
 class Average(BaseEstimator, RegressorMixin):
