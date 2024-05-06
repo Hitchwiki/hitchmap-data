@@ -2,9 +2,9 @@
 
 `final_maps`/ ... high resolution maps
 
-`maps` ... more maps
+`maps`/ ... more maps
 
-`intermediate ... maps in raw format`
+`intermediate/ ... maps in raw format`
 
 `models/` ... pickled models to draw the maps
 
@@ -12,6 +12,7 @@
 
 `summary_maps.ipynb` ... short writeup for the community
 
+`draw_map.py/draw_maps.ipynb` ... creating the fiinal maps that are shown in `summary_maps.ipynb`
 
 ## We wrote about our work
 

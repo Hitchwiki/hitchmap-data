@@ -1,14 +1,15 @@
-import rasterio
-import rasterio.plot
-from matplotlib import pyplot as plt
 import geopandas as gpd
 import numpy as np
-from tqdm import tqdm
+import rasterio
 import rasterio.mask
+import rasterio.plot
+from IPython.display import Image, display
+from matplotlib import pyplot as plt
 from shapely.geometry import Polygon
-from models import *
-from IPython.display import display, Image
+from tqdm import tqdm
 from tqdm.auto import tqdm
+
+from models import *
 
 tqdm.pandas()
 
@@ -170,6 +171,7 @@ def generate_highres_map(
     return_raster=False,
     final=False,
     figsize=10,
+    show=True,
 ):
     res = 10
 
@@ -190,8 +192,8 @@ def generate_highres_map(
     m.build_map(
         final=final,
         show_states=True,
-        show_cities=True,
-        show_roads=True,
+        show_cities=show,
+        show_roads=show,
         show_uncertainties=show_uncertainties,
         discrete_uncertainties=discrete_uncertainties,
         figsize=figsize

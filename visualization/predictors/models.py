@@ -1,18 +1,18 @@
-import rasterio
-import rasterio.plot
-from rasterio.crs import CRS
-from matplotlib import pyplot as plt
 import geopandas as gpd
-import pandas as pd
-import numpy as np
-import rasterio.mask
-from shapely.geometry import Point
 import matplotlib.colors as colors
+import numpy as np
+import pandas as pd
+import rasterio
+import rasterio.mask
+import rasterio.plot
 from matplotlib import cm
-from shapely.geometry import Polygon
-from rasterio.transform import from_gcps
+from matplotlib import pyplot as plt
 from rasterio.control import GroundControlPoint as GCP
-
+from rasterio.crs import CRS
+from rasterio.transform import from_gcps
+from shapely.geometry import Point, Polygon
+from shapely.ops import unary_union
+from shapely.validation import make_valid
 from sklearn.base import BaseEstimator, RegressorMixin
 from tqdm.auto import tqdm
 
@@ -42,7 +42,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             "world": [-180.0, -56.0, 180.0, 80.0],
             "africa": [-19.0, -35.0, 52.0, 38.0],
             "nigeria": [2.0, 4.0, 15.0, 14.0],
-            "asia": [34.0, 5.0, 180.0, 78.0], # TODO right lon value should be -169.0
+            "asia": [34.0, 5.0, 180.0, 78.0],  # TODO right lon value should be -169.0
             "north_america": [-170.0, 15.0, -50.0, 75.0],
             "south_america": [-83.0, -56.0, -33.0, 15.0],
             "australia": [95.0, -48.0, 180.0, 8.0],
@@ -50,6 +50,27 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         }
 
         return maps[self.region]
+    
+    # define where the descriptive text should be placed on the map
+    def get_text_anchor(self):
+        anchors = {
+            "europe": Point(-10, 70),
+            "world": Point(-170, -20),
+            "africa": Point(-14, -10),
+            "asia": Point(130, 28),
+            "north_america": Point(-165, 40),
+            "south_america": Point(-60, -45),
+            "australia": Point(98, -40),
+        }
+
+        # top left corner of text
+        anchor = anchors[self.region]
+        anchor = gpd.GeoDataFrame(index=[0], crs="epsg:4326", geometry=[anchor])
+        anchor = anchor.to_crs(epsg=3857)  # transform to metric epsg
+        anchor = anchor.geometry[0]
+
+        return anchor
+
 
     def map_to_polygon(self):
         # create boundary polygon
@@ -76,10 +97,9 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         )
 
         # handling special case when map spans over the 180 degree meridian
-        if (polygon_vertices_x[0] > 0 and polygon_vertices_x[2] < 0):
+        if polygon_vertices_x[0] > 0 and polygon_vertices_x[2] < 0:
             polygon_vertices_x[2] = 2 * MERIDIAN + polygon_vertices_x[2]
             polygon_vertices_x[3] = 2 * MERIDIAN + polygon_vertices_x[3]
-
 
         # https://gis.stackexchange.com/questions/425903/getting-rasterio-transform-affine-from-lat-and-long-array
 
@@ -135,7 +155,9 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         else:
             ratio = (MERIDIAN - xx[0]) / ((MERIDIAN - xx[0]) + (xx[2] + MERIDIAN))
             x = np.linspace(xx[0], MERIDIAN, int(pixel_width * ratio))
-            x = np.append(x, np.linspace(-MERIDIAN+1, xx[2], int(pixel_width * (1 - ratio))))
+            x = np.append(
+                x, np.linspace(-MERIDIAN + 1, xx[2], int(pixel_width * (1 - ratio)))
+            )
 
         # mind starting with upper value of y axis here
         y = np.linspace(yy[2], yy[0], pixel_height)
@@ -201,11 +223,15 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         )
         countries = countries.to_crs(epsg=3857)
         countries = countries[countries.NAME != "Antarctica"]
-        # TODO so far does not work as in final map the raster is not applied to the whole region
-        # countries = countries[countries.geometry.within(polygon.geometry[0])]
         country_shapes = countries.geometry
+        country_shapes = country_shapes.apply(lambda x: make_valid(x))
         if show_states:
-            countries.plot(ax=ax, linewidth=0.5 * (0.1 * figsize), facecolor="none", edgecolor="black")
+            countries.plot(
+                ax=ax,
+                linewidth=0.5 * (0.1 * figsize),
+                facecolor="none",
+                edgecolor="black",
+            )
 
         # use a pre-compiles list of important roads
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_roads.zip
@@ -216,7 +242,13 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             roads = gpd.read_file("map_features/roads/ne_10m_roads.shp")
             roads = roads.to_crs(epsg=3857)
             roads = roads[roads.geometry.within(self.map_to_polygon())]
-            roads.plot(ax=ax, markersize=0.2 * (0.1 * figsize), linewidth=0.5 * (0.1 * figsize), color="gray", zorder=2)
+            roads.plot(
+                ax=ax,
+                markersize=0.2 * (0.1 * figsize),
+                linewidth=0.5 * (0.1 * figsize),
+                color="gray",
+                zorder=2,
+            )
 
         # takes a lot of time
         # use a pre-compiled list of important cities
@@ -228,7 +260,10 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             cities = gpd.read_file("map_features/cities/ne_10m_populated_places.shp")
             cities = cities.to_crs(epsg=3857)
             cities = cities[cities.geometry.within(self.map_to_polygon())]
-            cities.plot(ax=ax, markersize=1.0 * figsize, color="navy", marker="o", zorder=10)
+            cities = cities[cities.geometry.within(unary_union(country_shapes))]
+            cities.plot(
+                ax=ax, markersize=1.0 * figsize, color="navy", marker="o", zorder=10
+            )
 
         if show_points:
             all_points.plot(ax=ax, markersize=10, color="red")
@@ -282,18 +317,11 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             "#330101",  # drop?
         ]
 
-        cmap = colors.ListedColormap(buckets)
-
-        # max_wait = max(
-        #     all_points.wait.max() + 0.1, 100
-        # )  # to get at least this value as maximum for the colored buckets
-        max_wait = 675
-        if self.verbose:
-            print("max waiting time:", max_wait)
-
         # define the heatmap color scale
         # values higher than the upper boundary are colored in the upmost color
         boundaries = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
+        cmap = colors.ListedColormap(buckets)
 
         # prepare the plot
         norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
@@ -332,6 +360,33 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         cmap.set_bad(color="blue")
         # TODO: not able to plot across 180 meridian
         rasterio.plot.show(raster, ax=ax, cmap=cmap, norm=norm, alpha=uncertainties)
+
+        if final:
+            anchor = self.get_text_anchor()
+            
+            fontsize_factor = 1.0 if self.region == "world" else 1.2
+            region_text = self.region.replace("_", " ").title()
+            if self.region == "world":
+                text = f"""Hitchhiking waiting times
+worldwide"""
+            else:
+                text = f"""Hitchhiking waiting times
+in {region_text}"""
+
+
+
+            ax.text(anchor.x, anchor.y, text, fontsize=figsize * fontsize_factor, fontfamily='serif', verticalalignment='top', fontweight='bold')
+            text = f"""
+
+
+
+- insufficient data regions grayed out -
+based on hitchmap.com and hitchwiki.org
+made by Till Wenke (April 2024)
+wenke.till@gmail.com"""
+
+            ax.text(anchor.x, anchor.y, text, fontsize=figsize * fontsize_factor / 2, fontfamily='serif', verticalalignment='top')
+
         if show_axis:
             ax.set_xlabel("Longitude", fontsize=figsize)
             ax.set_ylabel("Latitude", fontsize=figsize)
@@ -347,21 +402,37 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 "", ["#00c800", background_color]
             )
 
+            # from https://stackoverflow.com/a/56900830
+            cax = fig.add_axes(
+                [
+                    ax.get_position().x1 + 0.01,
+                    ax.get_position().y0 + (ax.get_position().height * 2 / 3) - (ax.get_position().height / 20),
+                    0.02,
+                    (ax.get_position().height / 3),
+                ]
+        )
+
             cbar_uncertainty = fig.colorbar(
                 cm.ScalarMappable(norm=norm_uncertainties, cmap=cmap_uncertainties),
-                ax=ax,
-                shrink=0.3,
-                pad=0.0,
+                cax=cax,
             )
             cbar_uncertainty.ax.tick_params(labelsize=figsize)
             cbar_uncertainty.ax.set_ylabel(
-                "Uncertainty in waiting time estimation", rotation=90, fontsize=figsize
+                "Uncertainty in waiting time estimation", rotation=90, fontsize=figsize * 2 / 3
             )
 
-        cax = fig.add_axes([ax.get_position().x1+0.01,ax.get_position().y0,0.02,ax.get_position().height])
-
+        # from https://stackoverflow.com/a/56900830
+        cax = fig.add_axes(
+            [
+                ax.get_position().x1 + 0.01,
+                ax.get_position().y0 + (ax.get_position().height / 20),
+                0.02,
+                (ax.get_position().height / 3),
+            ]
+        )
         cbar = fig.colorbar(
-            cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax
+            cm.ScalarMappable(norm=norm, cmap=cmap),
+            cax=cax,
         )
         boundary_labels = [
             "0 min",
@@ -390,7 +461,6 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 file_name = f"maps/{self.method}_{self.region}_{self.resolution}.png"
         plt.savefig(file_name, bbox_inches="tight")
         plt.show()
-        
 
 
 class Average(BaseEstimator, RegressorMixin):

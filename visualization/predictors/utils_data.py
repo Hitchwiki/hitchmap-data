@@ -1,17 +1,14 @@
+import geopandas as gpd
+import numpy as np
+import pandas as pd
 import rasterio
 import rasterio.plot
-
-from matplotlib import pyplot as plt
-import geopandas as gpd
-import pandas as pd
-import numpy as np
-from tqdm import tqdm
 import shapely
-
+from matplotlib import pyplot as plt
 from shapely.geometry import Point
+from tqdm import tqdm
 
 from utils_map import *
-
 
 DAY = 24 * 60
 WAIT_MAX = DAY
