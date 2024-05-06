@@ -468,10 +468,10 @@ junit/
 *.tif
 *.txt
 *.out
+*.pkl
 *.slurm
 cache/
 map_features/
-models/
 log/
 
 .vscode
