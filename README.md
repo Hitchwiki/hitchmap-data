@@ -1,4 +1,4 @@
-# All things data science on the spot data from [Hitchmap](https://hitchmap.com).
+# All things data science on the data from [Hitchmap](https://hitchmap.com).
 
 `cleaning/` ... ideas how to tidy up the data
 
