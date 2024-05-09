@@ -14,6 +14,10 @@
 
 `draw_map.py/draw_maps.ipynb` ... creating the fiinal maps that are shown in `summary_maps.ipynb`
 
-## We wrote about our work
+## Framework to build your own models
 
+
+
+## We wrote about our work
+- https://tillwenke.github.io/2024/05/06/hitchhiking-worldwide.html
 - https://tillwenke.github.io/2024/04/21/hitchmap-gp.html
