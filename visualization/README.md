@@ -5,3 +5,7 @@
 `predictors/` ... predictive models and the maps that could be drawn using them
 
 `dump.sqlite` ... dataset dump from https://hitchmap.com/dump.sqlite on 04/11/2024
+
+## Setup
+
+run `conda env create -f environment.yml`
