@@ -4,7 +4,7 @@
 
 `maps`/ ... more maps
 
-`intermediate/ ... maps in raw format`
+`intermediate/` ... maps in raw format
 
 `models/` ... pickled models to draw the maps
 
