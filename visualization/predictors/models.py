@@ -382,6 +382,7 @@ in {region_text}"""
 
 - insufficient data regions grayed out -
 based on hitchmap.com and hitchwiki.org
+https://github.com/Hitchwiki/hitchmap-data
 made by Till Wenke (April 2024)
 wenke.till@gmail.com"""
 
