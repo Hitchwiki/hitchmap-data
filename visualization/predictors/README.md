@@ -12,7 +12,7 @@
 
 `summary_maps.ipynb` ... short writeup for the community
 
-`draw_map.py/draw_maps.ipynb` ... creating the fiinal maps that are shown in `summary_maps.ipynb`
+`draw_map.py/draw_maps.ipynb` ... creating the final maps that are shown in `summary_maps.ipynb`
 
 ## Framework to build your own models
 We encourage you to contribute to this repository by filing PRs once you start building new models and maps.
