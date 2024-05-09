@@ -15,6 +15,11 @@
 `draw_map.py/draw_maps.ipynb` ... creating the fiinal maps that are shown in `summary_maps.ipynb`
 
 ## Framework to build your own models
+We encourage you to contribute to this repository by filing PRs once you start building new models and maps.
+
+How you build models, evaluate them, and draw new maps from them is showcased in `writeup_heatchmap.ipynb`.
+
+One way to build your model is to inherit from `MapBasedModel` in `models.py` - this class is responsible for drawing maps as well.
 
 
 
