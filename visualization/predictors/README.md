@@ -23,7 +23,7 @@
 <ins>`writeup_heatchmap.ipynb` ... long ML heavy writeup</ins>
 
 ## Framework to build your own models
-We encourage you to contribute to this repository by filing PRs once you start building new models and maps.
+We encourage you to contribute to this repository by filing a PR once you start building new models and maps.
 
 How you build models, evaluate them, and draw new maps from them is showcased in `writeup_heatchmap.ipynb`.
 
