@@ -12,6 +12,12 @@
 
 `experiments_*.ipynb` ... our own experiments with the models from `models.py`.
 
+`models.py` ... models we applied so far include
+  - Gaussian process
+  - weighted Gaussians
+  - average of all waiting times (baseline)
+  - average of same-size rectangles
+
 <ins>`summary_maps.ipynb` ... short writeup for the community</ins>
 
 <ins>`writeup_heatchmap.ipynb` ... long ML heavy writeup</ins>
