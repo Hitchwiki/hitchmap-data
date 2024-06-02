@@ -6,7 +6,7 @@
 
 `plots` ... dataset analysis plots.
 
-_`predictors/` ... hitchhiking maps and predictive models that were used to draw them_
+<ins>`predictors/` ... hitchhiking maps and predictive models that were used to draw them</ins>
 
 `dump.sqlite` ... dataset dump from https://hitchmap.com/dump.sqlite on 04/11/2024
 
