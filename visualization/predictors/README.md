@@ -12,7 +12,7 @@
 
 `experiments_*.ipynb` ... our own experiments with the models from `models.py`.
 
-`models.py` ... models we applied and built so far include
+`models.py` ... models we applied and built so far include:
   - Gaussian process
   - weighted Gaussians
   - average of all waiting times (baseline)
