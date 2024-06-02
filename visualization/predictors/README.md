@@ -8,13 +8,13 @@
 
 `models/` ... pickled models to draw the maps
 
-`writeup_heatchmap.ipynb` ... long ML heavy writeup
-
-`summary_maps.ipynb` ... short writeup for the community
-
 `draw_map.py & draw_maps.ipynb` ... creating the final maps that are shown in `summary_maps.ipynb`
 
 `experiments_*.ipynb` ... our own experiments with the models from `models.py`.
+
+<ins>`summary_maps.ipynb` ... short writeup for the community</ins>
+
+<ins>`writeup_heatchmap.ipynb` ... long ML heavy writeup</ins>
 
 ## Framework to build your own models
 We encourage you to contribute to this repository by filing PRs once you start building new models and maps.
