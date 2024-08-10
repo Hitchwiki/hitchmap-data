@@ -15,7 +15,7 @@ from utils_data import get_points
 from utils_map import *
 from utils_models import TargetTransformer
 
-
+f
 def plot_distribution_of_data_points():
     points = get_points("../data/points_train.csv")
 
@@ -161,7 +161,7 @@ def plot_transformed_targets(X, y, start=0.3e6, stop=1.7e6):
     plt.show()
 
 
-def plot_lmm_depending_on_lengthscale_noise(gpr):
+def plot_lml_depending_on_lengthscale_noise(gpr):
     # from https://scikit-learn.org/stable/auto_examples/gaussian_process/plot_gpr_noisy.html#sphx-glr-auto-examples-gaussian-process-plot-gpr-noisy-py
     lengthscale_space = np.logspace(2, 7, num=50)
     noise_level_space = np.logspace(-1, 1, num=50)

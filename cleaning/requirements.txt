@@ -10,3 +10,4 @@ scikit-learn
 scipy
 shapely
 tqdm
+lingua-language-detector
