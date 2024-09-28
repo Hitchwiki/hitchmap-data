@@ -2,4 +2,4 @@
 
 `cleaning/` ... ideas how to tidy up the data
 
-<ins>`visualization/` ... hitchhiking maps - using the data to build models that can predict hitchhiking waiting time and to draw maps</ins>
+`visualization/` ... hitchhiking maps - using the data to build models that can predict hitchhiking waiting time and to draw maps
