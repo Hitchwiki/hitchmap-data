@@ -1,0 +1,387 @@
+body {
+  background : url(./images/paper.png);
+  color      : black;
+  font-family: georgia,serif;
+  margin-left: 5em;
+  max-width  : 1000px;
+}
+
+table {
+  background-color: #f8f8f8;
+  border          : 1px solid;
+  border-collapse : separate;
+  border-spacing  : 2px;
+  font-family     : georgia; /* arial; */
+  font-size       : 0.88em;
+  line-height     : 1.5em;
+  vertical-align  : top;
+}
+
+thead tr th {
+  background-color: #e6e6e6;
+  border          : 1px solid #aaaaaa;
+  padding         : 0.2em 0.4em;
+}
+
+tbody tr td {
+  border : 1px solid #aaaaaa;
+  padding: 0.2em 0.4em;
+}
+
+/* Navigation for per-year tables */
+/* ------------------------------ */
+
+table.lognav {
+  background-color: transparent;
+  border-color    : transparent;
+  font-family     : inherit;
+  width           : 100%;
+}
+
+table.lognav tbody tr td {
+  border-color: transparent;
+}
+
+table.lognav tbody tr td:nth-child(1) {
+  text-align: left;
+  width     : 40px;
+}
+
+table.lognav tbody tr td:nth-child(2) {
+  font-family: inherit;
+  font-size  : 150%;
+  text-align : center;
+}
+
+table.lognav tbody tr td:nth-child(3) {
+  text-align: right;
+  width     : 40px;
+}
+
+.navdesc {
+  font-size  : 150%;
+  font-weight: bold;
+  margin     : 0;
+}
+
+/* Single (th) row summary table */
+/* ----------------------------- */
+
+thead.slog tr th:nth-child(1) {
+  text-align: left;
+}
+
+thead.slog tr th:nth-child(2) {
+  font-weight: 400;
+  text-align : left;
+}
+
+thead.slog tr th:nth-child(3) {
+  font-family: monospace;
+  text-align : right;
+}
+
+/* Per year summary tables */
+/* ----------------------- */
+
+table.log thead tr th:nth-child(1) {
+  text-align: left;
+  width     : 100px;
+}
+
+table.log thead tr th:nth-child(2) {
+  width: 740px;
+}
+
+table.log thead tr th:nth-child(3) {
+  font-size: initial;
+  width: 100px;
+}
+
+table.log tbody tr td {
+  vertical-align: top;
+}
+
+table.log tbody tr td:nth-child(3) {
+  font-family: monospace;
+  font-size  : initial;
+  text-align : right;
+}
+
+/* Per year summary table */
+/* ---------------------- */
+
+table.yearsumm {
+  font-family: inherit;
+  font-size  : inherit;
+}
+
+table.yearsumm tbody tr td:nth-child(1) {
+  width: 150px;
+}
+
+table.yearsumm tbody tr td:nth-child(2) {
+  font-family: monospace;
+  text-align : right;
+  width      : 85px;
+}
+
+/* All trips per year */
+/* ------------------ */
+
+table.yeardata {
+  font-family: inherit;
+  font-size  : inherit;
+}
+
+table.yeardata tbody tr {
+  vertical-align: top;
+}
+
+table.yeardata tbody tr td:nth-child(1) {
+  width: 95px;
+}
+
+/* Summary "pop-up" per trip data */
+/* ------------------------------ */
+
+table.yeardata tbody tr td:nth-child(1) div {
+  background-color: #F5FFFA;
+  color           : #0000FF;
+  font-family     : monospace;
+  font-size       : 90%;
+  line-height     : 1.5em;
+  text-align      : right;
+}
+
+h1.log {
+  font-size: 150%;
+  margin: 0;
+}
+
+h1.slog {
+  font-size: 150%;
+}
+
+div.viard {
+  background-image: linear-gradient(to bottom, #fff 0%, #fff 50%);
+  color           : black;
+  font-family     : monospace;
+  width: 56em     ;
+}
+
+img {
+  border: 1px solid #dddddd;
+  vertical-align: middle;
+}
+
+img.nob {
+  border: none;
+  vertical-align: middle;
+}
+
+img.svg {
+  width: 35px;
+}
+
+span.hide {
+  display: none;
+}
+
+h1.hide {
+  display: none;
+}
+
+.tt {
+  color      : #000000;
+  font-family: monospace;
+  font-style : italic;
+  font-size  : 110%;
+  font-weight: bold;
+}
+
+.pas-tt {
+  color      : #0000ff;
+  font-family: monospace;
+  font-style : italic;
+  font-weight: bold;
+}
+
+.stat-tt {
+  color      : #0000ff;
+  font-family: monospace;
+  font-style : italic;
+  font-size  : 100%;
+  font-weight: bold;
+}
+
+a[data-tt]:link,
+a[data-tt]:visited {
+  color: red;
+  position: relative;
+  text-decoration: none;
+}
+
+a[data-tt]:after {
+  content: attr(data-tt);
+  background-color: #f5fffa;
+  border-radius: 8px;
+  color: #000;
+  font-family: monospace;
+  font-size: 90%;
+  left: -30px;
+  padding: 4px 8px;
+  position: absolute;
+  top: -90px;
+  visibility: hidden;
+}
+
+a[data-tt]:hover:after {
+  visibility: visible;
+  z-index: 100;
+}
+
+figure.main {
+  display: inline;
+  margin: 0px 0px 10px 15px;
+  float: right;
+  border: 1px solid #cccccc;
+  font-family: cursive;
+  text-align: center;
+}
+
+body.main {
+  text-align: justify;
+}
+
+body.blog {
+  text-align: justify;
+}
+
+body.misc {
+  text-align: justify;
+  max-width : 50em;
+}
+
+p.blup {
+  font-size : small;
+  text-align: right;
+  font-style: italic;
+}
+
+.blups {
+  font-size : small;
+  font-style: italic;
+}
+
+.disc {
+  list-style-type: disc
+}
+
+.double {
+  padding-bottom: 1em;
+}
+
+span.pt {
+  background-color: #F5FFFA;
+  color           : green;
+  font-weight     : normal;
+}
+
+span.nh {
+  background-color: #F5FFFA;
+  color           : green;
+  font-weight     : normal;
+}
+
+span.idle {
+  background-color: #F5FFFA;
+  color           : fuchsia;
+  font-weight     : normal;
+}
+
+span.ferry {
+  background-color: #F5FFFA;
+  color           : green;
+  font-weight     : normal;
+}
+
+span.walk {
+  background-color: #F5FFFA;
+  color           : green;
+  font-weight     : normal;
+}
+
+span.cross {
+  background-color: #F5FFFA;
+  color           : red;
+  font-weight     : bold;
+}
+
+a[tt]:link,
+a[tt]:visited {
+  position: relative;
+  text-decoration: none;
+  color: black;
+}
+
+a[tt]:hover {
+  color: blue;
+}
+
+a[tt]:after {
+  content: attr(tt);
+  font-family: "Courier New",monospace;
+  font-size: 90%;
+  position: absolute;
+  color: #000;
+  top: -90px;
+  left: +00px;
+  background-color: #fff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  visibility: hidden;
+  width: 50;
+  max-width: 125;
+  text-align: right;
+}
+
+a[tt]:hover:after {
+  visibility: visible;
+  z-index: 100;
+  background-color: #F5FFFA;
+  color: black;
+}
+
+details > summary {
+  list-style: none;
+}
+
+summary {
+  color: #002bb8;
+}
+
+summary:hover {
+  text-decoration: underline;
+}
+
+.dt2ch {
+  margin-top: 2ch;
+}
+
+.dd0ch {
+  margin-left: 0ch;
+}
+
+.nolink {
+  background: none;
+  color     : #002bb8;
+}
+
+.nolink:hover {
+  text-decoration: underline;
+}
+
+.al {
+  list-style-type: lower-alpha;
+}

@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en" data-lt-installed="true"><script src="description_files/page-script.js" id="bw-fido2-page-script"></script><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+
+    <title>Keeping statistics - one way of doing it</title>
+
+    <link href="description_files/prino.css" rel="stylesheet" type="text/css" media="all">
+    <link href="description_files/style.css" rel="stylesheet" type="text/css" media="all">
+    <link href="https://prino.neocities.org/images/hitch.png" rel="shortcut icon" type="image/png">
+
+    <style>
+      ul li {margin-left: -2.0ch;}
+      ol li {margin-left: -1.0ch;}
+    </style>
+  </head>
+
+<body class="misc" data-new-gr-c-s-check-loaded="8.912.0" data-gr-ext-installed="">
+<h1>Keeping statistics - one way of doing it</h1>
+  <p>So you want to keep track of your rides and, once you’ve managed to get safely back home,
+     do something “useful” with the data you’ve collected? If yes, read on…
+
+  </p><p>This work-in-progress page is based on the notes Prino has used since he started recording his
+     rides on 16&nbsp;June 1980 at 7:47. The notes are pretty simple; you can obviously adapt them to
+     your own requirements.
+
+</p><h3>A possible form to record data</h3>
+  <p></p><figure class="main">
+       <img alt="../images/liftnote.png" src="description_files/liftnote.png" height="166" width="320">
+       <figcaption>Prino’s liftnote</figcaption>
+     </figure>
+     The forms Prino uses to record his data look like this, and, properly spaced, you can put three
+     columns with four rows on a sheet of A4 (210x297mm) paper. Fitting three columns on a US
+     “Letter” size sheet (215.9x279.4mm) of paper might be possible if the column widths are
+     reduced. Prino saves his notes in 17-ring binders.
+
+  <p>Need a <a href="https://translate.google.com/?hl=en&amp;tab=wT#nl/en/Datum%2C%20Time%2C%20KM-stand%2C%20Plaats%2C%20Vertrek%2C%20Aankomst%2C%20Snelheid%2C%20Opmerkingen" target="_blank">translation</a>?
+  <!--
+  <table>
+   <tr><td>Datum       <td>Date</tr>
+   <tr><td>Tijd        <td>Time</tr>
+   <tr><td>KM-stand    <td>Odometer</tr>
+   <tr><td>Plaats      <td>Place</tr>
+   <tr><td>Vertrek     <td>Departure</tr>
+   <tr><td>Aankomst    <td>Arrival</tr>
+   <tr><td>Snelheid    <td>Speed</tr>
+   <tr><td>Opmerkingen <td>Notes</tr>
+  </table>
+  -->
+  </p><p>The key to the detail of the produced statistics is the <b>Opmerkingen</b> section. It’s
+     simply called <b>Opmerkingen</b>, as you are unlikely to add specific comments to all of
+     your rides…
+
+  </p><p>For those of you who don’t want to go to the trouble of creating the forms yourselves? There are
+     ready-made versions available <a href="https://prino.neocities.org/miscellaneous/hitchtech.html#hitchnotes">here</a>, and on that page you can
+     also find some additional “technical” hitchhiking resources.
+
+</p><h4>The fields</h4>
+  <p>What follows is a description of the various fields on the above form. There is one field that
+     might seem to be missing, “Waiting Time,” but it should be obvious that it’s automagically
+     included as the difference between the arrival time of one ride and the departure time of the
+     next ride, and in those cases where something happens in between, the <b>Opmerkingen</b>
+     section comes to the rescue.
+
+</p><h5>Datum (Date)</h5>
+  <p>Pretty obvious.
+
+  </p><p>If you use the <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a>
+     format (YYYY-MM-DD), it’s easy to extend this to rides spanning multiple days by modifying
+     the format to YYYY-MM-DD/DD.
+
+</p><h5>Vertrek (Departure) / Aankomst (Arrival)</h5>
+  <p>Again, pretty obvious.
+
+  </p><p>The three columns contain the Tijd (Time), KM-stand (Odometer) and Plaats (Location) of
+     departure and arrival. In cases where no odometer is available or where it doesn’t work, you
+     can use <a href="https://maps.google.com/" target="_blank">Google Maps</a> to determine distances.
+     Prino has found that it is usually accurate to the nearest kilometre.
+
+  </p><p>The unnamed row below “Aankomst” contains the total time and distance of the ride.
+
+</p><h5>Snelheid (Speed)</h5>
+  <p>The contents of this field depends on individual preferences. Prino puts the real speed in
+     it, i.e. the distance divided by the <strong>actual</strong> driving time, which is the
+     arrival time minus the departure time <strong>minus</strong> any time recorded for stops.
+
+</p><h5>Opmerkingen (Miscellaneous notes)</h5>
+  <p>This is a free-format field that you can use for any purpose you like. Why free format?
+     Easy! It’s unlikely that you would need a specific format for all of your rides, e.g. why
+     include specific headings for rides that cross borders or span more than one day, when the
+     number of such rides is likely to be pretty small compared to “normal” rides.
+
+  </p><p>Here’s a non-exhaustive list of things Prino has been using this field for:
+
+  </p><ul class="disc">
+   <li>The type of driver. (Male, female, truck, van, taxi, etc, you can obviously make it as
+       detailed as you like)
+
+   </li><li>The nationality of the driver, Prino uses the
+       <a href="https://en.wikipedia.org/wiki/List_of_international_license_plate_codes" target="_blank">international license plate code</a>,
+       but only records this information if the driver is not from the country where they pick him up.
+
+   </li><li>Details of stops (reason: meal, rest, toilet, etc) and times. Recording these times
+       allows you to calculate the true driving speed!
+
+   </li><li>Details (i.e. time and odometer reading) at border crossings, which allow you to create
+       per-country totals.
+
+   </li><li>Odometer readings at midnight, which allows you to create per-calendar-day totals.
+
+   </li><li>Special vehicles (or even every type/model of vehicle/car).
+
+   </li><li>On the last ride of a day Prino adds a “Total distance/time/speed” entry.
+  </li></ul>
+
+  <p>There are probably lots of other things <strong>you</strong> might want to put into it.
+
+  </p><p>If the <b>Opmerkingen</b> section is too small (and Prino has had rides with a dozen stops and
+     crossing five borders in two days), he usually continues on the back of the form.
+     <!-- - see the two samples somewhere on this page. -->
+
+</p><h3>Storing the data on a PC or other device</h3>
+  <p>This is likely to be the most important decision you will have to make. There are (at least)
+     three options:
+
+  </p><ol>
+   <li>a (structured) text file, to be processed by a user-written program
+   </li><li>a spreadsheet
+   </li><li>a database
+  </li></ol>
+
+  <p>Each of these options has its pros and cons. Here are some details:
+
+</p><h4>Text file</h4>
+  <p>Prino uses the text file option with a few programs he has written himself. The advantage of
+     using this format is the fact that it allows him total flexibility, but it has a pretty big
+     disadvantage in that you have to think very carefully about the format you plan to use: it
+     should be able to cater for future changes without you having to completely rewrite your
+     programs. The format used by Prino, described later, was developed over about 28 years, and
+     despite the fact that he has moved to a new format after a few years, the result of not
+     giving the format enough thought initially, is rather cryptic due to more additions since
+     adopting it!
+
+</p><h4>A spreadsheet</h4>
+  <p>If you’re well versed in spreadsheets (or if not, try <a href="https://www.libreoffice.org/" target="_blank">LibreOffice</a>,
+     it’s free), you might want to consider using one to process your data. It will have the big
+     advantage that you can insert or delete columns in your source data, and the program will
+     automagically update the references in all other cells and/or sheets. Combined with the
+     many conditional functions, you should (probably) be able to produce any statistics
+     <strong>you</strong> like, although some of the more esoteric ones Prino’s program creates
+     might be pretty hard (or even impossible, but never say never) to replicate.
+
+  </p><p>If you want to use Prino’s input file format as described below, but would also like to use
+     a spreadsheet to generate tables that <span class="pas">lift</span> doesn’t generate, you can
+     use <span class="pas">dat2csv</span> to generate “lift.csv”, which contains a reduced,
+     information about country- and day-splits, and in-ride stops is removed, subset of the data
+     in “lift.dat”.
+
+  </p><p>A LibreOffice “Calc” spreadsheet you might use as a starting point, but which heavily relies
+     on the format of the input file used by Prino, is
+     <a href="https://prino.neocities.org/resources/lift%20&amp;%20v100+.ods" target="_blank">lift&nbsp;&amp;&nbsp;v100+.ods</a>.
+
+</p><h4>A database</h4>
+  <p>What was written about spreadsheets also holds true for databases. Not having used any PC
+     database programs, Prino cannot recommend any, but there are plenty of free ones: LibreOffice
+     “Base” and <a href="https://mariadb.com/" target="_blank">MariaDB</a>, to name just two of the
+     more well-known ones. Creating your statistics will mean writing queries (most likely in the
+     fairly easy-to-learn language SQL), but given the non-procedural nature of this language, some
+     results that can be created with a self-written program or a spreadsheet may be hard or even
+     impossible to recreate.
+
+</p><h3>Prino’s original program</h3>
+  <p>As mentioned above, and being a programmer by profession, Prino selected the first method of
+     storing the data, a text file. The first 60(!) versions of his program were written in
+     <a href="https://en.wikipedia.org/wiki/Turbo_Pascal" target="_blank">Turbo Pascal</a>
+     (V3.01a), and until about version 20 they used “Version&nbsp;I” of a simple
+     <a href="https://en.wikipedia.org/wiki/Comma-separated_values" target="_blank">CSV file</a>
+     with the data. It could handle rides passing through multiple countries and spanning more
+     than one day, but did not know anything about ferry crossings, stops, or time zones, to name
+     but a few of the things that arrived later…
+
+  </p><p>Given that the old format became obsolete a long time ago, it’s not interesting to go into
+     the nitty-gritty of it, but its output mimic’ed his manually created
+     <a href="https://prino.neocities.org/miscellaneous/5-tables.html">five tables</a> per trip, containing:
+
+  </p><ul class="disc">
+   <li>a table with the distribution of the distances per ride. Initially in intervals of
+       100&nbsp;km, but due to the overwhelming number of rides shorter than 100&nbsp;km, this
+       interval was soon split up into four additional intervals of 25&nbsp;km, and the, as
+       expected, rather small number of rides over 1,000&nbsp;km long are split into intervals
+       of 1,000&nbsp;km.
+   </li><li>a table of distances for each type of driver.
+   </li><li>a table of distances per country.
+   </li><li>a table with a count of the number of drivers per nationality.
+   </li><li>a table with various maxima, minima, and averages for the rides and days of the trip, i.e.
+       highest/lowest/average speed per ride/day, greatest/smallest/average distance per
+       ride/day, longest/shortest/average time per ride/day.
+  </li></ul>
+
+  <p>Simple, uncomplicated, and one might assume that most hitchhikers would leave it at this…
+
+</p><h3>Prino’s current program</h3>
+  <p>The <a href="https://prino.neocities.org/miscellaneous/pascal.html">current program</a> is written in Virtual Pascal V2.1.279 (or
+     PL/I, should you want to run it on IBM’s z/OS). It is licensed under the provisions of the
+     <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">GPL V3</a>. The
+     “authenticity” verified <a href="https://www.rarlab.com/" target="_blank">WinRAR</a> archive
+     containing the sources and executable files can be found as
+     “<a href="https://prino.neocities.org/resources/lift32bit.rar" title="The password for this archive is “lift”">lift32bit.rar</a>”.
+
+</p><h4 id="data">Data format used by Prino’s current program</h4>
+  <p>The “simple” format was used until the end of 1994. Due to the fact that Prino wanted to add
+     some additional statistics to the output files, it was changed into something a bit more
+     logical, although some people might find otherwise. (And they are right, it’s a right-royal
+     mess due to more additional requirements, and Prino would like to simplify some of the more
+     esoteric uses of punctuation, but that’s unlikely to happen anytime soon as he has a list
+     of additional tables he would like to add first)
+
+  </p><p>The current format, split into two parts to avoid scrolling, looks like this:
+
+  </p><p><span style="font-family: monospace; white-space: pre; font-weight: bold;">
+....v....1....v....2....v....3....v....4....v....5....v....6....v....7....v....8....v....9..
+999, 9999,  AAA, 99999.9, HHH.MM,  999.9, NAT, TYPE, CTY, HH.MM, S, HH.MM, HH.MM, YYYY-MM-DD
+ |    |      |     |         |        |    |    |     |     |    |    |      |        |
+ <a href="#col-trip">a</a>    <a href="#col-ride">b</a>      <a href="#col-day">c</a>     <a href="#col-distance">d</a>         <a href="#col-time">e</a>        <a href="#col-velocity">f</a>    <a href="#col-nationality">g</a>    <a href="#col-type">h</a>     <a href="#col-country">i</a>     <a href="#col-wait">j</a>    <a href="#col-split">k</a>    <a href="#col-deptime">l</a>      <a href="#col-arrtime">m</a>        <a href="#col-date">n</a>
+
+..v....0....v....1....v....2....v....3....v....4....v....5....v....6....v....7....v....8....v....9....v....0....v
+, 999999.9, xx, DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD , AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+     |      |                          |                                                 |
+     <a href="#col-odo">o</a>      <a href="#col-deptype">p</a>                          <a href="#col-dep">q</a>                                                 <a href="#col-arr">r</a>
+  </span>
+  </p><p>and the fields used in it are:
+
+  </p><dl>
+    <dt id="col-trip">Col<span class="stat-tt"> &nbsp;&nbsp;1 - &nbsp;&nbsp;3 (“Trip”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>number of the trip, up to three digits
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-ride">Col<span class="stat-tt"> &nbsp;&nbsp;6 - &nbsp;&nbsp;9 (“Ride”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>number of the ride within the trip, up to four digits
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-day">Col<span class="stat-tt"> &nbsp;13 - &nbsp;15 (“Day”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>“day” of the trip, up to three digits
+        <ul style="list-style-type: circle">
+          <li>up to three digits for a real day
+          </li><li>“<span style="font-family: courier">␣␣#</span>” to
+              indicate that this ride was split over two (or more) days
+          </li><li>“nna” through “nnz” for the parts traveled through more than one country. The “a” on
+              the first country <strong>must be lowercase</strong>, and nn should be the day on
+              which the ride entered the country, which, in case of rides that are split over
+              multiple days, may result in “12a”, “12b”, “12c”, and “13d”, as is the case of
+              ride 47 of the first trip Prino made.
+          </li><li>“!xy” to indicate the xy-th stop during this ride. <strong>“x”</strong> must be
+              present, but may be a blank!
+        </li></ul>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-distance">Col<span class="stat-tt"> &nbsp;18 - &nbsp;24 (“Distance”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>total distance for this ride, up to 99999.9 km
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-time">Col<span class="stat-tt"> &nbsp;27 - &nbsp;32 (“Time”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>driving time for this ride, up to 999:59
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-velocity">Col<span class="stat-tt"> &nbsp;34 - &nbsp;40 (“Velocity”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the data in these columns can be either
+          <ul style="list-style-type: circle">
+            <li>the average velocity for this ride, i.e. <span class="stat-tt">“Distance”</span> divided by <span class="stat-tt">“Time”</span><br>
+              <p>
+                or
+            </p></li><li>blank, if <span class="stat-tt">“Split”</span> is non-blank
+          </li></ul>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-nationality">Col<span class="stat-tt"> &nbsp;43 - &nbsp;45 (“Nationality”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the nationality of the driver, up to three characters<sup><span class="stat-tt">[1]</span></sup>
+    </li></ul>
+  </dd></dl>
+
+
+  <dl>
+    <dt id="col-type">Col<span class="stat-tt"> &nbsp;48 - &nbsp;51 (“Type”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the data in these columns can be either
+          <ul style="list-style-type: circle">
+            <li>the “type” of the driver, up to four characters, and it’s obviously fully up to you
+                to define a “type”.
+              <p>
+                </p><details>
+                  <summary>Prino’s 23 types of driver</summary>
+                  <p>
+                  </p><ul>
+                    <li><span class="stat-tt">-&nbsp;&nbsp;&nbsp;</span> - Male (single/multiple)
+                    </li><li><span class="stat-tt">-*&nbsp;&nbsp;</span>      - Male, with child(ren)
+                    </li><li><span class="stat-tt">V&nbsp;&nbsp;&nbsp;</span> - Female (single/multiple) (from the Dutch "Vrouw")
+                    </li><li><span class="stat-tt">V*&nbsp;&nbsp;</span>      - Female, with child(ren)
+                    </li><li><span class="stat-tt">T&nbsp;&nbsp;&nbsp;</span> - Truck
+                    </li><li><span class="stat-tt">B&nbsp;&nbsp;&nbsp;</span> - Van (from the Dutch "Bestelwagen")
+                    </li><li><span class="stat-tt">E&nbsp;&nbsp;&nbsp;</span> - Couple (male+female) (from the Dutch "Echtpaar", married couple)
+                    </li><li><span class="stat-tt">F&nbsp;&nbsp;&nbsp;</span> - Family
+                    </li><li><span class="stat-tt">P&nbsp;&nbsp;&nbsp;</span> - Police
+                    </li><li><span class="stat-tt">Bus&nbsp;</span>           - Bus
+                    </li><li><span class="stat-tt">M&nbsp;&nbsp;&nbsp;</span> - Motorbike
+                    </li><li><span class="stat-tt">Taxi</span>                - Taxi
+                    </li><li><span class="stat-tt">PW&nbsp;&nbsp;</span>      - Horse-drawn cart (from the Dutch "PaardenWagen")
+                    </li><li><span class="stat-tt">C&nbsp;&nbsp;&nbsp;</span> - Camper/mobile home
+                    </li><li><span class="stat-tt">Tr&nbsp;&nbsp;</span>      - Tractor
+                    </li><li><span class="stat-tt">Por&nbsp;</span>           - Porsche
+                    </li><li><span class="stat-tt">Cab&nbsp;</span>           - Cabriolet (roof down!)
+                    </li><li><span class="stat-tt">VT&nbsp;&nbsp;</span>      - Female truckdriver (V + T)
+                    </li><li><span class="stat-tt">MB&nbsp;&nbsp;</span>      - Mini-bus
+                    </li><li><span class="stat-tt">Fer&nbsp;</span>           - Ferrari
+                    </li><li><span class="stat-tt">Elec</span>                - Fully electric car
+                    </li><li><span class="stat-tt">VPor</span>                - Porsche (Female driver) (V + Por)
+                    </li><li><span class="stat-tt">V-El</span>                - Fully electric car (Female driver) (V+El[ec])
+                  </li></ul>
+                </details>
+
+              <p>
+                Of course it would be possible to add way more “type” of driver types, Prino has
+                mentally reserved at least one new category, “Old”, which will come in use if he
+                ever gets another ride in an oldtimer, the “Lagonda LG45” from 1937 has currently
+                been classified as a Cabrio.
+              </p><p>
+                or
+
+            </p></li><li>the type of “in-ride” wait, an exclamation (“!”) mark followed by three
+                characters. Free format, but at the moment all descriptions are hardcoded in
+                the program.
+
+              <p>
+                The “in-ride” waits just came into existence when they occurred, and although many
+                of them made sense at the time, two of them, “!V” and “!N” should probably have been
+                merged right from the start, and a third, “!T”, has become irrelevant since the
+                arrival of the electronic tachograph.
+              </p><p>
+                </p><details id="irw">
+                  <summary>Prino’s 20 types of in-ride and ex-ride waits</summary>
+                  <p>
+                  </p><ul>
+                    <li><span class="stat-tt">!B&nbsp;</span> - <b>B</b>order
+                    </li><li><span class="stat-tt">!P&nbsp;</span> - <b>P</b>etrol (*)
+                    </li><li><span class="stat-tt">!W&nbsp;</span> - Toilet (<b>W</b>C) (*)
+                    </li><li><span class="stat-tt">!D&nbsp;</span> - <b>D</b>rink (*)
+                    </li><li><span class="stat-tt">!M&nbsp;</span> - Snack (Used to be <b>M</b>eal) (*)
+                    </li><li><span class="stat-tt">!Y&nbsp;</span> - Meal (<b>Y</b>ummy…) (*)
+                    </li><li><span class="stat-tt">!R&nbsp;</span> - <b>R</b>est (*)
+                    </li><li><span class="stat-tt">!S&nbsp;</span> - <b>S</b>leep
+                    </li><li><span class="stat-tt">!C&nbsp;</span> - <b>C</b>ompany business
+                    </li><li><span class="stat-tt">!T&nbsp;</span> - <b>T</b>oll
+                    </li><li><span class="stat-tt">!L&nbsp;</span> - <b>L</b>egal (Police)
+                    </li><li><span class="stat-tt">!V&nbsp;</span> - <b>V</b>ehicle problems
+                    </li><li><span class="stat-tt">!N&nbsp;</span> - <b>N</b>o fuel
+                    </li><li><span class="stat-tt">!F&nbsp;</span> - Tacho <b>f</b>iddle
+                    </li><li><span class="stat-tt">!J&nbsp;</span> - Traffic <b>J</b>am
+                    </li><li><span class="stat-tt">!E&nbsp;</span> - <b>E</b>-Charge (*)
+                    </li><li><span class="stat-tt">!&amp;&nbsp;</span> - Smiespel (Don’t ask!)
+                    </li><li><span class="stat-tt">!^t</span> - Transit, such as the use of public transport between rides (!)
+                    </li><li><span class="stat-tt">!^w</span> - Walk, from a drop-off place to a better place to start hitching again (!)
+                    </li><li><span class="stat-tt">!^x</span> - Cross, 
+probably/possibly Prino specific, a reversal of direction, Prino
+                                                                        
+ frequently uses them during his “hitchhiking for hitchhiking’sake” 
+trips (!)
+                  </li></ul>
+
+                  <p>Note 1: Only the “(*)” marked ones are valid for “ex-ride” waits, using
+                     any of the others for such waits will result in those waits being classified as “Other”
+
+                  </p><p>Note 2: The “(!)” marked ones are (as yet unverified) <strong>only</strong> valid for “ex-ride” waits
+
+                  </p><p>There’s also an “Other” named type of wait that’s marked by just a “!” in the
+                     split column.
+                </p></details>
+
+              <p>There is one value that <strong>must</strong> be present for some
+                  specific “in-ride” waits:
+                </p><dl>
+                  <dt><span class="stat-tt">B</span> - border crossing
+                  </dt><dd>If the driver does not stop at the border, the time of crossing must be recorded in
+                      <span class="stat-tt">“Departure time”</span>, and, for crossings that involve a stop,
+                      or move into a different time zone, <span class="stat-tt">“Arrival”</span>.<br><br>
+
+                      In case of a triple crossing, i.e. day, border, and <strong>forward</strong>-moving
+                      time zone (e.g. PL-LT at midnight), the “B” <strong>must</strong> be followed
+                      by a “#”<sup><span class="stat-tt">[2]</span></sup>.
+                </dd></dl>
+
+              <p>To convert a wait into an “ex-ride” wait?
+                </p><dl>
+                  <dt><span class="stat-tt">^</span> - non-hitching time between rides
+                  </dt><dd>At the moment, this time must be allocated as the last “in-ride”
+                      waiting time of the previous ride, which needs to have its ending time
+                      adjusted, i.e. if ride&nbsp;N ends at 12:34 and is followed by 56 minutes
+                      during which you have a nice meal, you’d add a “!^Y” stop to
+                      ride&nbsp;N, with a start-of-stop time of 12:34, an end-of-stop time of 13:30,
+                      and adjust the end-of-ride time for ride&nbsp;N to 13:30.
+                </dd></dl>
+          </li></ul>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-country">Col<span class="stat-tt"> &nbsp;54 - &nbsp;56 (“Country”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the country for this ride, in one of the following formats:
+          <ul style="list-style-type: circle">
+            <li>the (up to) three-letter country abbreviation<sup><span class="stat-tt">[1]</span></sup>, when <span class="stat-tt">“Split”</span> is blank,<br>
+                or
+
+            </li><li>an “<strong>*</strong>” if this particular ride is split over multiple countries, where the “*” <strong>must</strong> be on the first line for this ride,<br>
+                or
+
+            </li><li><strong>blank</strong>, for those lines of the ride that deal with the split day data, i.e. where <span class="stat-tt">“Split”</span> is “#”,<br>
+                or
+
+            </li><li>the (up to) three-letter country abbreviation<sup><span class="stat-tt">[1]</span></sup>, if <span class="stat-tt">“Type”</span> is “!B” and <span class="stat-tt">“Split”</span> is “!”
+          </li></ul>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-wait">Col<span class="stat-tt"> &nbsp;59 - &nbsp;63 (“Wait”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the wait for this ride<sup><span class="stat-tt">[3][4]</span></sup>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-split">Col<span class="stat-tt"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;66 (“Split”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>a “split-type” indicator<sup><span class="stat-tt">[5]</span></sup>, with the following possible values:<br><br>
+          <dl>
+            <dt>blank
+            </dt><dd>first line for a new ride
+          </dd></dl>
+          <dl>
+            <dt>“#”
+            </dt><dd>the current line contains ride-data relating to a day split
+          </dd></dl>
+          <dl>
+            <dt>“*”
+            </dt><dd>the current line contains ride-data relating to a country split
+          </dd></dl>
+          <dl>
+            <dt>“!”
+            </dt><dd>the current line contains ride-data relating to an “in-ride” wait (See <span class="stat-tt">“Type”</span>)
+          </dd></dl>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-deptime">Col<span class="stat-tt"> &nbsp;69 - &nbsp;73 (“Departure time”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>a time field that can contain one of the following times
+          <ul style="list-style-type: circle">
+            <li>the departure time<sup><span class="stat-tt">[6]</span></sup> of this particular ride,<br>
+                or
+
+            </li><li>the starting time of an “in-ride” wait, i.e. where <span class="stat-tt">“Split”</span> is “!”,<br>
+                or
+
+            </li><li>the time for a non-stopping border crossing<sup><span class="stat-tt">[7]</span></sup>, i.e. <span class="stat-tt">“Type”</span> is “!B” and <span class="stat-tt">“Split”</span> is “!”
+          </li></ul>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-arrtime">Col<span class="stat-tt"> &nbsp;76 - &nbsp;80 (“Arrival time”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>a time field that can contain one of the following times
+          <ul style="list-style-type: circle">
+            <li>the arrival time<sup><span class="stat-tt">[8]</span></sup> of this particular ride,<br>
+                or
+
+            </li><li>the ending time of an “in-ride” wait, i.e. where <span class="stat-tt">“Split”</span> is “!”,<br>
+                or
+
+            </li><li>the time for a stopping border crossing<sup><span class="stat-tt">[7]</span></sup>, i.e. <span class="stat-tt">“Type”</span> is “!B” and <span class="stat-tt">“Split”</span> is “!”
+          </li></ul>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-date">Col<span class="stat-tt"> &nbsp;83 - &nbsp;92 (“Date”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the date, in <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank">ISO 8601</a> format. The date
+            is required  for the first ride of the day, and for every multiple-day line where the
+            <span class="stat-tt">“Split”</span> is “#”, <em>except</em> the first,
+            <em>unless</em> the multiple-day ride is the first ride of the day.
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-odo">Col<span class="stat-tt"> &nbsp;95 - 102 (“Odometer”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the odometer at the start if this ride, up to 999999.9 km<sup><span class="stat-tt">[14]</span></sup>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-deptype">Col<span class="stat-tt"> 105 - 106 (“Departure type”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the type of departure or departure location. It’s a 2-character field, with the first
+            character encoding the type of departure, with these two keys
+
+          <p>
+            </p><ul>
+              <li><span class="stat-tt">t</span> - for <b>t</b>humbed rides
+              </li><li><span class="stat-tt">a</span> - for <b>a</b>sked-for rides
+            </li></ul>
+
+          <p>
+            Prino uses lowercase, but <span class="pas">lift</span> will be just as happy with
+            uppercase.
+
+          </p><p>
+            and defaulting any other character to “Other.” Prino informally
+            uses <span class="stat-tt">i</span> for rides where the driver invited him, or a
+            driver used his CB radio to get him a follow-on ride, etc, and
+            <span class="stat-tt">q</span> for pre-arranged rides, like being dropped off at
+            a better starting location by family or friends.
+
+          </p><p>
+            The second, as yet unused, character might eventually be used to indicate the type
+            of location from where the ride was started, Prino currently uses the following keys
+
+            </p><ul>
+              <li><span class="stat-tt">-</span> - side of the road
+              </li><li><span class="stat-tt">R</span> - roadside petrol station or restaurant
+              </li><li><span class="stat-tt">B</span> - border
+              </li><li><span class="stat-tt">F</span> - ferry (or port)
+              </li><li><span class="stat-tt">P</span> - roadside parking
+              </li><li><span class="stat-tt">T</span> - toll station
+              </li><li><span class="stat-tt">H</span> - an “official” Dutch “<a href="https://en.wikipedia.org/wiki/Liftershalte" target="_blank">liftplaats</a>”
+              </li><li><span class="stat-tt">A</span> - an airport
+            </li></ul>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-dep">Col<span class="stat-tt"> 109 - 155 (“Place of departure”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the place of departure<sup><span class="stat-tt">[9]</span></sup>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt id="col-arr">Col<span class="stat-tt"> 159 - 205 (“Place of arrival”)</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the place of arrival<sup><span class="stat-tt">[9]</span></sup>
+      </li></ul>
+  </dd></dl>
+
+  <p id="notes"><b>Notes:</b>
+
+  </p><p id="distsign"><span class="stat-tt">&nbsp;[1]</span> Prino uses
+     <a href="https://unece.org/DAM/trans/conventn/Distsigns.pdf">Distinguishing Signs used on Vehicles in International Traffic</a> (<a href="https://prino.neocities.org/www/pdf/2012%20-%20distsigns.pdf">Local copy</a>) <!-- https://unece.org/distinguishing-signs-vehicles -->
+     and the <a href="https://en.wikipedia.org/wiki/List_of_international_vehicle_registration_codes">List of international vehicle registration codes</a>
+     on Wikipedia. Due the fact that three of these have changed since Prino encountered them for the first time, he still uses <b>“GB”</b> for Great-Britain,
+     <b>“SF”</b> for Finland, and <b>“ROU”</b> for Uruguay, rather than the current “UK”, “FIN”, and “UY”.
+
+  </p><p><span class="stat-tt">&nbsp;[2]</span> Given that Prino has never encountered a triple crossing
+      with a backward moving time zone (e.g. F-GB at midnight), he doesn’t expect the program to
+      handle them and, as yet, has no interest to test hypothetical cases. (And don’t even think
+      about quadruple(!?) crossings)
+
+  </p><p><span class="stat-tt">&nbsp;[3]</span> Prino never records the waiting time before the first
+     ride of the day, unless the first ride of the day happens to be one that continues directly
+     after the last ride of the previous day, without any intervening (sleep?) stop.
+
+  </p><p><span class="stat-tt">&nbsp;[4]</span> The normal “.” separator in the waiting time must be
+     replaced by a “<strong>:</strong>” (colon) for those waits caused by the departure from a
+     ferry terminal where you haven’t been able to get a ride on the ferry (and may have had to
+     wait until the next ferry…)
+
+  </p><p><span class="stat-tt">&nbsp;[5]</span> Multiple split lines may be present, but they <strong>must</strong>
+     be grouped, and the groups must be in “#”, “*”, “!” order!
+
+  </p><p><span class="stat-tt">&nbsp;[6]</span> The normal “.” separator in the departure time must be
+     replaced by
+     </p><ul class="disc">
+       <li>a “<strong>:</strong>” (<em>colon</em>) for departures after a ferry crossing in order to record the ferry crossing, or
+       </li><li>a <em>uppercase</em> “<strong>X</strong>” for departures from a same-named location at the other side of the road, or
+       </li><li>an <em>lowercase</em> “<strong>x</strong>” for departures from a different-named location at the other side of the road.
+     </li></ul>
+
+  <p><span class="stat-tt">&nbsp;[7]</span> Non-stopping (i.e. drive-through) border crossings must not record
+     an arrival time, unless the time zone changes.
+
+  </p><p><span class="stat-tt">&nbsp;[8]</span> The normal “.” separator in the arrival time of a time-zone-changing border crossing must be
+     replaced by
+     </p><ul class="disc">
+       <li>a “<strong>+</strong>” for a crossing in easterly direction, and
+       </li><li>a “<strong>-</strong>” for a crossing in westerly direction.
+     </li></ul>
+
+  <p><span class="stat-tt">&nbsp;[9]</span> The places of departure and arrival must be UTF-8 encoded
+     and their length is (currently) limited to 47 <em>bytes</em>!
+
+  </p><p><span class="stat-tt">[10]</span> Lines <strong>must not contain trailing blanks</strong>, but completely blank
+     lines, consisting of just a CR/LF, are allowed.
+
+  </p><p><span class="stat-tt">[11]</span> Although the data is in CSV format, all positions are fixed!
+
+  </p><p><span class="stat-tt">[12]</span> Lines starting with “<strong>{</strong>” in column 1 are treated
+     as comments or meta-data. A description of the meta-date format can be found below.
+
+  </p><p><span class="stat-tt">[13]</span> Columns containing numerical data or times must be right aligned,
+      columns containing text must be left aligned, and if the textual data is shorter than the column width,
+      the separating comma may follow it without intervening blanks, except for the departure location.
+
+  </p><p><span class="stat-tt">[14]</span> The <span class="stat-tt">“Odometer”</span> data is (currently)
+     completely ignored by the main <span class="pas">lift</span> program.
+
+  </p><p><span class="stat-tt">[15]</span> Lines longer than 255 characters are (currently) completely
+     ignored by the main <span class="pas">lift</span> program.
+
+</p><h4>Metadata</h4>
+  <p>As Prino didn’t want to make the format of the data even more complex than it already is, he
+     decided to allow for comments and meta-data to be embedded into the input file. Both comments
+     and meta-data start with a “{” and can be up to 255 characters long.
+
+  </p><p>The (currently) defined, but only partly used types of meta-data are:
+
+  </p><dl>
+    <dt>Col<span class="stat-tt"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>“<strong>{</strong>”, the start-of-comment/meta-data indicator
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt>Col<span class="stat-tt"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2…</span>
+    </dt><dd>
+      <ul class="disc">
+        <li>the following characters, in the order they came into 
+existence, indicate whether the line contains meta-data or is simply a 
+comment:<br><br>
+          <ul class="disc">
+            <li><span class="tt">“Z”&nbsp;&nbsp;&nbsp;&nbsp;</span> - the line contains <a href="#zone">time zone information</a>
+            </li><li><span class="tt">“&lt;”&nbsp;&nbsp;&nbsp;&nbsp;</span> - the line indicates the start of <a href="#partner">partner data</a>
+            </li><li><span class="tt">“&gt;”&nbsp;&nbsp;&nbsp;&nbsp;</span> - the line indicates the end of <a href="#partner">partner data</a>
+            </li><li><span class="tt">“I”&nbsp;&nbsp;&nbsp;&nbsp;</span> - the line contains <a href="#interrupt">interruption information</a>
+            </li><li><span class="tt">“H”&nbsp;&nbsp;&nbsp;&nbsp;</span> - the line contains a <a href="#URL">Google short URL</a> to Google Maps tracing a ride (or series of rides)
+            </li><li><span class="tt">“U”&nbsp;&nbsp;&nbsp;&nbsp;</span> - the line contains an additional <a href="#UTF-8">UTF-8 encoded departure or arrival location</a>
+            </li><li><span class="tt">“V”&nbsp;&nbsp;&nbsp;&nbsp;</span> - the line contains ride and day offsets to handle <a href="#split-yr">split-year trips</a>
+            </li><li><span class="tt">“^”&nbsp;&nbsp;&nbsp;&nbsp;</span> - the line contains <a href="#personal">personal information</a> for Prino’s eyes only
+            </li><li><span class="tt">“ascii”</span> - only required if the input file is transferred/translated for use on <a href="#zOS">z/OS using EBCDIC</a> encoding
+            </li><li><strong>any other character</strong> - the line is treated as a comment, and ignored
+          </li></ul>
+      </li></ul>
+  </dd></dl>
+
+  <dl>
+    <dt><span class="stat-tt" id="zone">Time zone information</span>
+    </dt><dd>The meta-data contained in lines starting with “<strong>{Z-</strong>” or “<strong>{Z+</strong>”
+        provides information about the time zones for the countries passed in a trip. The difference
+        between the two variants is that time zone information following a “<strong>{Z-</strong>”
+        completely replaces the current set of countries/time zone pairs, whereas “<strong>{Z+</strong>”
+        will add additional countries/time zone data pairs or replace existing ones. The option can be
+        used in multi-zonal countries, or in trips that span the change from winter- into summer-time,
+        or the reverse.
+
+        <p>Up to 31 country/time zone data pairs immediately follow the “<strong>{Zx</strong>” and
+           consist of eight characters,
+          </p><ul class="disc">
+            <li>a three-character country code (See <sup><span class="stat-tt">[1]</span></sup> above),
+            </li><li>a single blank, or
+            </li><li>a three-character offset from UTC for the country, from
+                <a href="https://en.wikipedia.org/wiki/List_of_UTC_time_offsets" target="_blank">-12 to +14</a>. The
+                offset must be in the format “+nnX” or “-nnX”, where the “X” can be “&nbsp;”, and, theoretically, as this
+                functionality has not yet been implemented, “a”, “b”, or “c”, indicating an additional offset of 15,
+                30, or 45 minutes.<br><br>
+                Assuming that the partial hour functionality will at some stage be implemented, the time zone information
+                for a theoretical trip through the Netherlands, Nepal, and Newfoundland would be encoded as<br><br>
+                <span class="stat-tt">{Z-NL  +01 NEP +05cCDN -03b</span>
+          </li></ul>
+
+        <p>Note that if a trip spans more than 31 countries, time zone data for additional countries can be added via
+           “<strong>{Z+</strong>” meta-data.
+  </p></dd></dl>
+
+  <dl>
+    <dt><span class="stat-tt" id="partner">Partner data</span>
+    </dt><dd>The meta-data contained in lines starting with “<strong>{&lt;</strong>” and “<strong>{&gt;</strong>” provides a
+        means of embedding data from (a) hitchhiking partner(s) in your own data, provided the partner data is an
+        exact subset of your own data.
+
+        <p>The <span class="tt">“&lt;”</span> character must be followed by <span class="stat-tt">␣tttt␣rrrr␣dddd␣-␣name-of-partner</span> where
+          </p><dl>
+            <dt><span class="stat-tt">␣</span>
+            </dt><dd>indicates a single blank character
+            </dd><dt><span class="stat-tt">tttt</span>
+            </dt><dd>is the value that will be subtracted from <span class="stat-tt">“Trip”</span> to give the actual trip number for the partner
+            </dd><dt><span class="stat-tt">rrrr</span>
+            </dt><dd>is the value that will be subtracted from <span class="stat-tt">“Ride”</span> to give the actual ride number for the partner
+            </dd><dt><span class="stat-tt">dddd</span>
+            </dt><dd>is the value that will be subtracted from <span class="stat-tt">“Day”</span> to give the actual day number for the partner
+            </dd><dt><span class="stat-tt">name-of-partner</span>
+            </dt><dd>will be used by the <a href="https://prino.neocities.org/miscellaneous/pascal.html#get-aud" target="_blank"><span class="pas">get-aud</span></a> program when data for a
+                specific partner needs to be extracted
+          </dd></dl>
+
+        <p>The <span class="tt">“&gt;”</span> character must be followed by <span class="stat-tt">␣-␣name-of-partner</span>
+           to indicate the end of the embedded data.
+  </p></dd></dl>
+
+  <dl>
+    <dt><span class="stat-tt" id="interrupt">Interruption information</span>
+    </dt><dd>The meta-data contained in lines starting with “<strong>{I</strong>” provides a means of embedding information for use in
+        <a href="https://prino.neocities.org/miscellaneous/pascal.html#h-h2html" target="_blank"><span class="pas">h-h2html</span></a>, such as non-hitching breaks, or even additional html!
+
+        <p>The use of the <span class="tt">“I”</span> character is further explained in the
+           <a href="https://prino.neocities.org/miscellaneous/pascal.html#interrupt" target="_blank">notes</a> following the description of that program.
+  </p></dd></dl>
+
+  <dl>
+    <dt><span class="stat-tt" id="URL">Google short URL</span>
+    </dt><dd>The <span class="tt">“H”</span> character is currently not used by any programs. It is followed
+        by the trip, ride, Google Maps short URL, departure and arrival locations, and the distance between
+        them returned by Google Maps. In data for more recent rides, the full Google Maps URL is also included to
+        prevent loss of data should Google become even more evil in the future, Nearly all of the original
+        five-character short URLs, many of them encoding non-trivial deviations of the routes followed, in
+        “lift.dat” are no longer working!
+
+      <p>
+        Due to the fact that the routes may contain privileged information, “{H” tags are no longer
+        included in the archived copy of “lift.dat” that Prino makes available here.
+
+      </p><p>
+        </p><details>
+          <summary>Click here for the current format, which may be subject to change!</summary>
+          <p>In the following <span class="stat-tt">␣</span> indicates a single blank.
+          </p><dl>
+            <dt id="gm_id">Col<span class="stat-tt"> &nbsp;&nbsp;1 - &nbsp;&nbsp;3 (“ID”)</span>
+            </dt><dd>
+              <ul class="disc">
+                <li>“{H␣”<br><br>
+              </li></ul>
+          </dd></dl>
+
+          <dl>
+            <dt id="gm_tr">Col<span class="stat-tt"> &nbsp;&nbsp;4 - &nbsp;11 (“Trip/Ride”)</span>
+            </dt><dd>
+              <ul class="disc">
+                <li>the trip and ride this URL meta-data belongs to, in the format “ttt.rr:␣”, where
+                     both “ttt” (the trip) and “rr” (the ride), separated by a “.”, have leading zeros.<br><br>
+              </li></ul>
+          </dd></dl>
+
+          <dl>
+            <dt id="gm_surl">Col<span class="stat-tt"> &nbsp;12 - &nbsp;49</span>
+            </dt><dd>
+              <ul class="disc">
+                <li>a Google Maps short URL, like <a href="https://goo.gl/maps/RTq31dF2QdEGqkkcA" target="_blank">https://goo.gl/maps/RTq31dF2QdEGqkkcA"</a>,
+                    followed by a single “␣”.<br><br>
+              </li></ul>
+          </dd></dl>
+
+          <dl>
+            <dt id="gm_dep">Col<span class="stat-tt"> &nbsp;50 - &nbsp;97</span>
+            </dt><dd>
+              <ul class="disc">
+                <li>the departure location, left aligned in a field with a length of 47 bytes,
+                    followed by a single “␣”, for the above short URL it would be
+                    “<span class="stat-tt">Raststätte&nbsp;Lappwald&nbsp;Nord......................␣</span>”
+                    on Autobahn A2 in Germany.
+
+                  <p>
+                    And note that you will count only 46 characters before the “␣”, the “missing”
+                    one is caused by the fact that the “ä” is encoded in two bytes using UTF-8, if
+                    you would look at the data in raw (byte) format in a hex-editor like
+                    <a href="https://mh-nexus.de/en/hxd/" target="_blank">HxD</a>, they might show
+                    up as
+                    </p><ul>
+                      <li>“Ã¤” (“ANSI”)
+                      </li><li>“├ñ” (“DOS/IBM-ASCII”)
+                      </li><li>“√§” (“Macintosh”)<br><br>
+                    </li></ul> <!-- 195 (0xc3)/164 (0xa4) -->
+              </li></ul>
+          </dd></dl>
+
+          <dl>
+            <dt id="gm_arr">Col<span class="stat-tt"> &nbsp;98 - 145</span>
+            </dt><dd>
+              <ul class="disc">
+                <li>the arrival location, left aligned in a field with a length of 47 bytes,
+                    followed by a single “␣”, for the above short URL it would be
+                    “<span class="stat-tt">Raststätte&nbsp;Rhynern&nbsp;Nord.......................␣</span>”
+                    on Autobahn A2 in Germany.<br><br>
+              </li></ul>
+          </dd></dl>
+
+          <dl>
+            <dt id="gm_km">Col<span class="stat-tt"> 146 - 156</span>
+            </dt><dd>
+              <ul class="disc">
+                <li>the length of the route followed, in the format “dddd.d␣km␣␣”,
+                    where leading zeros may be replaced by blanks, for the above short URL it would
+                    be “<span class="stat-tt">␣270␣␣␣km␣␣</span>”.<br><br>
+              </li></ul>
+          </dd></dl>
+
+          <dl>
+            <dt id="gm_lurl">Col<span class="stat-tt"> 157 - eol</span>
+            </dt><dd>
+              <ul class="disc">
+                <li>the Google Maps full URL, for the above short URL it would be
+                    <a href="https://www.google.com/maps/dir/52.2202545,11.057979/51.6327059,7.8763526/@51.777806,8.6034904,8.5z/data=!4m2!4m1!3e0" target="_blank">https://www.google.com/maps/dir/52.2202545,11.057979/51.6327059,7.8763526/@51.777806,8.6034904,8.5z/data=!4m2!4m1!3e0</a>
+              </li></ul>
+          </dd></dl>
+       </details>
+
+  </dd></dl>
+
+  <dl>
+    <dt><span class="stat-tt" id="UTF-8">UTF-8 encoded departure or arrival location</span>
+    </dt><dd>The <span class="tt">“U”</span> character is currently not used by any programs. It will (at some point in the future) be used to allow the use of
+        UTF-8-encoded locations that exceed the current 47-byte limit.
+
+        <p>The format of “<strong>{U</strong>” metadata is:
+
+        </p><p><span class="stat-tt">{U␣x␣CC␣????a</span>, where
+        </p><dl>
+          <dt><span class="stat-tt">␣</span>
+          </dt><dd>indicates a single blank character
+          </dd><dt><span class="stat-tt">“x”</span>
+          </dt><dd>can be either “d”(eparture) or “a”(rrival)
+          </dd><dt><span class="stat-tt">“CC”</span>
+          </dt><dd>is the <a href="https://en.wikipedia.org/wiki/ISO_3166-1" target="_blank">2-character ISO 3166-1</a> country code
+        </dd></dl>
+  </dd></dl>
+
+  <dl>
+    <dt><span class="stat-tt" id="split-yr">Split-year trips</span>
+    </dt><dd>The meta-data contained in lines starting with “<strong>{V</strong>” provides a means of embedding
+        offsets that are required to normalise the ride and day number for processing by
+        <a href="https://prino.neocities.org/miscellaneous/pascal.html#lift" target="_blank"><span class="pas">lift</span></a>, as the program cannot
+        natively handle trips that start with a ride or day other than 1 and 1.
+
+        <p>This meta-data should not be entered manually; it will automagically be added by
+           <a href="https://prino.neocities.org/miscellaneous/pascal.html#datsplit" target="_blank"><span class="pas">datsplit</span></a>, the program
+           that is used to split the input file for <span class="pas">lift</span> into separate files per
+           trip and per year.
+        </p><p>The <span class="tt">“V”</span> character must be followed by <span class="stat-tt">␣rrrr␣dddd</span> where
+        </p><dl>
+          <dt><span class="stat-tt">␣</span>
+          </dt><dd>indicates a single blank character
+          </dd><dt><span class="stat-tt">rrrr</span>
+          </dt><dd>is the value that will be subtracted from <span class="stat-tt">“Ride”</span> to give the internal-use-only ride number for this trip
+          </dd><dt><span class="stat-tt">dddd</span>
+          </dt><dd>is the value that will be subtracted from <span class="stat-tt">“Day”</span> to give the internal-use-only day number for this trip
+        </dd></dl>
+  </dd></dl>
+
+  <dl>
+    <dt><span class="stat-tt" id="personal">For Prino’s eyes-only information</span>
+    </dt><dd>The meta-data contained in lines starting with “<strong>{^</strong>” allows Prino to add personal
+        notes to some of his rides, such as names and (email) addresses of his drivers. A simple invocation
+        of “<a href="https://www.gnu.org/software/sed/" target="_blank">sed</a>” with a command line of
+        <a href="https://www.grymoire.com/Unix/Sed.html" target="_blank"><span class="stat-tt">-i “/^{\^.*$/d” input file</span></a>
+        will quietly remove these lines from the file that is publicly accessible. Which means you will never see such lines!
+  </dd></dl>
+
+  <dl>
+    <dt><span class="stat-tt" id="zOS">z/OS using EBCDIC</span>
+    </dt><dd>The <strong>lowercase</strong> <span class="tt">“ascii”</span> <strong>string</strong>
+        metadata is only required if the input file is transferred to z/OS, which uses
+        <a href="https://en.wikipedia.org/wiki/EBCDIC" target="_blank">EBCDIC</a> rather than
+        ASCII/UTF-8, <strong>and</strong> the resulting output needs to be transferred back,
+        <strong>via the same procedure</strong>, to the original ASCII/UTF-8 based system.
+
+        <p>The explanation for the above is rather technical, but it boils down to the fact that there
+           are at least three ways:
+          </p><ol>
+            <li>FTP,
+            </li><li><a href="http://gsf-soft.com/Documents/IND$FILE.html" target="_blank">IND$FILE</a>, an IBM proprietary protocol, and
+            <!-- ISPF command-table entry: IND$FILE 0 SELECT CMD(IND$FILE &ZPARM) MODE(FSCR) -->
+            </li><li>the Work Station Agent (an IBM tool supplied with ISPF, the z/OS “IDE”),
+          </li></ol>
+
+        <p>of transferring data between the ASCII/UTF-8 realm and z/OS. All three allow lossless transfers
+           from and to z/OS, but all use (in many cases) different translate tables for ASCII control
+           characters (<span class="tt">0x00..0x1F</span>) and characters between <span class="tt">0x80..0xFF</span>
+           (many of which are used to encode UTF-8 characters). Using the ASCII metadata allows programs written in
+           PL/I (and COBOL) to detect UTF-8 characters no matter which transfer procedure is used. Feel free to
+           <a href="mailto:robert%2eah%2eprins%40gmail%2ecom?subject=%5bHH%5d%20ASCII%20to%20EBCDIC%20metadata">email me</a>
+           if you want a full explanation.
+  </p></dd></dl>
+
+<h3>The results of Prino’s current programs</h3>
+  <p>The current programs produce rather a lot more output than the five tables per trip! In fact,
+     the main program now produces eight files and an optional additional post-processor program that
+     translates the output into .RTF format creates two additional files with two tables sorted in
+     various other orders. The programs and files, assuming their default names, they produce are:
+
+</p><h3>The main program, <span class="pas">lift</span></h3>
+
+<p id="disclaimer"><em><strong>Disclaimer:</strong> Much of the code in <span class="pas">lift</span> was written
+   before Prino implemented support for time zones, and even now he does <strong>not</strong> record
+   the odometer reading at the “correct” midnight for those rides that span multiple days!</em>
+
+</p><p><em>As a consequence, the following tables might contain erroneous or misleading data:</em>
+
+  </p><ul>
+    <li class="li double"><em>the “totals per day” table in the “per trip” section of “<a href="#flift">lift.h-h</a>”.
+        These tables theoretically contain days that go from midnight, 0:00, to midnight, 24:00, but
+        have a length exceeding 24 hours. However, in these particular tables, the <em>zone</em> column
+        will correct any discrepancy in the summation of the other columns.</em>
+
+    </li><li><em>All tables that reuse per-day data in any way. All of them are marked below with a
+        “See disclaimer” note.</em>
+  </li></ul>
+
+<p>For the moment, and that moment may well last forever, Prino has given up finding a solution
+   for this problem other than forgetting about time zones, and using a clock set to UTC…
+
+
+</p><p><span class="pas">lift</span> produces eight files, described in
+   the following sections.
+
+</p><h4 id="fsumm">“summ.h-h” - A general summary</h4>
+  <p>This file contains more than 100 tables, some of them broken into several parts because
+     they would otherwise require A3 or A2 size paper. (The total below <!-- 76 @ 2022-10-20 --> doesn’t count
+     individual tables of sets) Here’s the full list:
+
+  </p><ol>
+    <li class="li">two tables of totals for every trip
+      <ul class="disc">
+        <li class="li">per individual trip
+        </li><li class="li double">as a running cumulative total
+      </li></ul>
+
+    </li><li class="li">a table of totals for all distances
+    </li><li class="li">a table of totals for all types
+    </li><li class="li">a table of totals for all countries
+    </li><li class="li">a table of totals for all nationalities
+    </li><li class="li double">a table of totals for all speeds
+
+    </li><li class="li">(up to) five tables of totals for all waits
+      <ul class="disc">
+        <li class="li">waits split up into waiting time intervals
+        </li><li class="li">a statistical analysis of waiting times
+        </li><li class="li">short and long rides following waits
+        </li><li class="li">in-ride waits split up into reason per wait (*)
+        </li><li class="li double">ex-ride waits, in essence, non-hitching time between rides, split up into reason per “wait” (*)
+      </li></ul>
+
+    </li><li class="li">two tables of ferry-related waits (*)
+      <ul class="disc">
+        <li class="li">waits after ferry crossings
+        </li><li class="li double">time spent on ferries
+      </li></ul>
+
+    </li><li class="li">three tables of pick-ups
+      <ul class="disc">
+        <li class="li">per nationality per country
+        </li><li class="li">per country per type
+        </li><li class="li double">per nationality per type
+      </li></ul>
+
+    </li><li class="li">a table with the distribution of hourly departure times per weekday
+    <br><br>
+
+    </li><li class="li">a table with the first and last ride for all distances
+    </li><li class="li">a table with the first and last ride for all types
+    </li><li class="li">a table with the first and last ride for all countries
+    </li><li class="li">a table with the first and last ride for all nationalities
+    </li><li class="li double">a table with the first and last ride for all speeds
+
+    </li><li class="li">two tables of waits per trip, split into short and long waits
+      <ul class="disc">
+        <li class="li">per individual trip
+        </li><li class="li double">as a running cumulative total
+      </li></ul>
+
+    </li><li class="li">a table of waits per country, split into short and long waits
+    </li><li class="li">a table of waits before departure times (also s &amp; l split)
+    </li><li class="li">a table of waits per weekday (also s &amp; l split)
+    </li><li class="li">a table of waits per month (also s &amp; l split)
+    </li><li class="li double">a table of waits per year (also s &amp; l split)
+
+    </li><li class="li">a max/min/average summary for all rides
+    </li><li class="li">a max/min/average summary for all days (See <a href="#disclaimer">disclaimer</a>)
+    </li><li class="li">a max/min/average summary for all types
+    </li><li class="li">a max/min/average summary for all nationalities
+    </li><li class="li double">a max/min/average summary for all countries
+
+    </li><li class="li double">a table of rides per country, split into internal and border crossing rides
+
+    </li><li class="li double">a table of rides per country, split into native and “foreign” drivers
+
+    </li><li class="li">two tables of longest (km/#r) consecutive distance per country
+      <ul class="disc">
+        <li class="li">the longest run of consecutive rides inside a country
+        </li><li class="li double">the longest run of consecutive rides outside a country
+      </li></ul>
+
+    </li><li class="li">four tables for the max/min speed &amp; max/min rides for a given number of distances
+    </li><li class="li double">four tables for the max/min speed &amp; max/min distance for a given number of rides
+
+    </li><li class="li">four tables for the maximum number of rides 
+exceeding a number of selected velocities, maximised for the number of 
+rides and the distance,
+      <ul class="disc">
+        <li class="li">one set of two tables for absolute speed
+        </li><li class="li double">one set of two tables for average speed
+      </li></ul>
+
+    </li><li class="li">four tables for the maximum number of rides 
+exceeding a number of selected lengths, maximised for the number of 
+rides and the distance,
+      <ul class="disc">
+        <li class="li">one set of two tables for absolute distance
+        </li><li class="li double">one set of two tables for average distance
+      </li></ul>
+
+    </li><li class="li">a max/min/average summary for all weekdays (See <a href="#disclaimer">disclaimer</a>)
+    </li><li class="li double">a max/min/average summary for all months (See <a href="#disclaimer">disclaimer</a>)
+
+    </li><li class="li">a max/min/average summary for all rides per year
+    </li><li class="li double">a max/min/average summary for all days per year
+
+    </li><li class="li">a table of the distribution of distances per day (See <a href="#disclaimer">disclaimer</a>)
+    </li><li class="li double">a table of the distribution of speeds per day (See <a href="#disclaimer">disclaimer</a>)
+
+    </li><li class="li">a table with the first and last day for all distances (See <a href="#disclaimer">disclaimer</a>)
+    </li><li class="li double">a table with the first and last day for all speeds (See <a href="#disclaimer">disclaimer</a>)
+
+    </li><li class="li">four tables for the max/min speed &amp; max/min days for a given number of distances (See <a href="#disclaimer">disclaimer</a>)
+    </li><li class="li double">four tables for the max/min speed &amp; max/min distance for a given number of days (See <a href="#disclaimer">disclaimer</a>)
+
+    </li><li class="li">four tables for the maximum number of days 
+exceeding a number of selected velocities, maximised for the number of 
+days and the distance,
+      <ul class="disc">
+        <li class="li">one set of two tables for absolute speed (See <a href="#disclaimer">disclaimer</a>)
+        </li><li class="li double">one set of two tables for average speed (See <a href="#disclaimer">disclaimer</a>)
+      </li></ul>
+
+    </li><li class="li">four tables for the maximum number of days 
+exceeding a number of selected lengths, maximised for the number of days
+ and the distance,
+      <ul class="disc">
+        <li class="li">one set of two tables for absolute distance (See <a href="#disclaimer">disclaimer</a>)
+        </li><li class="li double">one set of two tables for average distance (See <a href="#disclaimer">disclaimer</a>)
+      </li></ul>
+
+    </li><li class="li">a table of the distribution of distances per trip
+    </li><li class="li double">a table of the distribution of velocities per trip
+
+    </li><li class="li">four tables for the max/min speed &amp; max/min trips for a given number of distances
+    </li><li class="li double">four tables for the max/min speed &amp; max/min distance for a given number of trips
+
+    </li><li class="li">four tables for the maximum number of trips 
+exceeding a number of selected velocities, maximised for the number of 
+trips and the distance,
+      <ul class="disc">
+        <li class="li">one set of two tables for absolute speed
+        </li><li class="li double">one set of two tables for average speed
+      </li></ul>
+
+    </li><li class="li">four tables for the maximum number of trips 
+exceeding a number of selected lengths, maximised for the number of 
+trips and the distance,
+      <ul class="disc">
+        <li class="li">one set of two tables for absolute distance
+        </li><li class="li double">one set of two tables for average distance
+      </li></ul>
+
+    </li><li class="li">a table with totals per weekday (See <a href="#disclaimer">disclaimer</a>)
+    </li><li class="li">a table with totals per month (See <a href="#disclaimer">disclaimer</a>)
+    </li><li class="li double">a table of general totals per year
+
+    </li><li class="li double">a table with the first/last ride/trip per year
+
+    </li><li class="li double">a table with usage of days per year
+
+    </li><li class="li double">a table with pickups on days per year
+
+    </li><li class="li double">a table with pickups per weekday per month
+
+    </li><li class="li double">a table of totals for consecutive days (See <a href="#disclaimer">disclaimer</a>)
+
+    </li><li class="li">two tables of totals for 24-hour periods
+      <ul class="disc">
+        <li class="li">maximum distance per 24-hour period per year
+        </li><li class="li double">consecutive longer 24-hour period distances
+      </li></ul>
+
+    </li><li class="li">a table of totals for 365 (or 366, if the period contains 29 February) day periods (See <a href="#disclaimer">disclaimer</a>)
+    </li><li class="li double">a table of the minimum number of rides needed for selected numbers of nationalities
+
+    </li><li class="li double">two tables (trip/year) with the number of calendar days, types, countries, and nationalities
+       of drivers met during the trip/year, split into total and “new”
+
+    </li><li class="li">four tables (two per type, two per nationality) with
+      <ul class="disc">
+        <li class="li">the longest run of consecutive rides for a single type or nationality
+        </li><li class="li double">the longest run of consecutive rides without a type or nationality
+      </li></ul>
+
+    </li><li class="li double">a table of pickup times per 6-hour interval per country
+
+    </li><li class="li double">two (ride + day) sets of three tables with 10% information about rides/days, distances, and times
+
+    </li><li class="li double">a table of DTV (+ L=) per type (“Thumb”, “Ask”, or “Other”) of pickup
+
+    </li><li class="li double">a table of waits per type of pickup, split into short and long waits
+
+    </li><li class="li double">six tables (three per country and year) for each type of pickup, split into internal and external rides
+
+    </li><li class="li double">a table with indicators which countries have been hitched-in or hitched-through and with locals or foreigners
+
+    </li><li class="li double">three tables showing the progressive maxima for distance, time, and velocity
+
+    </li><li class="li double">four tables (two for foreigners, two for natives) showing the progressive longer numbers and distances covered by both
+
+    </li><li class="li double">two tables (per type &amp; nationality) for the longest non-stop ride and the distribution of the number of stops
+
+    </li><li class="li double">a table of progressively longer distances per calendar day
+
+    </li><li class="li double">a table showing the distribution of the number of borders crossed for rides starting in a given country
+
+    </li><li class="li">a table showing the longest (distance-wise) and fastest rides crossing a set number of borders
+  </li></ol>
+
+<h4 id="flift">“lift.h-h” - Detailed summaries per trip, type, country, nationality, and year</h4>
+  <p>This file contains detailed summaries per trip, type (of driver/vehicle), country, nationality
+     (of driver), and year. It contains a section for each of these entities, split by
+     “<b>Totals per type/country/nationality/year</b>” separator pages.
+
+</p><h4 id="flift-sect-per-trip">The “per trip” section</h4>
+  <p>The “per trip” section contains four pages per trip:
+
+  </p><h5>Page 1</h5>
+    <ol>
+      <li id="flift-tot-per-day">a table with totals per day (See <a href="#disclaimer">disclaimer</a>)
+      </li><li>a table of totals for all distances
+      </li><li>a table of totals for all types
+      </li><li>a table of totals for all countries
+      </li><li>a table of totals for all nationalities
+      </li><li>a table of totals for all speeds
+      </li><li>a max/min/average summary for all rides and days (See <a href="#disclaimer">disclaimer</a>)
+     </li></ol>
+
+  <h5>Page 2</h5>
+    <ol>
+      <li>a table of totals for all waits
+      </li><li>a table of the statistical waiting time distribution
+      </li><li>a table of all in-ride waits per category (*)
+      </li><li>a table of all ex-ride waits per category (*)
+      </li><li>a table of waits per country, split in short and long waits
+      </li><li>a table of successively longer distances per 24-hours
+    </li></ol>
+
+  <h5>Page 3</h5>
+    <ol>
+      <li>three tables of pick-ups
+        <ul class="disc">
+          <li>per nationality per country
+          </li><li>per country per type
+          </li><li>per nationality per type
+        </li></ul>
+      </li>
+    </ol>
+
+  <h5>Page 4</h5>
+    <ol>
+      <li>a max/min/average summary for all types
+      </li><li>a max/min/average summary for all nationalities
+      </li><li>a max/min/average summary for all countries
+      </li><li>two tables detailing distances per country
+        <ul class="disc">
+          <li>a table listing the (partial) country distances in the order they were passed
+          </li><li>a table that just summarises the distance per country
+        </li></ul>
+    </li></ol>
+
+<h4 id="flift-sect-per-type">The “per type” section</h4>
+  <p>The “per type” section (currently) contains two pages per type (of driver/vehicle), containing
+     the following seven tables:
+
+  </p><h5>Page 1</h5>
+    <ol>
+      <li>a table of totals for all distances
+      </li><li>a table of totals for all countries
+      </li><li>a table of totals for all nationalities
+      </li><li>a table of totals for all speeds
+    </li></ol>
+
+  <h5>Page 2</h5>
+    <ol>
+      <li>a table with the distribution of hourly departure times per weekday
+      </li><li>a table of progressively longer rides for this type
+      </li><li>a table of progressively faster rides for this type
+      </li><li>a table of progressively longer non-stop rides
+      </li><li>a table of DTV (+ L=) per type (“Thumb”, “Ask”, or “Other”) of pickup
+      </li><li>a max/min/average summary for the type
+    </li></ol>
+
+  <p>Note that the “per type” section individual per-type pages do not contain a <b>totals-per-type</b>
+     table, as it would contain just a single line with the totals for that particular type. Instead
+     the type is merged into the heading of the totals-for-all-distances table.
+
+</p><h4 id="flift-sect-per-cnty">The “per country” section</h4>
+  <p>The “per country” section (currently) contains one page per country travelled in, containing
+     the following five tables:
+
+  </p><h5>Page 1</h5>
+    <ol>
+      <li>a table of totals for all waits
+      </li><li>a table of the statistical waiting time distribution
+      </li><li>a table with the distribution of departure times
+    </li></ol>
+
+  <h5>Page 2</h5>
+    <ol>
+      <li>a table of DTV (+ L=) per type (“Thumb”, “Ask”, or “Other”) of pickup
+      </li><li>a table of waits per type of pickup, split in short and long waits
+      </li><li>a table of progressively longer distances per calendar day for this country
+      </li><li>a table with the longest/fastest rides starting in this country and crossing successively more borders
+      </li><li>a max/min/average summary for the country, containing two
+ rows, one for the non-border-crossing rides, and one for the 
+border-crossing rides
+    </li></ol>
+
+  <p>Note that this section does not include a <b>totals-per-country</b> table. Like in the “per type”
+     section, the country is merged into the heading of the first table on the page.
+
+</p><h4 id="flift-sect-per-nat">The “per nationality” section</h4>
+  <p>The “per nationality” section (currently) contains one page per nationality of driver, containing
+     the following seven tables:
+
+  </p><h5>Page 1</h5>
+    <ol>
+      <li>a table of totals for all distances
+      </li><li>a table of totals for all types
+      </li><li>a table of totals for all countries
+      </li><li>a table of totals for all speeds
+      </li><li>a table of progressively longer rides for this nationality
+      </li><li>a table of progressively faster rides for this nationality
+      </li><li>a table of progressively longer non-stop rides
+      </li><li>a max/min/average summary for the nationality
+    </li></ol>
+
+  <p>Note that the “per nationality” section individual per-nationality pages do not contain a <b>totals-per-nationality</b>
+     table. It follows the format of the two previously described sections, and merges the nationality
+     into the heading of the first table on the page.
+
+</p><h4 id="flift-sect-per-year">The “per year” section</h4>
+  <p>The “per year” section (currently) contains six pages per year, containing
+     the following tables:
+
+  </p><h5>Page 1</h5>
+    <ol>
+      <li>a table of totals for all distances
+      </li><li>a table of totals for all types
+      </li><li>a table of totals for all countries
+      </li><li>a table of totals for all nationalities
+      </li><li>a table of totals for all speeds
+      </li><li>a max/min/average summary for all rides and days (See <a href="#disclaimer">disclaimer</a>)
+    </li></ol>
+
+  <h5>Page 2</h5>
+    <ol>
+      <li>a table of totals for all waits
+      </li><li>a table of the statistical waiting time distribution
+      </li><li>a table of all in-ride waits per category (*)
+      </li><li>a table of waits per country, split into short and long waits
+    </li></ol>
+
+  <h5>Page 3</h5>
+    <ol>
+      <li>three tables of pick-ups
+        <ul class="disc">
+          <li>per nationality per country
+          </li><li>per country per type
+          </li><li>per nationality per type
+        </li></ul>
+      </li>
+    </ol>
+
+  <h5>Page 4</h5>
+    <ol>
+      <li>a max/min/average summary for all types
+      </li><li>a max/min/average summary for all nationalities
+      </li><li>a max/min/average summary for all countries
+      </li><li>a table that summarises the distance per country, split into non-border-crossing and border-crossing rides
+    </li></ol>
+
+  <h5>Page 5</h5>
+    <ol>
+      <li>a table with the longest consecutive distance inside each country visited in the year
+      </li><li>a table with all per-country segments for the whole year
+    </li></ol>
+
+  <h5>Page 6</h5>
+    <ol>
+      <li>a table of totals for all distances per day (See <a href="#disclaimer">disclaimer</a>)
+      </li><li>a table of totals for all speeds per day (See <a href="#disclaimer">disclaimer</a>)
+      </li><li>a table with totals per weekday (See <a href="#disclaimer">disclaimer</a>)
+      </li><li>a table with totals per month (See <a href="#disclaimer">disclaimer</a>)
+      </li><li>a table with progressively longer 24-hour periods
+      </li><li>a table with the total period in days hitched during the year
+    </li></ol>
+
+  <p>Like in all previous sections, the year is merged into the heading of the first table on page 1 of each “per-year” page.
+
+</p><h4>Additional notes regarding the “lift.h-h” file</h4>
+  <ul class="disc">
+    <li>Tables marked with “(*)” above may not always be present.
+    </li><li>On some occasions logical pages may overflow onto a second physical page. <span class="pas">lift</span>
+        and <span class="pas">h-h2rtf</span> are not yet capable of detecting this problem.
+  </li></ul>
+
+<h4 id="fdays">“days.h-h” - Per day summary</h4>
+  <p>This file contains a single table with a line for every calendar day of every trip, detailing
+    </p><ul class="disc">
+      <li>the number of the trip
+      </li><li>the day in the trip
+      </li><li>the distance hitched during the day (See <a href="#disclaimer">disclaimer</a>)
+      </li><li>the (actual) driving time during the day (See <a href="#disclaimer">disclaimer</a>)
+      </li><li>the average velocity for the day
+      </li><li>the date
+    </li></ul>
+
+  <p>A follow-up program, <span class="pas">dayform</span>, will process this file, putting the
+     original single-column data into four columns of 70 rows. It also sorts the file into three
+     additional orders, Distance, Time and Velocity. If the data is required to be in .RTF format,
+     this program is required.
+
+</p><h4 id="ftrip">“trip.h-h” - Formatted input data</h4>
+  <p>This file contains the input data in a neat table, omitting the odometer, place of
+     departure, and arrival columns. <span class="pas">lift</span> will paginate trips that do
+     not fit on a single sheet of A4 paper.
+
+</p><h4 id="fweek">“week.h-h” - Weekday per year summary</h4>
+  <p>This file always contains the following two tables:
+
+    </p><ol>
+      <li>a table with the number of times and distance/time/velocity hitched on every weekday (Mon
+          to Sun) for every year, and
+      </li><li>a table of pickups and distance/time/velocity per weekday per day of the month (+ totals).
+    </li></ol>
+
+  <p>However, if the input file contains more than 1,000 rides, the second table is split out into
+      an additional 12 tables, one per month, replacing the pickups by the number of days hitched.
+
+</p><h4 id="fmnth">“mnth.h-h” - Month per year summaries</h4>
+  <p>This file contains five tables with monthly data:
+
+    </p><ol>
+      <li class="li">a table containing days hitched and distance per month per year, (See <a href="#disclaimer">disclaimer</a>)
+      </li><li class="li">a table cumulating the results of the previous table, giving a running total per year, (See <a href="#disclaimer">disclaimer</a>)
+      </li><li class="li" i="">a table detailing the total distance per calendar day per month, (See <a href="#disclaimer">disclaimer</a>)
+      </li><li class="li" i="">a table detailing the first use (or not) of all 366 calendar days, and
+      </li><li class="li">a table simply containing a list of days hitched, distances, time and velocities for every month. (See <a href="#disclaimer">disclaimer</a>)
+      </li><li class="li">five tables of cumulative data per month tables, sorted, except for the first, descending on
+      <ol>
+        <li class="al">the day of the month, 1..29/30/31
+        </li><li class="al">total days hitched for the day of the month
+        </li><li class="al">total distance  for the day of the month
+        </li><li class="al">total time for the day of the month
+        </li><li class="al">average velocity for the day of the month
+      </li></ol>
+    </li></ol>
+
+  <p>Like the first table in “week.h-h”, the first four tables in this file do not contain time or velocity data.
+
+  </p><p>A follow-up program, <span class="pas">mnthform</span>, will process this file, merging the first
+     four originally split-in-half tables, and putting the original single column data of the fifth into
+     four columns of (up to) 70 rows and sorts this table into four additional orders, Days, Distance,
+     Time and Velocity. It also produces five additional pages with per calendar month tables sorted in
+     days, distance, time, verlocity, and average distance per day per month. If the data is required
+     to be in .RTF format, this program is required.
+
+</p><h4 id="fntop">“ntop.h-h” - Top-N tables</h4>
+  <p>This file contains sets of three Top-N tables:
+  </p><ol>
+    <li class="li">three top-50 tables for all rides (for distance, time, and velocity)
+    </li><li class="li">three top-10 tables for each trip, type, country, nationality, and year (ditto)
+  </li></ol>
+
+  <p>In those cases where there are less than 10 rides in a trip, for a type, in a country,
+     for a nationality, or in a year, the Top-10 may actually reduce to, in some cases, a Top-1,
+     which is then repeated three times for distance, time, and velocity…
+
+</p><h4 id="fxtra">“xtra.h-h” - stuff</h4>
+  <p>This file contains six tables that should really be in “summ.h-h”, but due to the
+     fact that they are in landscape format, with lines much longer than the self-imposed
+     121-character line length limit of that file, they are in this file.
+
+  </p><p>The first two tables in this file record “milestones”:
+  </p><ol>
+    <li class="li">a table containing the details of the ride where Prino reached a “milestone” in number of rides
+    </li><li class="li">a table containing the details of the ride where Prino reached a “milestone” in the hitched distance
+  </li></ol>
+
+  <p>The next three tables contain all sets of “n” rides where
+  </p><ol>
+    <li>each ride in the set of “n” is longer than the previous one
+    </li><li>each ride in the set of “n” is faster than the previous one
+    </li><li>each ride in the set of “n” is longer <em>and</em> faster than the previous one
+  </li></ol>
+
+  <p>The final table contains a list of all progressively longer non-stop rides
+
+</p><h3>An optional program, <span class="pas">newlift</span></h3>
+  <p>The set of programs contains an optional program, <span class="pas">newlift</span>, which can be used to
+     remove all data that does not relate to the current trip from
+    </p><ul>
+      <li>“lift.h-h”, leaving only
+        <ul class="circle">
+          <li>four pages for the current trip,
+          </li><li>a “Totals per type” separator page, followed by two pages for every type that appeared in the current trip,
+          </li><li>a “Totals per country” separator page, followed by one page for every country that appeared in the current trip,
+          </li><li>a “Totals per nationality” separator page, followed by one page for every nationality that appeared in the current trip, and
+          </li><li class="li double">a “Totals per year” separator page, followed by six pages per year for the year(s) of the current trip.
+        </li></ul>
+      </li><li>“ntop.h-h”, leaving only
+        <ul class="circle">
+          <li>the three Top-50 tables (if any of them contains any reference to the current trip),
+          </li><li>a “Top-10 per trip” separator page, followed by the Top-10 table for the current trip
+          </li><li>a “Top-10 per type” separator page, followed by one page for every type that appeared in the current trip,
+          </li><li>a “Top-10 per country” separator page, followed by one page for every country that appeared in the current trip,
+          </li><li>a “Top-10 per nationality” separator page, followed by one page for every nationality that appeared in the current trip, and
+          </li><li class="li double">a “Top-10 per year” separator page, followed by one page for every year that contained rides of the current trip.
+        </li></ul>
+        <strong>Note:</strong> The “Top-10 per …” pages are always present in the output file, but the sections themselves may be
+        empty if the current trip does not contain any rides that end up in any of the Top-10 tables.<br><br>
+      </li><li>“trip.h-h”, leaving only
+        <ul class="circle">
+          <li>the page(s) containing the formatted output of the current trip.
+        </li></ul>
+    </li></ul>
+
+  <p>which is kinder to trees if you insist on also keeping the results on paper.
+
+</p><h3>Two more, somewhat less optional, programs, <span class="pas">dayform</span> and <span class="pas">mnthform</span></h3>
+  <p><span class="pas">dayform</span> is a post-processor for <span class="pas">lift</span>. It takes in
+     “days.h-h”, and spits it out in a multi-column (4x70) format. It also sorts the input file
+     into three additional (distance, time, and velocity) orders and outputs those in the same
+     multi-column format.
+
+  </p><p><span class="pas">mnthform</span> is another post-processor for <span class="pas">lift</span>. It takes in
+     “mnth.h-h”, merges the first four per-six-months tables, and converts the single column per-month data into
+     a multi-columnar (4x10n, n=1..7) format, creating a set of 15 tables—the cumulative data per month tables are
+     not changed
+
+     </p><ol>
+       <li>Months in Year order,
+       </li><li>Months in Days order,
+       </li><li>Months in Distance order,
+       </li><li>Months in Time order,
+       </li><li>Months in Velocity order,
+       </li><li>Months in Days per month order,
+       </li><li>Months in Distance per month order,
+       </li><li>Months in Time per month order,
+       </li><li>Months in Velocity per month order,
+       </li><li>Months in Average distance per day per month order,
+       </li><li>Cumulative distance for the day of the month, 1..29/30/31,
+       </li><li>Cumulative total days hitched for the day of the month,
+       </li><li>Cumlative total distance  for the day of the month,
+       </li><li>Cumulative total time for the day of the month, and
+       </li><li>Cumulative average velocity for the day of the month.
+     </li></ol>
+
+  <p>Note that <span class="pas">newlift</span> actually modifies the “lift.h-h”, “ntop.h-h”, and “trip.h-h” files,
+     whereas <span class="pas">dayform</span> and <span class="pas">mnthform</span> will spit out the result of
+     processing “days.h-h” and “mnth.h-h” into new files, “days.h-c” and “mnth.h-c”.
+
+    </p><p class="blup">Last updated on 25 September 2024 (Correct order of tables for “summ.h-h”)
+
+  </p><p style="display: none;"><a href="https://s05.flagcounter.com/more/FKn6"><img alt="Free counters!" src="description_files/Untitled.png"></a>
+
+</p></body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>

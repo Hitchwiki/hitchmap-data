@@ -1,0 +1,86 @@
+a {
+  background: none;
+  color: #002bb8;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #5a3696;
+}
+
+a:active {
+  color: #faa700;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a[data-pw] {
+   position: relative;
+}
+
+a[data-pw]:after {
+  content: attr(data-pw);
+  position: absolute;
+  left: 101%;
+  bottom: 0%;
+  background-color: ivory;
+  width: max-content;
+  opacity: 0;
+  transition: opacity 0.1s ease-in-out;
+  }
+
+a[data-pw]:hover:after {
+  opacity: 1;
+}
+
+.flagcounter {
+  display: none;
+}
+
+.grey {
+  color: grey;
+}
+
+.red {
+  color: red;
+}
+
+.green {
+  color: green;
+}
+
+.blue {
+  color: blue;
+}
+
+.black {
+  color: black;
+}
+
+.pas {
+  background-color: #F5FFFA;
+  color: black;
+  font-weight: bold;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.left {
+  text-align: left;
+}
+
+.right {
+  text-align: right;
+}
+
+.center {
+  text-align: center;
+}
+
+.justify {
+  text-align: justify;
+}
