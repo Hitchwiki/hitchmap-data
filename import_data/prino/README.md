@@ -1,6 +1,6 @@
 Hitchhiking records of [Robert Prins](https://prino.neocities.org) who recorded his trips throughout his life and achieved a Guinness World Record for hitchhiking.
 
-`raw.ods` > `rides.csv` as a tabular representation of all rides is obtained from [his website](https://prino.neocities.org/miscellaneous/keeping-statistics).
+`raw.ods` -> `rides.csv` as a tabular representation of all rides is obtained from [his website](https://prino.neocities.org/miscellaneous/keeping-statistics) via [this link](https://prino.neocities.org/resources/lift%20&%20v100+.ods).
 
 `description.html` is a dump of [his website](https://prino.neocities.org/miscellaneous/keeping-statistics) describing how to read `raw.ods`.
 
