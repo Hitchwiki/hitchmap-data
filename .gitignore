@@ -465,3 +465,4 @@ junit/
 
 # custom
 cache/
+dump.sqlite
