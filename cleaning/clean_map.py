@@ -32,7 +32,7 @@ import logging
 from stats import *
 from utils import *
 
-logging.basicConfig(filename='logging.log', encoding='utf-8', level=logging.INFO)
+
 # progress bars
 from tqdm import tqdm
 
@@ -52,7 +52,6 @@ def points_from_country(region="Germany", level="country"):
     points = points[points.progress_apply(lambda point: point["geometry"].within(polygon), axis=1)]
 
     return points
-# TODO why working on places and points at the same time - places are sufficient - modify points at the end only
 # TODO delete places in water
 # TODO write test for the single components?
 
@@ -61,6 +60,7 @@ def points_from_country(region="Germany", level="country"):
 region = "Germany"
 level = "country"
 
+logging.basicConfig(filename=f'./logging/logging_{region}.log', encoding='utf-8', level=logging.INFO)
 places_file = f"./data/places_{region}.csv"
 if not os.path.isfile(places_file):
     points = points_from_country(region, level)
@@ -237,7 +237,7 @@ for i in tqdm(range(0, N_CLUSTERS)):
     # fig, ax = osmnx.plot_graph(G)
     # #"natural"~"water"
 
-    services = feature_from_region(current_region, tags={"highway": "services"})
+    services = feature_from_region(current_region, tags={"highway": ["services", "rest_area"]})
     # query both features at once is faster
     fuel_parking = feature_from_region(
         current_region, tags={"amenity": ["parking", "fuel"]}
@@ -468,41 +468,45 @@ with open(f"./stats/stats_{region}.txt", "w") as f:
 # difference map
 # green points are from the new cleaned map vs red points from the original map
 
-map = folium.Map(prefer_canvas=True, control_scale=True)
+def save_as_map(places_to_save, set_of_places="normal"):
+    map = folium.Map(prefer_canvas=True, control_scale=True)
 
-def dot(lat, lon, color):
-    folium.CircleMarker([lat, lon], opacity=0.0, radius=5, fillOpacity=1.0, fillColor=color).add_to(map)
+    def dot(lat, lon, color):
+        folium.CircleMarker([lat, lon], opacity=0.0, radius=5, fillOpacity=1.0, fillColor=color).add_to(map)
 
-def line(lat1, lon1, lat2, lon2, color):
-    folium.PolyLine([(lat1, lon1), (lat2, lon2)], color=color).add_to(map)
+    def line(lat1, lon1, lat2, lon2, color):
+        folium.PolyLine([(lat1, lon1), (lat2, lon2)], color=color).add_to(map)
 
-for country, group in cleaned_places.groupby("country_group"):
-    for index, place in group.iterrows():
-        if place.road_delete:
-            dot(place.lat, place.lon, "black")
-        else:
-            dot(place.lat, place.lon, "lightgreen")
-            # if the place did not change only the red dot is visible
-            dot(place.original_lat, place.original_lon, "red")
+    for country, group in places_to_save.groupby("country_group"):
+        for index, place in group.iterrows():
+            if place.road_delete:
+                dot(place.lat, place.lon, "black")
+            else:
+                dot(place.lat, place.lon, "lightgreen")
+                # if the place did not change only the red dot is visible
+                dot(place.original_lat, place.original_lon, "red")
 
-            correction_line_color = None
-            if place.feature != None:
-                correction_line_color = "orange"
-            # after proximity merge places can still get moved/ merged because of there relation to a road
-            elif place.road_segment:
-                correction_line_color = "purple"
-            elif place.road_distance:
-                correction_line_color = "green"
-            elif place.proximity:
-                correction_line_color = "blue"
-            
-            
-            if correction_line_color is not None:
-                line(place.lat, place.lon, place.original_lat, place.original_lon, correction_line_color)
+                correction_line_color = None
+                if place.feature != None:
+                    correction_line_color = "orange"
+                # after proximity merge places can still get moved/ merged because of there relation to a road
+                elif place.road_segment:
+                    correction_line_color = "purple"
+                elif place.road_distance:
+                    correction_line_color = "green"
+                elif place.proximity:
+                    correction_line_color = "blue"
+                
+                
+                if correction_line_color is not None:
+                    line(place.lat, place.lon, place.original_lat, place.original_lon, correction_line_color)
 
-# show
-map.save("map.html")
-map
+    # show
+    map.save(f"./map/{set_of_places}/map_{region}.html")
+
+save_as_map(places_to_save=cleaned_places)
+places_to_save = cleaned_places[cleaned_places.proximity]
+save_as_map(places_to_save=places_to_save, set_of_places="merging")
 # TODO still have to perform the actual merge on both places and underlying points
 
 # eventually store results
