@@ -70,7 +70,7 @@ dependencies:
     - seaborn==0.13.0
     - shapely==2.0.2
     - six==1.16.0
-    - scikit-learn
+    - scikit-learn==1.6.0
     - snuggs==1.4.7
     - stack-data==0.6.2
     - tenacity==8.2.3

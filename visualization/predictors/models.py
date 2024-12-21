@@ -15,6 +15,7 @@ from shapely.ops import unary_union
 from shapely.validation import make_valid
 from sklearn.base import BaseEstimator, RegressorMixin
 from tqdm.auto import tqdm
+import time
 
 tqdm.pandas()
 
@@ -226,17 +227,20 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         country_shapes = countries.geometry
         country_shapes = country_shapes.apply(lambda x: make_valid(x))
         if show_states:
+            start = time.time()
             countries.plot(
                 ax=ax,
                 linewidth=0.5 * (0.1 * figsize),
                 facecolor="none",
                 edgecolor="black",
             )
+            print(f"Time elapsed to load countries: {time.time() - start}")
 
         # use a pre-compiles list of important roads
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_roads.zip
         # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
         if show_roads:
+            start = time.time()
             if self.verbose:
                 print("Loading roads...")
             roads = gpd.read_file("map_features/roads/ne_10m_roads.shp")
@@ -249,12 +253,14 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 color="gray",
                 zorder=2,
             )
+            print(f"Time elapsed to load roads: {time.time() - start}")
 
         # takes a lot of time
         # use a pre-compiled list of important cities
         # download https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_populated_places.zip
         # from https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
         if show_cities:
+            start = time.time()
             if self.verbose:
                 print("Loading cities...")
             cities = gpd.read_file("map_features/cities/ne_10m_populated_places.shp")
@@ -264,15 +270,19 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             cities.plot(
                 ax=ax, markersize=1.0 * figsize, color="navy", marker="o", zorder=10
             )
+            print(f"Time elapsed to load cities: {time.time() - start}")
 
         if show_points:
+            start = time.time()
             all_points.plot(ax=ax, markersize=10, color="red")
+            print(f"Time elapsed to load points: {time.time() - start}")
 
         # limit heatmap to landmass by asigning no data value to sea
         if self.verbose:
             print("Transforming heatmap...")
         nodata = np.nan
         with rasterio.open(map_path) as heatmap:
+            start = time.time()
             max_map_wait = heatmap.read().max()
             min_map_wait = heatmap.read().min()
             if self.verbose:
@@ -284,6 +294,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 heatmap, country_shapes, nodata=nodata
             )
             out_meta = heatmap.meta
+            print(f"Time elapsed to transform heatmap: {time.time() - start}")
 
         out_meta.update(
             {
@@ -332,6 +343,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         )  # background color light gray for landmass with uncertainties
 
         if show_uncertainties:
+            start = time.time()
             # let certainty have no influence on sea color
             uncertainties = np.where(
                 np.isnan(raster.read()[0]), uncertainties.min(), uncertainties
@@ -352,6 +364,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 np.float64
             )  # matplotlib cannot handle float128
             self.uncertainties = uncertainties
+            print(f"Time elapsed to load uncertainties: {time.time() - start}")
         else:
             uncertainties = 1.0
 

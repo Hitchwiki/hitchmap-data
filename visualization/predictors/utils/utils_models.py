@@ -80,11 +80,12 @@ def evaluate_cv(estimator, X, y, folds=5):
     return estimator.fit(X, y)
 
 
-def get_gpr(initial_kernel):
+def get_gpr(initial_kernel, train_from_scrath: bool = True):
+    optimizer = "fmin_l_bfgs_b" if train_from_scrath else None
     gpr = GaussianProcessRegressor(
         kernel=initial_kernel,
         alpha=0.0**2,
-        optimizer="fmin_l_bfgs_b",
+        optimizer=optimizer,
         normalize_y=True,
         n_restarts_optimizer=0,
         random_state=42,
@@ -110,8 +111,8 @@ def fit_gpr_silent(gpr, X, y):
     return gpr
 
 
-def get_optimized_gpr(initial_kernel, X, y, verbose=False):
-    gpr = get_gpr(initial_kernel=initial_kernel)
+def get_optimized_gpr(initial_kernel, X, y, train_from_scratch: bool=True, verbose : bool=False):
+    gpr = get_gpr(initial_kernel=initial_kernel, train_from_scrath=train_from_scratch)
     if verbose:
         gpr = fit_gpr(gpr, X, y)
     else:

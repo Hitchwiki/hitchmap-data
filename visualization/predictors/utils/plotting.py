@@ -15,7 +15,7 @@ from utils_data import get_points
 from utils_map import *
 from utils_models import TargetTransformer
 
-f
+
 def plot_distribution_of_data_points():
     points = get_points("../data/points_train.csv")
 
