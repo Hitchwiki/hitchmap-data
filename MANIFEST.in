@@ -1,5 +1,4 @@
 include README.md
 include LICENSE
 graft cleaning
-graft import_data
 graft visualization
