@@ -1,0 +1,13 @@
+folium
+geopandas
+ipykernel
+ipython
+matplotlib
+numpy
+osmnx
+pandas
+scikit-learn
+scipy
+shapely
+tqdm
+lingua-language-detector
