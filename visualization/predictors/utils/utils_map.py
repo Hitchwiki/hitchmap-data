@@ -124,7 +124,7 @@ def raster_from_model(
             resolution=resolution,
         )
 
-    raster_maker.raw_raster = map
+    raster_maker.raw_raster : np.array = map
     if show_uncertainties:
         raster_maker.raw_uncertainties = uncertainty_map
 

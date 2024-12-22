@@ -7,6 +7,7 @@ import shapely
 from matplotlib import pyplot as plt
 from shapely.geometry import Point
 from tqdm import tqdm
+import sqlite3
 
 from utils_map import *
 
@@ -15,7 +16,21 @@ WAIT_MAX = DAY
 
 
 def get_points(path, wait_max=WAIT_MAX):
-    points = gpd.read_file(path)
+    file_type = path.split(".")[-1]
+    if file_type == "csv":
+        points = gpd.read_file(path)
+    elif file_type == "sqlite":
+        points = pd.read_sql('select * from points where not banned', sqlite3.connect(path))
+        # unnecessary/ unknown features
+        points = points.drop(columns=['banned','ip'])
+        # fokus on basic features
+        points = points[['lat', 'lon', 'wait']]
+        points = points.dropna()
+        waiting_time_per_point = points.groupby(["lat", "lon"]).mean()
+        waiting_time_per_point = waiting_time_per_point.reset_index()
+        points = gpd.GeoDataFrame(waiting_time_per_point, geometry=gpd.GeoSeries())
+    else:
+        raise ValueError(f"File type of {path} not supported.")
     points.wait = points.wait.astype(float)
     points.lat = points.lat.astype(float)
     points.lon = points.lon.astype(float)
@@ -69,17 +84,17 @@ def get_cut_through_germany():
 
 def get_from_region(region):
     points = get_points("../data/points_train_val.csv")
-    points, polygon, map_boundary = get_points_in_region(points, region)
+    points, _, _ = get_points_in_region(points, region)
     points["lon"] = points.geometry.x
     points["lat"] = points.geometry.y
 
     train = get_points("../data/points_train.csv")
-    train, polygon, map_boundary = get_points_in_region(train, region)
+    train, _, _ = get_points_in_region(train, region)
     train["lon"] = train.geometry.x
     train["lat"] = train.geometry.y
 
     val = get_points("../data/points_val.csv")
-    val, polygon, map_boundary = get_points_in_region(val, region)
+    val, _, _ = get_points_in_region(val, region)
     val["lon"] = val.geometry.x
     val["lat"] = val.geometry.y
 

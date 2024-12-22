@@ -24,9 +24,26 @@ RESOLUTION = 2
 # 180 degree meridian in epsg 3857
 MERIDIAN = 20037508
 
+BUCKETS = [
+    "#008200",  # dark green
+    "#00c800",  # light green
+    "#c8ff00",  # light yellow
+    "#ffff00",  # yellow
+    "#ffc800",  # light orange
+    "#ff8200",  # dark orange
+    "red",  # red
+    "#c80000",  # dark red
+    "#820000",  # wine red
+    "#330101",  # drop?
+]
+
+# define the heatmap color scale
+# values higher than the upper boundary are colored in the upmost color
+BOUNDARIES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
 
 class MapBasedModel(BaseEstimator, RegressorMixin):
-    def __init__(self, method, region="world", resolution=RESOLUTION, verbose=False):
+    def __init__(self, method:str, region:str="world", resolution:int=RESOLUTION, verbose:bool=False):
         self.method = method
         self.region = region
         self.resolution = resolution  # pixel per degree
@@ -193,16 +210,40 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         self,
         points=None,
         all_points=None,
-        show_states=True,
-        show_cities=False,
-        show_roads=False,
-        show_points=False,
-        show_axis=False,
-        show_uncertainties=False,
-        discrete_uncertainties=False,
-        final=False,
-        figsize=10,
+        show_states:bool=True,
+        show_cities:bool=False,
+        show_roads:bool=False,
+        show_points:bool=False,
+        show_axis:bool=False,
+        show_uncertainties:bool=False,
+        discrete_uncertainties:bool=False,
+        final:bool=False,
+        figsize:int=10,
     ):
+        """Creates the map from rasterio .tif raster.
+        
+        Args:
+            points: GeoDataFrame with hitchhiking spots
+            all_points: GeoDataFrame with all hitchhiking spots
+            show_states: bool, default=True
+                Whether to show country borders
+            show_cities: bool, default=False
+                Whether to show cities
+            show_roads: bool, default=False
+                Whether to show roads
+            show_points: bool, default=False
+                Whether to show hitchhiking spots
+            show_axis: bool, default=False
+                Whether to show axis labels
+            show_uncertainties: bool, default=False
+                Whether to show uncertainties in waiting time estimation
+            discrete_uncertainties: bool, default=False
+                Whether to show discrete uncertainties
+            final: bool, default=False
+                Whether to show the final map
+            figsize: int, default=10
+                Size of the figure
+        """
         # setup
         if not hasattr(self, "raw_uncertainties"):
             uncertainties = 1.0
@@ -310,8 +351,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             destination.write(out_image)
 
         # plot the heatmap
-        if self.verbose:
-            print("Plotting heatmap...")
+        print("Plotting heatmap...") if self.verbose else None
         raster = rasterio.open(new_map_path)
 
         # TODO smoother spectrum instead of buckets
@@ -616,7 +656,7 @@ class WeightedAveragedGaussian(MapBasedModel):
         no_data_threshold=0.00000001,
     ):
         self.raster = None
-        self.raw_raster = None
+        self.raw_raster : np.array = None
 
         self.points = X
         self.circle_size = 50000

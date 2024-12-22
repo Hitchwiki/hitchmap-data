@@ -44,6 +44,7 @@ class TransformedTargetRegressorWithUncertainty(TransformedTargetRegressor):
         Predict using the underlying regressor and transform the result back.
         """
         # always return the standard deviation as it is required for the proper inverse_transform
+        # regressor_ is the fitted regressor
         model: BaseEstimator = self.regressor_
         tran_pred, tran_std = model.predict(X, return_std=True)
         if transform_predictions:
