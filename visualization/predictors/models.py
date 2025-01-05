@@ -57,6 +57,11 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         self.version = version
         self.verbose = verbose
 
+        self.map_boundary = self.get_map_boundary()
+        self.rasterio_path = f"intermediate/map_{self.method}_{self.region}_{self.resolution}_{self.version}.tif"
+        self.map_path = f"intermediate/map_{method}_{region}_{resolution}_{version}.txt"
+    
+
     def get_map_boundary(self):
         # [lon_bottom_left, lat_bottom_left, lon_top_right, lat_top_right]
         maps = {
@@ -115,7 +120,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         return polygon
 
     def save_as_raster(self):
-        map_path = self.get_raster_path()
+        """Saves as .tif raster for rasterio."""
 
         polygon_vertices_x, polygon_vertices_y, pixel_width, pixel_height = (
             self.define_raster()
@@ -153,7 +158,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         # important: rasterio requires [0,0] of the raster to be in the upper left corner and [rows, cols] in the lower right corner
         # TODO find out why raster is getting smaller in x direction when stored as tif (e.g. 393x700 -> 425x700)
         with rasterio.open(
-            map_path,
+            self.rasterio_path,
             "w",
             driver="GTiff",
             height=self.raw_raster.shape[0],
@@ -165,13 +170,67 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         ) as destination:
             destination.write(self.raw_raster, 1)
 
-        self.raster = rasterio.open(map_path)
+        self.raster = rasterio.open(self.rasterio_path)
 
         return map
 
+    def get_landmass_raster(self):
+        countries = gpd.read_file(
+            "map_features/countries/ne_110m_admin_0_countries.shp"
+        )
+        countries = countries.to_crs(epsg=3857)
+        countries = countries[countries.NAME != "Antarctica"]
+        country_shapes = countries.geometry
+        country_shapes = country_shapes.apply(lambda x: make_valid(x))
+        self.landmass_raster = np.zeros(map.grid.shape[1:])
+        for x, vertical_line in tqdm(enumerate(map.grid.transpose()), total=len(map.grid.transpose())):
+            for y, coords in enumerate(vertical_line):
+                this_point = Point(float(coords[0]), float(coords[1]))
+                self.landmass_raster[y][x] = 1 if any([country_shape.contains(this_point) for country_shape in country_shapes]) else 0
+
+    def get_recalc_raster(self):
+
+        def pixel_from_point(point) -> tuple[int, int]:
+            lats = map.Y.transpose()[0]
+            lat_index = None
+            for i, lat in enumerate(lats):
+                if lat >= point["lat"] and point["lat"] >= lats[i+1]:
+                    lat_index = i
+                    break
+
+            lons = map.X[0]
+            lon_index = None
+            for i, lon in enumerate(lons):
+                if lon <= point["lon"] and point["lon"] <= lons[i+1]:
+                    lon_index = i
+                    break
+
+            return (lat_index, lon_index)
+
+        recalc_radius = 800000 # TODO: determine from model largest influence radius
+        recalc_radius_pixels = int(np.ceil(abs(recalc_radius / (map.grid[0][0][0] - map.grid[0][0][1]))))
+
+        self.recalc_raster = np.zeros(map.grid.shape[1:])
+        self.recalc_raster.shape
+        for i, point in points.iterrows():
+            lat_pixel, lon_pixel = pixel_from_point(point)
+
+            for i in range(lat_pixel - recalc_radius_pixels, lat_pixel + recalc_radius_pixels):
+                for j in range(lon_pixel - recalc_radius_pixels, lon_pixel + recalc_radius_pixels):
+                    if i < 0 or j < 0 or i >= self.recalc_raster.shape[0] or j >= self.recalc_raster.shape[1]:
+                        continue
+                    self.recalc_raster[i, j] = 1
+        
+        print("Report reduction of rasters.")
+        print(self.recalc_raster.sum(), self.recalc_raster.shape[0] * self.recalc_raster.shape[1], self.recalc_raster.sum() / (self.recalc_raster.shape[0] * self.recalc_raster.shape[1]))
+        self.get_landmass_raster()
+        self.recalc_raster = self.recalc_raster * self.landmass_raster
+        print(self.landmass_raster.sum(), self.landmass_raster.shape[0] * self.landmass_raster.shape[1], self.landmass_raster.sum() / (self.landmass_raster.shape[0] * self.landmass_raster.shape[1]))
+        print(self.recalc_raster.sum(), self.recalc_raster.shape[0] * self.recalc_raster.shape[1], self.recalc_raster.sum() / (self.recalc_raster.shape[0] * self.recalc_raster.shape[1]))
+
+
     def get_map_grid(self) -> np.array:
         """Create pixel grid for map."""
-        self.map_boundary = self.get_map_boundary()
 
         xx, yy, pixel_width, pixel_height = self.define_raster()
         # handling special case when map spans over the 180 degree meridian
@@ -215,10 +274,6 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         return xx, yy, pixel_width, pixel_height
 
-    def get_raster_path(self):
-        """Path to map raster as .tif file to work with in rasterio."""
-        return f"intermediate/map_{self.method}_{self.region}_{self.resolution}_{self.version}.tif"
-
     def build_map(
         self,
         points=None,
@@ -261,7 +316,6 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         else:
             uncertainties = self.raw_uncertainties
         self.map_boundary = self.get_map_boundary()
-        map_path = self.get_raster_path()
 
         fig, ax = plt.subplots(figsize=(figsize, figsize))
 
@@ -333,7 +387,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         if self.verbose:
             print("Transforming heatmap...")
         nodata = np.nan
-        with rasterio.open(map_path) as heatmap:
+        with rasterio.open(self.rasterio_path) as heatmap:
             start = time.time()
             max_map_wait = heatmap.read().max()
             min_map_wait = heatmap.read().min()

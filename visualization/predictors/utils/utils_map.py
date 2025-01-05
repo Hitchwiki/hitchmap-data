@@ -103,7 +103,7 @@ def raster_from_model(
     )
 
     grid = raster_maker.get_map_grid()
-    height = X.shape[0]
+    height = raster_maker.X.shape[0]
     map = np.empty((0, height))
     if show_uncertainties:
         uncertainty_map = np.empty((0, height))
