@@ -2,6 +2,8 @@
 
 `final_maps`/ ... high resolution maps
 
+`map_features/` ... contains geodata of features that can be displayed on maps
+
 `maps`/ ... more maps
 
 `intermediate/` ... maps in raw format
