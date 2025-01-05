@@ -43,10 +43,18 @@ BOUNDARIES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 
 class MapBasedModel(BaseEstimator, RegressorMixin):
-    def __init__(self, method:str, region:str="world", resolution:int=RESOLUTION, verbose:bool=False):
+    def __init__(
+        self,
+        method: str,
+        region: str = "world",
+        resolution: int = RESOLUTION,
+        version: str = "",
+        verbose: bool = False,
+    ):
         self.method = method
         self.region = region
         self.resolution = resolution  # pixel per degree
+        self.version = version
         self.verbose = verbose
 
     def get_map_boundary(self):
@@ -68,9 +76,9 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         }
 
         return maps[self.region]
-    
-    # define where the descriptive text should be placed on the map
+
     def get_text_anchor(self):
+        """Define where the descriptive text should be placed on the map."""
         anchors = {
             "europe": Point(-10, 70),
             "world": Point(-170, -20),
@@ -88,7 +96,6 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         anchor = anchor.geometry[0]
 
         return anchor
-
 
     def map_to_polygon(self):
         # create boundary polygon
@@ -162,8 +169,8 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         return map
 
-    # create pixel grid for map
-    def get_map_grid(self):
+    def get_map_grid(self) -> np.array:
+        """Create pixel grid for map."""
         self.map_boundary = self.get_map_boundary()
 
         xx, yy, pixel_width, pixel_height = self.define_raster()
@@ -184,7 +191,12 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         self.X = np.longdouble(self.X)
         self.Y = np.longdouble(self.Y)
 
+        grid = np.array((self.X, self.Y))
+        self.grid = grid
+        return grid
+
     def define_raster(self):
+        """Defines the raster in mercator projection not in usual degrees."""
         xx, yy = self.map_to_polygon().exterior.coords.xy
 
         # Note above return values are of type `array.array`
@@ -204,27 +216,26 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         return xx, yy, pixel_width, pixel_height
 
     def get_raster_path(self):
-        return f"intermediate/map_{self.method}_{self.region}_{self.resolution}.tif"
+        """Path to map raster as .tif file to work with in rasterio."""
+        return f"intermediate/map_{self.method}_{self.region}_{self.resolution}_{self.version}.tif"
 
     def build_map(
         self,
         points=None,
-        all_points=None,
-        show_states:bool=True,
-        show_cities:bool=False,
-        show_roads:bool=False,
-        show_points:bool=False,
-        show_axis:bool=False,
-        show_uncertainties:bool=False,
-        discrete_uncertainties:bool=False,
-        final:bool=False,
-        figsize:int=10,
+        show_states: bool = True,
+        show_cities: bool = False,
+        show_roads: bool = False,
+        show_points: bool = False,
+        show_axis: bool = False,
+        show_uncertainties: bool = False,
+        discrete_uncertainties: bool = False,
+        final: bool = False,
+        figsize: int = 10,
     ):
         """Creates the map from rasterio .tif raster.
-        
+
         Args:
             points: GeoDataFrame with hitchhiking spots
-            all_points: GeoDataFrame with all hitchhiking spots
             show_states: bool, default=True
                 Whether to show country borders
             show_cities: bool, default=False
@@ -315,7 +326,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         if show_points:
             start = time.time()
-            all_points.plot(ax=ax, markersize=10, color="red")
+            points.plot(ax=ax, markersize=10, color="red")
             print(f"Time elapsed to load points: {time.time() - start}")
 
         # limit heatmap to landmass by asigning no data value to sea
@@ -346,7 +357,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
             }
         )
 
-        new_map_path = f"intermediate/map_{self.method}_{self.region}_{self.resolution}_processed.tif"
+        new_map_path = f"intermediate/map_{self.method}_{self.region}_{self.resolution}_{self.version}_processed.tif"
         with rasterio.open(new_map_path, "w", **out_meta) as destination:
             destination.write(out_image)
 
@@ -416,7 +427,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
 
         if final:
             anchor = self.get_text_anchor()
-            
+
             fontsize_factor = 1.0 if self.region == "world" else 1.2
             region_text = self.region.replace("_", " ").title()
             if self.region == "world":
@@ -426,9 +437,15 @@ worldwide"""
                 text = f"""Hitchhiking waiting times
 in {region_text}"""
 
-
-
-            ax.text(anchor.x, anchor.y, text, fontsize=figsize * fontsize_factor, fontfamily='serif', verticalalignment='top', fontweight='bold')
+            ax.text(
+                anchor.x,
+                anchor.y,
+                text,
+                fontsize=figsize * fontsize_factor,
+                fontfamily="serif",
+                verticalalignment="top",
+                fontweight="bold",
+            )
             text = f"""
 
 
@@ -439,7 +456,14 @@ https://github.com/Hitchwiki/hitchmap-data
 made by Till Wenke (April 2024)
 wenke.till@gmail.com"""
 
-            ax.text(anchor.x, anchor.y, text, fontsize=figsize * fontsize_factor / 2, fontfamily='serif', verticalalignment='top')
+            ax.text(
+                anchor.x,
+                anchor.y,
+                text,
+                fontsize=figsize * fontsize_factor / 2,
+                fontfamily="serif",
+                verticalalignment="top",
+            )
 
         if show_axis:
             ax.set_xlabel("Longitude", fontsize=figsize)
@@ -460,11 +484,13 @@ wenke.till@gmail.com"""
             cax = fig.add_axes(
                 [
                     ax.get_position().x1 + 0.01,
-                    ax.get_position().y0 + (ax.get_position().height * 2 / 3) - (ax.get_position().height / 20),
+                    ax.get_position().y0
+                    + (ax.get_position().height * 2 / 3)
+                    - (ax.get_position().height / 20),
                     0.02,
                     (ax.get_position().height / 3),
                 ]
-        )
+            )
 
             cbar_uncertainty = fig.colorbar(
                 cm.ScalarMappable(norm=norm_uncertainties, cmap=cmap_uncertainties),
@@ -472,7 +498,9 @@ wenke.till@gmail.com"""
             )
             cbar_uncertainty.ax.tick_params(labelsize=figsize)
             cbar_uncertainty.ax.set_ylabel(
-                "Uncertainty in waiting time estimation", rotation=90, fontsize=figsize * 2 / 3
+                "Uncertainty in waiting time estimation",
+                rotation=90,
+                fontsize=figsize * 2 / 3,
             )
 
         # from https://stackoverflow.com/a/56900830
@@ -656,7 +684,7 @@ class WeightedAveragedGaussian(MapBasedModel):
         no_data_threshold=0.00000001,
     ):
         self.raster = None
-        self.raw_raster : np.array = None
+        self.raw_raster: np.array = None
 
         self.points = X
         self.circle_size = 50000

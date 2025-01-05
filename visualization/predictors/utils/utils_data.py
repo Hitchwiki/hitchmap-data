@@ -15,7 +15,7 @@ DAY = 24 * 60
 WAIT_MAX = DAY
 
 
-def get_points(path, wait_max=WAIT_MAX, until:pd.Timestamp=pd.Timestamp.today()):
+def get_points(path, wait_max=WAIT_MAX, begin:pd.Timestamp=pd.Timestamp.min, until:pd.Timestamp=pd.Timestamp.today()):
     file_type = path.split(".")[-1]
     if file_type == "csv":
         points = gpd.read_file(path)
@@ -25,6 +25,7 @@ def get_points(path, wait_max=WAIT_MAX, until:pd.Timestamp=pd.Timestamp.today())
         points = points.drop(columns=['banned','ip'])
         points["datetime"] = pd.to_datetime(points["datetime"])
         points = points[points["datetime"] < until]
+        points = points[points["datetime"] > begin]
         # fokus on basic features
         points = points[['lat', 'lon', 'wait']]
         points = points.dropna()

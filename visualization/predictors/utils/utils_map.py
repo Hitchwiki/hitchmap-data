@@ -18,21 +18,28 @@ RESOLUTION = 2
 
 
 def save_numpy_map(
-    map, region="world", method="ordinary", kind_of_map="map", resolution=RESOLUTION
+    map,
+    region="world",
+    method="ordinary",
+    kind_of_map="map",
+    resolution=RESOLUTION,
+    version: str = "",
 ):
-    map_path = f"intermediate/{kind_of_map}_{method}_{region}_{resolution}.txt"
+    map_path = (
+        f"intermediate/{kind_of_map}_{method}_{region}_{resolution}_{version}.txt"
+    )
     np.savetxt(map_path, map)
 
 
 def load_numpy_map(
-    region="world", method="ordinary", kind_of_map="map", resolution=RESOLUTION
+    region="world", method="ordinary", kind_of_map="map", version:str="", resolution=RESOLUTION
 ):
-    map_path = f"intermediate/{kind_of_map}_{method}_{region}_{resolution}.txt"
+    map_path = f"intermediate/{kind_of_map}_{method}_{region}_{resolution}_{version}.txt"
     return np.loadtxt(map_path)
 
 
-def load_raster(region="world", method="ordinary", resolution=RESOLUTION):
-    map_path = f"intermediate/map_{method}_{region}_{resolution}.tif"
+def load_raster(region="world", method="ordinary", version:str="", resolution=RESOLUTION):
+    map_path = f"intermediate/map_{method}_{region}_{resolution}_{version}.tif"
     return rasterio.open(map_path)
 
 
@@ -78,17 +85,24 @@ def get_points_in_region(points, region="world"):
 
 
 def raster_from_model(
-    model, region, resolution=RESOLUTION, show_uncertainties=False, verbose=False
+    model,
+    region,
+    resolution=RESOLUTION,
+    show_uncertainties=False,
+    verbose=False,
+    version: str = "",
 ):
     model_name = type(model).__name__
 
     raster_maker = MapBasedModel(
-        method=model_name, region=region, resolution=resolution, verbose=verbose
+        method=model_name,
+        region=region,
+        resolution=resolution,
+        version=version,
+        verbose=verbose,
     )
 
-    raster_maker.get_map_grid()
-    X, Y = raster_maker.X, raster_maker.Y
-    grid = np.array((X, Y))
+    grid = raster_maker.get_map_grid()
     height = X.shape[0]
     map = np.empty((0, height))
     if show_uncertainties:
@@ -107,14 +121,23 @@ def raster_from_model(
         map = np.vstack((map, pred))
 
     print(f"Time elapsed to compute full map: {time.time() - start}")
-    print(f"For map of shape: {map.shape} that is {map.shape[0] * map.shape[1]} pixels and a time per pixel of {(time.time() - start) / (map.shape[0] * map.shape[1])} seconds")
+    print(
+        f"For map of shape: {map.shape} that is {map.shape[0] * map.shape[1]} pixels and a time per pixel of {(time.time() - start) / (map.shape[0] * map.shape[1])} seconds"
+    )
 
     # because we vstacked above
     map = map.T
     if show_uncertainties:
         uncertainty_map = uncertainty_map.T
 
-    save_numpy_map(map, region=region, method=model_name, resolution=resolution)
+    save_numpy_map(
+        map,
+        region=region,
+        method=model_name,
+        resolution=resolution,
+        version=version,
+    )
+
     if show_uncertainties:
         save_numpy_map(
             uncertainty_map,
@@ -122,9 +145,10 @@ def raster_from_model(
             method=model_name,
             kind_of_map="uncertainty",
             resolution=resolution,
+            version=version,
         )
 
-    raster_maker.raw_raster : np.array = map
+    raster_maker.raw_raster: np.array = map
     if show_uncertainties:
         raster_maker.raw_uncertainties = uncertainty_map
 
@@ -201,7 +225,7 @@ def generate_highres_map(
         show_roads=show,
         show_uncertainties=show_uncertainties,
         discrete_uncertainties=discrete_uncertainties,
-        figsize=figsize
+        figsize=figsize,
     )
 
 
