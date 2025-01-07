@@ -9,6 +9,7 @@ from shapely.geometry import Polygon
 from tqdm import tqdm
 from tqdm.auto import tqdm
 import time
+from map_based_model import MapBasedModel
 
 from models import *
 
@@ -152,7 +153,7 @@ def raster_from_model(
     if show_uncertainties:
         raster_maker.raw_uncertainties = uncertainty_map
 
-    raster_maker.save_as_raster()
+    raster_maker.save_as_rasterio()
 
     return raster_maker
 

@@ -1,9 +1,14 @@
 import sys
 sys.path.append('./utils')
-from utils_imports import *
+from utils.utils_data import get_points
+from utils.utils_map import raster_from_model
+import pickle
+from utils.utils_models import fit_gpr_silent
+
+
 # train
 res = 10
-points = get_points("dump.sqlite", until=pd.Timestamp("2024-01-30"))
+points = get_points("dump.sqlite")
 points["lon"] = points.geometry.x
 points["lat"] = points.geometry.y
 
@@ -14,9 +19,7 @@ X.shape, y.shape
 with open("models/kernel.pkl", "rb") as file:
     gpr = pickle.load(file)
     
-print(gpr.regressor.optimizer)
 gpr.regressor.optimizer = None
-print(gpr.regressor.optimizer)
 
 gpr = fit_gpr_silent(gpr, X, y)
 raster_maker = raster_from_model(
@@ -24,6 +27,7 @@ raster_maker = raster_from_model(
     "world",
     res,
     show_uncertainties=True,
+    version="dev",
     verbose=True,
 )
 

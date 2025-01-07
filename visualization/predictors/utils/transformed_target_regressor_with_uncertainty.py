@@ -39,10 +39,11 @@ class TransformedTargetRegressorWithUncertainty(TransformedTargetRegressor):
 
         return super().fit(X, y, **fit_params)
 
-    def predict(self, X, return_std=False, transform_predictions=True, **predict_params):
+    def predict(self, X, return_std=False, transform_predictions=True, verbose=True, **predict_params):
         """
         Predict using the underlying regressor and transform the result back.
         """
+        print(f"Model called for prediction with X of shape {X.shape}")
         # always return the standard deviation as it is required for the proper inverse_transform
         # regressor_ is the fitted regressor
         model: BaseEstimator = self.regressor_
