@@ -1,4 +1,4 @@
-name: heatchmap
+name: hitchmap-data
 dependencies:
   - pip
   - python=3.10
