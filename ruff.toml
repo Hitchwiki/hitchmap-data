@@ -18,7 +18,3 @@ select = [
     # pycodestyle
     "D"
 ]
-
-[lint.pydocstyle]
-# Use Google-style docstrings.
-convention = "google"
