@@ -3,6 +3,7 @@ dependencies:
   - pip
   - python=3.10
   - pip:
+    - datasets
     - folium
     - geopandas
     - ipykernel
