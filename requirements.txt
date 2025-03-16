@@ -3,6 +3,7 @@ geopandas
 ipykernel
 ipython
 matplotlib
+networkx
 numpy
 osmnx
 pandas
