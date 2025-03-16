@@ -1,26 +1,10 @@
 # All things data science on the data from [Hitchmap](https://hitchmap.com).
 
-[![PyPI version](https://badge.fury.io/py/heatchmap.svg)](https://badge.fury.io/py/heatchmap)
-
 `cleaning/` ... ideas how to tidy up the data
 
 `visualization/` ... hitchhiking maps - using the data to build models that can predict hitchhiking waiting time and to draw maps
 
-## Installation
+`import_data/` ... taking significant amounts of self-logged hitchhiking experiences and bringing it into the hitchmap format to be imported there bulk.
 
-You can install the `heatchmap` package from PyPI:
 
-```bash
-pip install heatchmap
-```
-
-## Usage
-
-Here are some usage examples for the `heatchmap` package:
-
-```python
-import heatchmap
-
-# Example usage
-# Add your usage examples here
-```
+install pyvenv from requirements.txt is suffcient at the start

@@ -466,3 +466,5 @@ junit/
 # custom
 cache/
 dump.sqlite
+
+*.csv
