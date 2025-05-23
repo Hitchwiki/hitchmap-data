@@ -1,3 +1,9 @@
+[deprecated]
+
+This approach of cleaning by merging spots is not too relevant anymore. There is another approach used on `hitchmap.com` used now.
+
+Feel free to still use this space here to explore new/ more ideas on how to clean the vast amount of hitchhiking rides data.
+
 # hitchmap_data_cleaning
 
 Relaunching the https://hitchmap.com via https://github.com/bopjesvla/hitch with more meaningful hitchhiking spots.

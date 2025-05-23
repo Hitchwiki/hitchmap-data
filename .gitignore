@@ -468,3 +468,7 @@ cache/
 dump.sqlite
 
 *.csv
+
+huggingface/
+points.sqlite
+*.png

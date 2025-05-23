@@ -6,6 +6,7 @@ dependencies:
     - datasets
     - folium
     - geopandas
+    - heatchmap
     - ipykernel
     - ipython
     - matplotlib
@@ -14,6 +15,7 @@ dependencies:
     - pandas
     - scikit-learn
     - scipy
+    - seaborn
     - shapely
     - tqdm
     - lingua-language-detector
