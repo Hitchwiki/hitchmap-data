@@ -19,3 +19,4 @@ dependencies:
     - shapely
     - tqdm
     - lingua-language-detector
+    - worldmap
