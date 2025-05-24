@@ -4,7 +4,7 @@ dependencies:
   - python=3.10
   - pip:
     - datasets
-    - folium
+    - folium==0.19.6
     - geopandas
     - heatchmap
     - ipykernel
@@ -13,6 +13,7 @@ dependencies:
     - numpy
     - osmnx
     - pandas
+    - pycountry
     - scikit-learn
     - scipy
     - seaborn

@@ -194,11 +194,8 @@ def show_map(path="maps/map.png"):
 # draw a map from pre-computed raster
 def generate_highres_map(
     region,
-    resolution=RESOLUTION,
     show_uncertainties=False,
-    verbose=False,
     discrete_uncertainties=False,
-    return_raster=False,
     final=False,
     figsize=10,
     show=True,

@@ -1,7 +1,6 @@
 import geopandas as gpd
 import matplotlib.colors as colors
 import numpy as np
-import pandas as pd
 import rasterio
 import rasterio.mask
 import rasterio.plot
@@ -17,8 +16,6 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from tqdm.auto import tqdm
 import time
 import os
-import pickle
-from utils.utils_data import get_points
 
 tqdm.pandas()
 
@@ -260,10 +257,7 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
                 Size of the figure
         """
         # setup
-        if not hasattr(self, "raw_uncertainties"):
-            uncertainties = 1.0
-        else:
-            uncertainties = self.raw_uncertainties
+        uncertainties = 1.0 if not hasattr(self, "raw_uncertainties") else self.raw_uncertainties
         self.map_boundary = self.get_map_boundary()
 
         fig, ax = plt.subplots(figsize=(figsize, figsize))
@@ -368,28 +362,10 @@ class MapBasedModel(BaseEstimator, RegressorMixin):
         print("Plotting heatmap...") if self.verbose else None
         raster = rasterio.open(new_map_path)
 
-        # TODO smoother spectrum instead of buckets
-        buckets = [
-            "#008200",  # dark green
-            "#00c800",  # light green
-            "#c8ff00",  # light yellow
-            "#ffff00",  # yellow
-            "#ffc800",  # light orange
-            "#ff8200",  # dark orange
-            "red",  # red
-            "#c80000",  # dark red
-            "#820000",  # wine red
-            "#330101",  # drop?
-        ]
-
-        # define the heatmap color scale
-        # values higher than the upper boundary are colored in the upmost color
-        boundaries = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-
-        cmap = colors.ListedColormap(buckets)
+        cmap = colors.ListedColormap(BUCKETS)
 
         # prepare the plot
-        norm = colors.BoundaryNorm(boundaries, cmap.N, clip=True)
+        norm = colors.BoundaryNorm(BOUNDARIES, cmap.N, clip=True)
 
         background_color = "0.7"
         ax.set_facecolor(
@@ -532,7 +508,7 @@ wenke.till@gmail.com"""
             "90",
             "> 100",
         ]
-        cbar.ax.set_yticks(ticks=boundaries, labels=boundary_labels)
+        cbar.ax.set_yticks(ticks=BOUNDARIES, labels=boundary_labels)
         cbar.ax.tick_params(labelsize=figsize)
 
         if self.method == "ITERATIVE":
