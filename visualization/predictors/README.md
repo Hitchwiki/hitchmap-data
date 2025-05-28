@@ -6,7 +6,7 @@
 
 `maps`/ ... more maps
 
-`intermediate/` ... maps in raw format
+`intermediate/` ... maps in raw format (create yourself)
 
 `models/` ... pickled models to draw the maps
 
