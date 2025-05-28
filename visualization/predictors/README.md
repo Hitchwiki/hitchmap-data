@@ -33,7 +33,7 @@ How you build models, evaluate them, and draw new maps from them is showcased in
 
 One way to build your model is to inherit from `MapBasedModel` in `models.py` - this class is responsible for drawing maps as well.
 
-## We wrote about our work
+## Blog posts about this work
 
 - https://tillwenke.github.io/2024/05/06/hitchhiking-worldwide.html
 - https://tillwenke.github.io/2024/04/21/hitchmap-gp.html
