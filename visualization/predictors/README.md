@@ -14,12 +14,7 @@
 
 `experiments_*.ipynb` ... experiments with the models from `models.py`.
 
-`models.py` ... models we applied and built so far include:
-
-- Gaussian Process
-- weighted Gaussians
-- average of all waiting times (baseline)
-- average of same-size rectangles
+`gpmap.py`, `map_based_model.py`, `models.py` ... models we applied and built so far that made it into https://github.com/Hitchwiki/heatchmap/tree/master/heatchmap:
 
 **`summary_maps.ipynb` ... short writeup for the community**
 
