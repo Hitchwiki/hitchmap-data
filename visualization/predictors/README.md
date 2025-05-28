@@ -26,7 +26,7 @@ We encourage you to contribute to this repository by filing a PR once you start 
 
 How you build models, evaluate them, and draw new maps from them is showcased in `writeup_heatchmap.ipynb`.
 
-One way to build your model is to inherit from `MapBasedModel` in `models.py` - this class is responsible for drawing maps as well.
+One way to build your model is to inherit from `MapBasedModel` in `map_based_model.py` - this class is responsible for drawing maps as well.
 
 ## Blog posts about this
 
