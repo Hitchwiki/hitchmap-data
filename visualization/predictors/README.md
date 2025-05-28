@@ -21,9 +21,9 @@
 - average of all waiting times (baseline)
 - average of same-size rectangles
 
-`<ins>summary_maps.ipynb` ... short writeup for the community`</ins>`
+**`summary_maps.ipynb` ... short writeup for the hitchhiking community**
 
-`<ins>writeup_heatchmap.ipynb` ... long ML heavy writeup`</ins>`
+**`writeup_heatchmap.ipynb` ... long ML heavy writeup**
 
 ## Framework to build your own models
 
