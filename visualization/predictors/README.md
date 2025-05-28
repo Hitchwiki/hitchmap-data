@@ -12,7 +12,7 @@
 
 `draw_map.py & draw_maps.ipynb` ... creating the final maps that are shown in `summary_maps.ipynb`
 
-`experiments_*.ipynb` ... our own experiments with the models from `models.py`.
+`experiments_*.ipynb` ... experiments with the models from `models.py`.
 
 `models.py` ... models we applied and built so far include:
 
