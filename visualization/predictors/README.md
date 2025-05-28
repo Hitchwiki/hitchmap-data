@@ -2,7 +2,7 @@
 
 `final_maps`/ ... high resolution maps
 
-`map_features/` ... contains geodata of features that can be displayed on maps
+`map_features/` ... contains geodata of features that can be displayed on maps (download and create yourself)
 
 `maps`/ ... more maps
 
