@@ -8,3 +8,5 @@
 
 
 install pyvenv from requirements.txt is suffcient at the start
+
+Get started to export hitchhiking data by running `getting_started.ipynb`.
