@@ -4,9 +4,9 @@ from enum import Enum
 
 
 class Location(BaseModel):
-    latitude: float = Field(...)
-    longitude: float = Field(...)
-    is_exact: bool = Field(...)
+    latitude: float
+    longitude: float
+    is_exact: bool
 
 
 class MethodEnum(str, Enum):
@@ -146,9 +146,9 @@ class Stop(BaseModel):
 class HitchhikingRecord(BaseModel):
     stops: List[Stop] = Field(..., min_items=1)
     rating: Optional[int] = Field(None, ge=1, le=5)
+    hitchhikers: List[Hitchhiker] = Field(..., min_items=1)
     comment: Optional[str] = None
     signals: Optional[List[Signal]] = None
-    hitchhikers: List[Hitchhiker] = Field(..., min_items=1)
     occupants: Optional[List[Occupant]] = None
     mode_of_transportation: Optional[ModeOfTranportation] = None
     ride: Optional[Ride] = None
