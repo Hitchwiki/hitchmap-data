@@ -1,12 +1,14 @@
-name: hitchmap-data
+name: hitchhiking-data
 dependencies:
   - pip
   - python=3.10
   - pip:
     - datasets
+    - dotenv
     - folium==0.19.6
     - geopandas
     - heatchmap
+    - huggingface_hub
     - ipykernel
     - ipython
     - matplotlib
@@ -20,5 +22,6 @@ dependencies:
     - seaborn
     - shapely
     - tqdm
+    - typing_extensions
     - lingua-language-detector
     - worldmap

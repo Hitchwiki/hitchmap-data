@@ -1,3 +1,4 @@
+# from https://github.com/Hitchwiki/hitchhiking-data-standard/tree/main/python
 from pydantic import Field, BaseModel
 from typing import List, Optional, Tuple
 from enum import Enum
@@ -17,7 +18,7 @@ class MethodEnum(str, Enum):
     invited = "invited"
     prearranged = "prearranged"
 
-class Signal(BaseModel):
+class Signal(BaseModel, use_enum_values=True):
     methods: List[MethodEnum]
     sign_content: Optional[str] = None
     sign_languages: Optional[List[str]] = None
@@ -33,9 +34,9 @@ class ReasonEnum(str, Enum):
     business = "business"
     recreational = "recreational"
 
-class Ride(BaseModel):
+class Ride(BaseModel, use_enum_values=True):
     vehicle_destination: Optional[Location] = None
-    reason: Optional[List[ReasonEnum]] = None
+    reasons: Optional[List[ReasonEnum]] = None
 
 
 class GenderEnum(str, Enum):
@@ -44,7 +45,7 @@ class GenderEnum(str, Enum):
     non_binary = "non_binary"
     prefer_not_to_say = "prefer_not_to_say"
 
-class Person(BaseModel):
+class Person(BaseModel, use_enum_values=True):
     origin_location: Optional[str] = None
     origin_country: Optional[str] = None
     year_of_birth: Optional[int] = None
@@ -68,8 +69,8 @@ class ReasonToPickUpEnum(str, Enum):
     safety_concern = "safety_concern"
     opposed = "opposed"
 
-class Occupant(Person):
-    reason_to_pick_up: Optional[ReasonToPickUpEnum] = None
+class Occupant(Person, use_enum_values=True):
+    reasons_to_pick_up: Optional[ReasonToPickUpEnum] = None
 
 
 class KindEnum(str, Enum):
@@ -88,7 +89,7 @@ class KindEnum(str, Enum):
     ferry = "ferry"
     boat = "boat"
 
-class ModeOfTranportation(BaseModel):
+class ModeOfTranportation(BaseModel, use_enum_values=True):
     kind: KindEnum = Field(...)
     make: Optional[str] = None
     model: Optional[str] = None
@@ -96,7 +97,7 @@ class ModeOfTranportation(BaseModel):
     license_plate_identifier: Optional[str] = None
 
 
-class ReasonsToHitchhikeEnum(str, Enum):
+class ReasonToHitchhikeEnum(str, Enum):
     commute = "commute"
     vacation = "vacation"
     sport = "sport"
@@ -107,17 +108,17 @@ class ReasonsToHitchhikeEnum(str, Enum):
     environmental = "environmental"
     fundraising = "fundraising"
 
-class Hitchhiker(Person):
+class Hitchhiker(Person, use_enum_values=True):
     nickname: Optional[str] = None  # Nickname of the hitchhiker. Assumed unique within the data source.
     hitchhiking_since: Optional[int] = None  # The year the person hitchhiked for the first time.
-    reasons_to_hitchhike: Optional[List[ReasonsToHitchhikeEnum]] = None  # Reasons for a specific hitchhiking ride.
+    reasons_to_hitchhike: Optional[List[ReasonToHitchhikeEnum]] = None  # Reasons for a specific hitchhiking ride.
 
 class GiftKindEnum(str, Enum):
     money = "money"
     food = "food"
     goods = "goods"
 
-class Gift(BaseModel):
+class Gift(BaseModel, use_enum_values=True):
     kind: GiftKindEnum = Field(...)
     description: Optional[str] = None
     price: Optional[Tuple[float, str]] = None  # [amount, currency]
@@ -131,7 +132,7 @@ class DeclinedRideReasonEnum(str, Enum):
     space_missing = "space_missing"
     too_slow = "too_slow"
 
-class DeclinedRide(BaseModel):
+class DeclinedRide(BaseModel, use_enum_values=True):
     destination: Optional[Location] = None
     reasons: Optional[List[DeclinedRideReasonEnum]] = None
 
