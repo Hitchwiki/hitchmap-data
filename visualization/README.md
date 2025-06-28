@@ -4,7 +4,7 @@
 
 `data/` ... splits of the dataset that might be part of a kaggle competition that is in the making.
 
-`plots` ... dataset analysis plots.
+`plots/` ... dataset analysis plots (not pushed to GitHub)
 
 <ins>`predictors/` ... hitchhiking maps and predictive models that were used to draw them</ins>
 
