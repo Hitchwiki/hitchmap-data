@@ -8,8 +8,6 @@
 
 <ins>`predictors/` ... hitchhiking maps and predictive models that were used to draw them</ins>
 
-`dump.sqlite` ... dataset dump from https://hitchmap.com/dump.sqlite on 04/11/2024
-
 ## Setup
 
 run `conda env create -f environment.yml`
